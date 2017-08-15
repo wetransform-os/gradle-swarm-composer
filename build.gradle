@@ -1,0 +1,59 @@
+plugins {
+  id 'groovy'
+  id 'maven-publish'
+  id 'org.standardout.eclipseconfig' version '1.1.0'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+group = 'to.wetransform'
+version = '1.0.0-SNAPSHOT'
+
+repositories {
+  jcenter()
+}
+
+dependencies{
+  compile gradleApi()
+  compile localGroovy()
+
+  // testing
+  testCompile 'junit:junit:4.12'
+}
+
+/*
+ * Some general project configuration
+ */
+configurations.all {
+  // ensure SNAPSHOTs are updated every time if needed
+  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.1'
+}
+
+/*
+ * Publishing to Maven
+ *
+ * https://docs.gradle.org/current/userguide/publishing_maven.html
+ */
+publishing {
+  publications {
+    plugin(MavenPublication) {
+      from components.java
+    }
+  }
+
+  repositories {
+    maven {
+      url 'https://artifactory.wetransform.to/artifactory/' +
+        (version.endsWith('-SNAPSHOT') ? 'private-snapshot-local' : 'private-release-local')
+      credentials {
+        username project.hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : ''
+        password project.hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
+      }
+    }
+  }
+}
