@@ -16,7 +16,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'to.wetransform.hale:gradle-hale-plugin:1.0.0-SNAPSHOT'
+    classpath 'to.wetransform:gradle-swarm-composer:1.0.0-SNAPSHOT'
   }
 }
 
