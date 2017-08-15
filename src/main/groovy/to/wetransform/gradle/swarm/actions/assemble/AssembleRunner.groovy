@@ -72,7 +72,7 @@ class AssembleRunner implements AssembleConfig {
   Map loadEnvironment(File envFile) {
     List lines = envFile.readLines(StandardCharsets.UTF_8.name())
     def pairs = lines.findResults { String line ->
-      def matcher = (line =~ /^([^#=+])=(.*)$/)
+      def matcher = (line =~ /^([^#=]+)=(.*)$/)
       if (matcher.size() >= 1) {
         def name = matcher[0][1].trim()
         def value = matcher[0][2]
