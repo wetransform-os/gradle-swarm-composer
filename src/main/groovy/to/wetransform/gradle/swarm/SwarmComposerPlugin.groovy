@@ -80,7 +80,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
       mode = 'swarm'
 
       group 'Assemble compose file for swarm mode'
-      description "Generates compose file for $stack with setup $setup"
+      description "Generates compose file for stack $stack with setup $setup"
     }
 
     if (setup == 'local' || setup == 'default') {
@@ -93,7 +93,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
         mode = 'compose'
 
         group 'Assemble compose file for Docker Compose'
-        description "Generates compose file for $stack with setup $setup"
+        description "Generates Docker Compose file for $stack with setup $setup"
       }
     }
 
