@@ -5,12 +5,28 @@
 
 package to.wetransform.gradle.swarm.actions.assemble;
 
+import java.util.List;
+
 /**
  * Configuration interface for assemble action.
  *
  * @author Simon Templer
  */
 public interface AssembleConfig {
+
+  /**
+   * @return the name of the stack
+   */
+  String getStackName();
+
+  void setStackName(String name);
+
+  /**
+   * @return the name of the setup
+   */
+  String getSetupName();
+
+  void setSetupName(String name);
 
   /**
    * Get the configured template file.
@@ -27,18 +43,18 @@ public interface AssembleConfig {
   void setTemplate(Object template);
 
   /**
-   * Get the configured environment file.
+   * Get the configured configuration files.
    *
-   * @return the environment file
+   * @return the configuration files
    */
-  Object getEnvironment();
+  List<Object> getConfigFiles();
 
   /**
-   * Set the file defining the environment.
+   * Set the file list of configuration files.
    *
-   * @param environment the environment file, should be a File or String with the file path
+   * @param configFiles the list of configuration files, each should be a File or String with the file path
    */
-  void setEnvironment(Object environment);
+  void setConfigFiles(List<Object> configFiles);
 
   /**
    * Get the target file.

@@ -32,6 +32,13 @@ class SwarmComposerPlugin implements Plugin<Project> {
       stacksDir.eachDir { dir ->
         def name = dir.name
 
+        def configFiles = []
+        def configPattern = ['*.env', '*-config.yml', '*-config.yaml']
+
+        // stack base configuration
+        def stackConfig = project.fileTree(dir: dir, includes: configPattern)
+        configFiles.addAll(stackConfig.asCollection())
+
         def stackFile = new File(dir, 'stack.yml')
         if (stackFile.exists()) {
           // build tasks for the stack
@@ -40,31 +47,39 @@ class SwarmComposerPlugin implements Plugin<Project> {
             // build tasks for setups
             setupsDir.eachDir { setupDir ->
               def setup = setupDir.name
-              project.task("assemble-${name}-${setup}", type: Assemble) {
-                template = stackFile
-                environment = new File(setupDir, '.env')
-                target = project.file("${name}-${setup}.yml")
 
-                group 'Assemble compose file'
-                description "Generates compose file for $name with setup $setup"
-              }
+              def setupConfig = project.fileTree(
+                dir: setupDir,
+                includes: ['*.env', '*.yml', '*.yaml'])
+              configFiles.addAll(setupConfig.asCollection())
+
+              configureSetup(project, stackFile, name, setup, configFiles)
             }
           }
           else {
             // build default task
-            def setup = 'default'
-            project.task("assemble-${name}-${setup}", type: Assemble) {
-              template = stackFile
-              environment = project.file('.env')
-              target = project.file("${name}-${setup}.yml")
 
-              group 'Assemble compose file'
-              description "Generates compose file for $name with setup $setup"
-            }
+            def defaultConfig = project.fileTree(dir: project.projectDir, includes: configPattern)
+            configFiles.addAll(defaultConfig.asCollection())
+
+            configureSetup(project, stackFile, name, 'default', configFiles)
           }
         }
       }
 
+    }
+  }
+
+  void configureSetup(Project project, File stackFile, String stack, String setup,
+    List cfgFiles) {
+
+    project.task("assemble-${stack}-${setup}", type: Assemble) {
+      template = stackFile
+      configFiles = cfgFiles ?: []
+      target = project.file("${stack}-${setup}.yml")
+
+      group 'Assemble compose file'
+      description "Generates compose file for $stack with setup $setup"
     }
   }
 

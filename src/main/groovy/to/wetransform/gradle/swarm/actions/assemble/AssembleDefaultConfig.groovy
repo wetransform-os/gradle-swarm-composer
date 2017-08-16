@@ -12,9 +12,13 @@ package to.wetransform.gradle.swarm.actions.assemble
  */
 class AssembleDefaultConfig implements AssembleConfig {
 
+  String stackName
+
+  String setupName
+
   def template
 
-  def environment
+  List<Object> configFiles = []
 
   def target
 

@@ -49,16 +49,30 @@ class AssembleRunner implements AssembleConfig {
     assert targetFile
     assert !targetFile.isDirectory()
 
-    // build template context
-    Map<String, Object> context = [:]
-
-    // environment
-    File envFile = toFile(environment)
-    if (envFile && envFile.exists()) {
-      context.env = loadEnvironment(envFile)
+    // config files
+    def configs = configFiles.collect { cfg ->
+      Map<String, Object> result = [:]
+      File configFile = toFile(cfg)
+      if (configFile && configFile.exists()) {
+        if (configFile.name.endsWith('.env')) {
+          // load environment file
+          result.env = loadEnvironment(configFile)
+        }
+        else if (configFile.name.endsWith('.yml') || configFile.name.endsWith('.yaml')) {
+          //TODO support yaml configuration
+        }
+      }
+      result
     }
-    else {
-      context.env = [:]
+
+    Map<String, Object> context = mergeConfigs(configs)
+
+    // stack and setup names
+    if (stackName) {
+      context.stack = stackName
+    }
+    if (setupName) {
+      context.setup = setupName
     }
 
     // build template
@@ -69,7 +83,59 @@ class AssembleRunner implements AssembleConfig {
     }
   }
 
-  Map loadEnvironment(File envFile) {
+  private Map<String, Object> mergeConfigs(Iterable<Map<String, Object>> configs) {
+    configs.asCollection().inject([:], this.&combineMap)
+  }
+
+  private Map combineMap(Map a, Map b) {
+    Map result = [:]
+    result.putAll(a)
+    b.each { key, value ->
+      result.merge(key, value, this.&combineValue)
+    }
+    result
+  }
+
+  private Object combineValue(Object a, Object b) {
+    if (a instanceof Map) {
+      if (b instanceof Map) {
+        combineMap(a, b)
+      }
+      else {
+        //XXX error?
+        a
+      }
+    }
+    else if (b instanceof Map) {
+      //XXX error?
+      b
+    }
+    else if (a instanceof List && b instanceof List) {
+      def combined = []
+      combined.addAll(a)
+      combined.addAll(b)
+      combined
+    }
+    else if (a instanceof List && !(b instanceof List)) {
+      def combined = []
+      combined.addAll(a)
+      combined.add(b)
+      combined
+    }
+    else if (!(a instanceof List) && b instanceof List) {
+      def combined = []
+      combined.add(a)
+      combined.addAll(b)
+      combined
+    }
+    else {
+      // b overrides a
+      //XXX message?
+      b
+    }
+  }
+
+  private Map loadEnvironment(File envFile) {
     List lines = envFile.readLines(StandardCharsets.UTF_8.name())
     def pairs = lines.findResults { String line ->
       def matcher = (line =~ /^([^#=]+)=(.*)$/)
