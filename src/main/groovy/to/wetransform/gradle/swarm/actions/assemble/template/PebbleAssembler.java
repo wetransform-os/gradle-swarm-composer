@@ -34,9 +34,10 @@ public class PebbleAssembler implements TemplateAssembler {
   @Override
   public void compile(File template, Map<String, Object> context, Supplier<OutputStream> target) throws PebbleException, IOException {
     PebbleTemplate compiledTemplate = engine.getTemplate(template.getAbsolutePath());
+
     try (OutputStream out = target.get();
         Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-      compiledTemplate.evaluate(writer, context);
+      compiledTemplate.evaluate(writer, ContextWrapper.create(context));
     }
   }
 

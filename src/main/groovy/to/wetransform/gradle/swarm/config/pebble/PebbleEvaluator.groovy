@@ -22,8 +22,9 @@ import com.mitchellbosecke.pebble.loader.StringLoader
 import com.mitchellbosecke.pebble.node.RootNode;
 import com.mitchellbosecke.pebble.parser.Parser;
 import com.mitchellbosecke.pebble.parser.ParserImpl
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import com.mitchellbosecke.pebble.template.PebbleTemplate
 
+import to.wetransform.gradle.swarm.actions.assemble.template.ContextWrapper;
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.ConfigHelper
 
@@ -117,7 +118,7 @@ class PebbleEvaluator implements ConfigEvaluator {
   private def evaluateValue(def value, Map context) {
     PebbleTemplate compiledTemplate = engine.getTemplate(value as String);
     StringWriter writer = new StringWriter()
-    compiledTemplate.evaluate(writer, context)
+    compiledTemplate.evaluate(writer, ContextWrapper.create(context))
     def result = writer.toString()
 
     // "hack" to convert to a boolean (for conditions)

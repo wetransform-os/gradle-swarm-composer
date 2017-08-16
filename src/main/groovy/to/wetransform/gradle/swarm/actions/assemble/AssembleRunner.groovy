@@ -91,8 +91,8 @@ class AssembleRunner implements AssembleConfig {
     context.DockerCompose = (mode == 'compose')
     context.SwarmMode = (mode == 'swarm')
 
-    if (project.logger.debugEnabled) {
-      project.logger.debug('Context for assembling:\n' +
+    if (project.logger.infoEnabled) {
+      project.logger.info('Context for assembling:\n' +
         JsonOutput.prettyPrint(JsonOutput.toJson(context)))
     }
 
