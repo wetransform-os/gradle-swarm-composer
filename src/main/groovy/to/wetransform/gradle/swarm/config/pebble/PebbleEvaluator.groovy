@@ -55,6 +55,10 @@ class PebbleEvaluator implements ConfigEvaluator {
      * This does not work on conditions however, because they may use
      * the non-evaluated text for their check, which will very likely
      * have a wrong result.
+     *
+     * XXX Idea: Use DynamicAttributeProvider interface to evaluate
+     * dependencies as they are requested? Problem: Not for top level
+     * variables.
      */
 
     // do a first evaluation pass
@@ -77,8 +81,7 @@ class PebbleEvaluator implements ConfigEvaluator {
     def keys = new LinkedHashSet(config.keySet())
     Set<String> toEvaluateAfter = new HashSet<>()
 
-    // merge config to make relative (neighboring) resolving possible?
-    //XXX not working, mabye due to the self-references -> using overall config instead
+    // merge config to make relative (neighboring) resolving possible
     def evalConfig = ConfigHelper.mergeConfigs([config, overall])
 
     // def evalConfig = overall
