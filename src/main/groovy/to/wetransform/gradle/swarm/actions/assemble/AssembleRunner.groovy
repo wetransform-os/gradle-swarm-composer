@@ -79,11 +79,6 @@ class AssembleRunner implements AssembleConfig {
     ConfigEvaluator evaluator = new PebbleEvaluator()
     context = evaluator.evaluate(context)
 
-    if (project.logger.debugEnabled) {
-      project.logger.debug('Context for assembling:\n' +
-        JsonOutput.prettyPrint(JsonOutput.toJson(context)))
-    }
-
     // stack and setup names
     if (stackName) {
       context.stack = stackName
@@ -91,9 +86,15 @@ class AssembleRunner implements AssembleConfig {
     if (setupName) {
       context.setup = setupName
     }
+    // mode
     context.mode = mode
     context.DockerCompose = (mode == 'compose')
     context.SwarmMode = (mode == 'swarm')
+
+    if (project.logger.debugEnabled) {
+      project.logger.debug('Context for assembling:\n' +
+        JsonOutput.prettyPrint(JsonOutput.toJson(context)))
+    }
 
     // build template
     targetFile.withOutputStream { out ->

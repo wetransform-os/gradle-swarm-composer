@@ -33,10 +33,11 @@ class SwarmComposerPlugin implements Plugin<Project> {
         def name = dir.name
 
         def configFiles = []
-        def configPattern = ['*.env', '*-config.yml', '*-config.yaml']
 
         // stack base configuration
-        def stackConfig = project.fileTree(dir: dir, includes: configPattern)
+        def stackConfig = project.fileTree(
+          dir: dir,
+          includes: ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml'])
         configFiles.addAll(stackConfig.asCollection())
 
         def stackFile = new File(dir, 'stack.yml')
@@ -59,7 +60,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
           else {
             // build default task
 
-            def defaultConfig = project.fileTree(dir: project.projectDir, includes: configPattern)
+            def defaultConfig = project.fileTree(
+              dir: project.projectDir,
+              includes: ['*.env', '*-config.yml', '*-config.yaml'])
             configFiles.addAll(defaultConfig.asCollection())
 
             configureSetup(project, stackFile, name, 'default', configFiles)

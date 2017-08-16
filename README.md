@@ -29,3 +29,44 @@ buildscript {
 
 apply plugin: 'to.wetransform.swarm-composer'
 ```
+
+### Default project layout
+
+```
+root
+│
+├──stacks
+│  ├──stack1
+│  │  ├─ stack.yml
+│  │  └──config
+│  │     ├─ config1.yml
+│  │     └─ config2.env
+│  │
+│  └──stack2
+│     └─ stack.yml
+│
+└──setups
+   ├──local
+   │  ├─ config1.yml
+   │  └─ config2.env
+   │
+   └──setup2
+      └─ config1.yml
+```
+
+### Configuration
+
+Configuration can be done in `.yml` and `.env` files.
+YAML configurations are accessible via their property path (segments separated separated by dots), variables defined in environment files are available with the `env.` prefix.
+
+**TODO: ** Example file, Example for variable replacement, where can config files be placed, ...
+
+#### Reserved variable names
+
+Some variables are provided by swarm-composer and will override any variables you define with the same name:
+
+- **stack** - The name of the stack
+- **setup** - The name of the setup
+- **mode** - The mode for the configuration assembly, either `swarm` or `compose`
+- **DockerCompose** - Boolean that states if the mode is `compose` - very handy for conditions on Docker Compose specific blocks
+- **SwarmMode** - Boolean that states if the mode is `swarm` - very handy for conditions on Swarm mode specific blocks
