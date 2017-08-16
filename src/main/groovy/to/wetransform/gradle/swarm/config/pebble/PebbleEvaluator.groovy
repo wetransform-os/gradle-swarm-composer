@@ -12,6 +12,9 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Map
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory;
+
 import com.mitchellbosecke.pebble.PebbleEngine
 import com.mitchellbosecke.pebble.lexer.LexerImpl;
 import com.mitchellbosecke.pebble.lexer.TokenStream;
@@ -22,7 +25,7 @@ import com.mitchellbosecke.pebble.parser.ParserImpl
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
-import to.wetransform.gradle.swarm.config.ConfigHelper;;;;;;
+import to.wetransform.gradle.swarm.config.ConfigHelper
 
 /**
  * Evaluates config based on Pebble templates.
@@ -34,8 +37,11 @@ class PebbleEvaluator implements ConfigEvaluator {
   private final PebbleEngine engine = new PebbleEngine.Builder()
     .newLineTrimming(true)
     .strictVariables(true)
+    .autoEscaping(false)
     .loader(new StringLoader())
     .build()
+
+  private static final Logger log = LoggerFactory.getLogger(PebbleEvaluator)
 
   @Override
   public Map<String, Object> evaluate(Map<String, Object> config) {
@@ -129,17 +135,22 @@ class PebbleEvaluator implements ConfigEvaluator {
   boolean isDynamicValue(String value) {
     //XXX this function uses Pebble internal API
 
-    LexerImpl lexer = new LexerImpl(engine.syntax, engine.extensionRegistry.getUnaryOperators().values(),
-      engine.extensionRegistry.getBinaryOperators().values())
-    Reader templateReader = new StringReader(value)
-    TokenStream tokenStream = lexer.tokenize(templateReader, 'dynamic')
+    try {
+      LexerImpl lexer = new LexerImpl(engine.syntax, engine.extensionRegistry.getUnaryOperators().values(),
+        engine.extensionRegistry.getBinaryOperators().values())
+      Reader templateReader = new StringReader(value)
+      TokenStream tokenStream = lexer.tokenize(templateReader, 'dynamic')
 
-    Parser parser = new ParserImpl(engine.extensionRegistry.getUnaryOperators(),
-      engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers());
-    RootNode root = parser.parse(tokenStream)
-    def visitor = new DynamicCheckVisitor()
-    root.accept(visitor)
-    visitor.dynamic
+      Parser parser = new ParserImpl(engine.extensionRegistry.getUnaryOperators(),
+        engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers());
+      RootNode root = parser.parse(tokenStream)
+      def visitor = new DynamicCheckVisitor()
+      root.accept(visitor)
+      visitor.dynamic
+    } catch (e) {
+      log.warn("Could not determine if expression is dynamic: $value", e)
+      false
+    }
   }
 
 }

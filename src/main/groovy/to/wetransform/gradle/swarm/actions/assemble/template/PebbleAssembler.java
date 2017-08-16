@@ -27,6 +27,7 @@ public class PebbleAssembler implements TemplateAssembler {
 
   private final PebbleEngine engine = new PebbleEngine.Builder()
       .newLineTrimming(false)
+      .autoEscaping(false)
       .strictVariables(true)
       .build();
 
