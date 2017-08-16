@@ -17,6 +17,7 @@ Usage
 ```groovy
 buildscript {
   repositories {
+    jcenter()
     maven {
       url 'https://artifactory.wetransform.to/artifactory/private-snapshot-local'
     }

@@ -6,6 +6,8 @@
 package to.wetransform.gradle.swarm.actions.assemble
 
 import org.gradle.api.Project
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import static to.wetransform.gradle.swarm.util.Helpers.*
 
@@ -59,7 +61,7 @@ class AssembleRunner implements AssembleConfig {
           result.env = loadEnvironment(configFile)
         }
         else if (configFile.name.endsWith('.yml') || configFile.name.endsWith('.yaml')) {
-          //TODO support yaml configuration
+          result = loadYaml(configFile)
         }
       }
       result
@@ -149,6 +151,14 @@ class AssembleRunner implements AssembleConfig {
       }
     }
     pairs.collectEntries()
+  }
+
+  private Map loadYaml(File yamlFile) {
+    Yaml yaml = new Yaml(new SafeConstructor());
+    Map result
+    yamlFile.withInputStream {
+      result = yaml.load(it)
+    }
   }
 
 }

@@ -23,6 +23,9 @@ dependencies{
   compile 'com.mitchellbosecke:pebble:2.4.0'
   // alternative: http://jtwig.org/
 //  compile "org.jtwig:jtwig-core:5.86.0.RELEASE"
+  
+  // YAML processing
+  compile 'org.yaml:snakeyaml:1.18'
 
   // testing
   testCompile 'junit:junit:4.12'
