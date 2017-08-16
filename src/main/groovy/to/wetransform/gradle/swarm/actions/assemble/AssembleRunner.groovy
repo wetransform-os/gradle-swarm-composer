@@ -6,15 +6,17 @@
 package to.wetransform.gradle.swarm.actions.assemble
 
 import org.gradle.api.Project
-import org.yaml.snakeyaml.Yaml
-import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import static to.wetransform.gradle.swarm.util.Helpers.*
+import static to.wetransform.gradle.swarm.config.ConfigHelper.*
 
 import java.nio.charset.StandardCharsets
 
+import groovy.json.JsonOutput;
 import groovy.lang.Delegate
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler
+import to.wetransform.gradle.swarm.config.ConfigEvaluator
+import to.wetransform.gradle.swarm.config.pebble.PebbleEvaluator;;
 
 /**
  * Assembles a configuration template.
@@ -70,7 +72,17 @@ class AssembleRunner implements AssembleConfig {
       result
     }
 
+    // merge configuration files
     Map<String, Object> context = mergeConfigs(configs)
+
+    // evaluate configuration
+    ConfigEvaluator evaluator = new PebbleEvaluator()
+    context = evaluator.evaluate(context)
+
+    if (project.logger.debugEnabled) {
+      project.logger.debug('Context for assembling:\n' +
+        JsonOutput.prettyPrint(JsonOutput.toJson(context)))
+    }
 
     // stack and setup names
     if (stackName) {
@@ -88,82 +100,6 @@ class AssembleRunner implements AssembleConfig {
       assembler.compile(templateFile, context) {
         out
       }
-    }
-  }
-
-  private Map<String, Object> mergeConfigs(Iterable<Map<String, Object>> configs) {
-    configs.asCollection().inject([:], this.&combineMap)
-  }
-
-  private Map combineMap(Map a, Map b) {
-    Map result = [:]
-    result.putAll(a)
-    b.each { key, value ->
-      result.merge(key, value, this.&combineValue)
-    }
-    result
-  }
-
-  private Object combineValue(Object a, Object b) {
-    if (a instanceof Map) {
-      if (b instanceof Map) {
-        combineMap(a, b)
-      }
-      else {
-        //XXX error?
-        a
-      }
-    }
-    else if (b instanceof Map) {
-      //XXX error?
-      b
-    }
-    else if (a instanceof List && b instanceof List) {
-      def combined = []
-      combined.addAll(a)
-      combined.addAll(b)
-      combined
-    }
-    else if (a instanceof List && !(b instanceof List)) {
-      def combined = []
-      combined.addAll(a)
-      combined.add(b)
-      combined
-    }
-    else if (!(a instanceof List) && b instanceof List) {
-      def combined = []
-      combined.add(a)
-      combined.addAll(b)
-      combined
-    }
-    else {
-      // b overrides a
-      //XXX message?
-      b
-    }
-  }
-
-  private Map loadEnvironment(File envFile) {
-    List lines = envFile.readLines(StandardCharsets.UTF_8.name())
-    def pairs = lines.findResults { String line ->
-      def matcher = (line =~ /^([^#=]+)=(.*)$/)
-      if (matcher.size() >= 1) {
-        def name = matcher[0][1].trim()
-        def value = matcher[0][2]
-        [name, value]
-      }
-      else {
-        null
-      }
-    }
-    pairs.collectEntries()
-  }
-
-  private Map loadYaml(File yamlFile) {
-    Yaml yaml = new Yaml(new SafeConstructor());
-    Map result
-    yamlFile.withInputStream {
-      result = yaml.load(it)
     }
   }
 
