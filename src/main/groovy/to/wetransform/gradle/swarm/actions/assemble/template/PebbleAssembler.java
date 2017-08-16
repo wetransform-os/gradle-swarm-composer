@@ -25,7 +25,10 @@ import com.mitchellbosecke.pebble.template.PebbleTemplate;
  */
 public class PebbleAssembler implements TemplateAssembler {
 
-  private final PebbleEngine engine = new PebbleEngine.Builder().newLineTrimming(false).build();
+  private final PebbleEngine engine = new PebbleEngine.Builder()
+      .newLineTrimming(false)
+      .strictVariables(true)
+      .build();
 
   @Override
   public void compile(File template, Map<String, Object> context, Supplier<OutputStream> target) throws PebbleException, IOException {
