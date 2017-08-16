@@ -12,6 +12,8 @@ package to.wetransform.gradle.swarm.actions.assemble
  */
 class AssembleDefaultConfig implements AssembleConfig {
 
+  String mode = 'swarm'
+
   String stackName
 
   String setupName

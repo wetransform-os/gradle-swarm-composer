@@ -41,6 +41,9 @@ class AssembleRunner implements AssembleConfig {
     TemplateAssembler assembler = project.composer.templateEngine
     assert assembler
 
+    // mode
+    assert mode in ['swarm', 'compose']
+
     // template must exist
     File templateFile = toFile(template)
     assert templateFile
@@ -76,6 +79,9 @@ class AssembleRunner implements AssembleConfig {
     if (setupName) {
       context.setup = setupName
     }
+    context.mode = mode
+    context.DockerCompose = (mode == 'compose')
+    context.SwarmMode = (mode == 'swarm')
 
     // build template
     targetFile.withOutputStream { out ->

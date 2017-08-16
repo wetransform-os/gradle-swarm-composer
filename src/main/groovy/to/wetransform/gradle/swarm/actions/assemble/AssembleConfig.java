@@ -15,6 +15,14 @@ import java.util.List;
 public interface AssembleConfig {
 
   /**
+   * @return the mode for assembling the configuration,
+   *   either <code>'swarm'</code> or <code>'compose'</code>.
+   */
+  String getMode();
+
+  void setMode(String mode);
+
+  /**
    * @return the name of the stack
    */
   String getStackName();
