@@ -89,14 +89,26 @@ class SwarmComposerPlugin implements Plugin<Project> {
     if (setup == 'local' || setup == 'default') {
       // offer compose mode
 
+      def composeFile = new File(stackFile.parentFile, "${setup}-compose.yml")
       project.task("compose-${stack}-${setup}", type: Assemble) {
         template = stackFile
         configFiles = cfgFiles ?: []
-        target = new File(stackFile.parentFile, "${setup}-compose.yml")
+        target = composeFile
         mode = 'compose'
 
         group 'Assemble compose file for Docker Compose'
         description "Generates Docker Compose file for $stack with setup $setup"
+      }.doLast {
+        // add a script file for convenient Docker Compose calls
+        File scriptFile = project.file("docker-${stack}-${setup}.sh")
+        def relPath = project.projectDir.toPath().relativize( composeFile.toPath() ).toFile().toString()
+        scriptFile.text = """#!/bin/bash
+docker-compose -f \"$relPath\" \"\$@\""""
+        try {
+          ['chmod', 'a+x', scriptFile.absolutePath].execute()
+        } catch (e) {
+          // ignore
+        }
       }
     }
 
