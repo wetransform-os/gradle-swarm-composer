@@ -79,7 +79,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
     project.task("assemble-${stack}-${setup}", type: Assemble) {
       template = stackFile
       configFiles = cfgFiles ?: []
-      target = project.file("stack-${stack}-${setup}.yml")
+      target = new File(stackFile.parentFile, "${setup}-stack.yml")
       mode = 'swarm'
 
       group 'Assemble compose file for swarm mode'
@@ -92,7 +92,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
       project.task("compose-${stack}-${setup}", type: Assemble) {
         template = stackFile
         configFiles = cfgFiles ?: []
-        target = project.file("${stack}-${setup}.yml")
+        target = new File(stackFile.parentFile, "${setup}-compose.yml")
         mode = 'compose'
 
         group 'Assemble compose file for Docker Compose'
