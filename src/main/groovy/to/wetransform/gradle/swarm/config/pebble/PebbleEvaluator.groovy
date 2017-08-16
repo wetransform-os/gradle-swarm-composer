@@ -41,6 +41,15 @@ class PebbleEvaluator implements ConfigEvaluator {
   public Map<String, Object> evaluate(Map<String, Object> config) {
     Set<String> toEvaluate = new HashSet<>()
 
+    /*
+     * FIXME the simple approach used for evaluation here is based on
+     * the assumption that evaluation will be replacements, meaning that
+     * there can be multiple passes on evaluation.
+     * This does not work on conditions however, because they may use
+     * the non-evaluated text for their check, which will very likely
+     * have a wrong result.
+     */
+
     // do a first evaluation pass
     toEvaluate = doEvaluationPass([], config, config)
     // do additional evaluation passes while there is still stuff to be evaluated (maximum 5 passes)
