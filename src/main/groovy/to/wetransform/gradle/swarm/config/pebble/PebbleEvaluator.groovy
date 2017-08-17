@@ -64,7 +64,7 @@ class PebbleEvaluator implements ConfigEvaluator {
     // do a first evaluation pass
     toEvaluate = doEvaluationPass([], config, config)
     // do additional evaluation passes while there is still stuff to be evaluated (maximum 5 passes)
-    for (int i = 0; !toEvaluate.empty || i < 5; i++) {
+    for (int i = 0; !toEvaluate.empty && i < 5; i++) {
       toEvaluate = doEvaluationPass([], config, config)
     }
     //FIXME improvement: use info on keys still to be evaluated
@@ -121,7 +121,12 @@ class PebbleEvaluator implements ConfigEvaluator {
   private def evaluateValue(def value, Map context) {
     PebbleTemplate compiledTemplate = engine.getTemplate(value as String);
     StringWriter writer = new StringWriter()
-    compiledTemplate.evaluate(writer, ContextWrapper.create(context))
+    try {
+      compiledTemplate.evaluate(writer, ContextWrapper.create(context))
+    } catch (ClassCastException e) {
+      //XXX hack: try again next iteration (until for instance boolean is correctly resolved)
+      return value
+    }
     def result = writer.toString()
 
     // "hack" to convert to a boolean (for conditions)

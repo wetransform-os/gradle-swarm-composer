@@ -57,10 +57,14 @@ root
 
 ### Configuration
 
-Configuration can be done in `.yml` and `.env` files.
+Configuration variables to be used in templates can be defined in `.yml` and `.env` files.
 YAML configurations are accessible via their property path (segments separated separated by dots), variables defined in environment files are available with the `env.` prefix.
 
-**TODO: ** Example file, Example for variable replacement, where can config files be placed, ...
+**TODO:** Example file, Example for variable replacement, where can config files be placed, ...
+
+**TODO:** Configuration that controls swarm-composer behavior (e.g. which modes are enabled, if another setup should be extended, if a custom file name should be used, etc.)
+
+Restrictions for variable evaluation in configuration files: Simple value insertions/replacements work, for conditions only boolean variables are supported right now. 
 
 #### Reserved variable names
 

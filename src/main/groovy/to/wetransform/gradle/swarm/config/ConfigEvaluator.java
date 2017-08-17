@@ -21,6 +21,6 @@ public interface ConfigEvaluator {
    * @param config the configuration
    * @return the evaluated configuration
    */
-  Map<String, Object> evaluate(Map<String, Object> config);
+  Map<String, Object> evaluate(Map<String, Object> config) throws Exception;
 
 }
