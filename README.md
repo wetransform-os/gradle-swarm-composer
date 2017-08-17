@@ -8,6 +8,7 @@ Goals of this plugin are:
 - Support independent configurations for multiple deployments / setups for the same stack
 - Allow distributing configuration for both setups and stacks across multiple files for better maintainability
 - Support storing deployment specific configuration encrypted
+- Ensure that required configuration variables are set
 
 
 Usage
