@@ -9,6 +9,7 @@ Goals of this plugin are:
 - Allow distributing configuration for both setups and stacks across multiple files for better maintainability
 - Support storing deployment specific configuration encrypted
 - Ensure that required configuration variables are set
+- Allow to easily extend an existing deployment configuration
 
 
 Usage
@@ -20,7 +21,7 @@ buildscript {
   repositories {
     jcenter()
     maven {
-      url 'https://artifactory.wetransform.to/artifactory/private-snapshot-local'
+      url 'https://artifactory.wetransform.to/artifactory/libs-snapshot-local'
     }
   }
   dependencies {
@@ -47,7 +48,8 @@ root
 │     └─ stack.yml
 │
 └──setups
-   ├──local
+   ├──setup1
+   │  ├─ swarm-composer.yml
    │  ├─ config1.yml
    │  └─ config2.env
    │
@@ -56,6 +58,28 @@ root
 ```
 
 ### Configuration
+
+Individual configuration for swarm-composer regarding each setup can be done via the `swarm-compose.yml` file.
+Here are the currently supported options explained with an example:
+
+```yaml
+# Swarm composer configuration
+description: |
+  Optional description of the setup for documentation purposes
+
+# a setup may extend other setups to avoid duplicate configuration
+extends:
+  - other-setup
+  - another-setup
+
+# States that this setup creates a configuration compatible to Docker Compose
+docker-compose: true
+
+# Custom target file in project root
+target-file: docker-compose.yml
+```
+
+### Template variables
 
 Configuration variables to be used in templates can be defined in `.yml` and `.env` files.
 YAML configurations are accessible via their property path (segments separated separated by dots), variables defined in environment files are available with the `env.` prefix.
@@ -72,6 +96,3 @@ Some variables are provided by swarm-composer and will override any variables yo
 
 - **stack** - The name of the stack
 - **setup** - The name of the setup
-- **mode** - The mode for the configuration assembly, either `swarm` or `compose`
-- **DockerCompose** - Boolean that states if the mode is `compose` - very handy for conditions on Docker Compose specific blocks
-- **SwarmMode** - Boolean that states if the mode is `swarm` - very handy for conditions on Swarm mode specific blocks
