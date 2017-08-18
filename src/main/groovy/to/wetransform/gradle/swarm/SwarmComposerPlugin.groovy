@@ -183,15 +183,25 @@ class SwarmComposerPlugin implements Plugin<Project> {
       description desc
     }
 
-    if (composeSupported) {
+    boolean createScript = true
+    if (createScript) {
       task.doLast {
         // add a script file for convenient Docker Compose calls
-        File scriptFile = project.file("${stack}-${setup}.sh")
+        File scriptFile = project.file(composeSupported ? "${stack}-${setup}.sh" : "deploy-${stack}-${setup}.sh")
         def relPath = project.projectDir.toPath().relativize( composeFile.toPath() ).toFile().toString()
+
+        def run
+        if (composeSupported) {
+          run = "docker-compose -f \"$relPath\" \"\$@\""
+        }
+        else {
+          run = "docker stack deploy --compose-file \"$relPath\" --with-registry-auth $stack"
+        }
+
         scriptFile.text = """#!/bin/bash
 set -e
 ./gradlew ${taskName}
-docker-compose -f \"$relPath\" \"\$@\""""
+$run"""
         try {
           ['chmod', 'a+x', scriptFile.absolutePath].execute()
         } catch (e) {
