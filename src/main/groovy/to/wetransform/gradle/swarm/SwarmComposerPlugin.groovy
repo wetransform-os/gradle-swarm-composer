@@ -173,7 +173,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
     }
 
     // task for assembling compose file
-    def task = project.task("assemble-${stack}-${setup}", type: Assemble) {
+    def taskName = "assemble-${stack}-${setup}"
+    def task = project.task(taskName, type: Assemble) {
       template = stackFile
       configFiles = cfgFiles ?: []
       target = composeFile
@@ -188,6 +189,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
         File scriptFile = project.file("${stack}-${setup}.sh")
         def relPath = project.projectDir.toPath().relativize( composeFile.toPath() ).toFile().toString()
         scriptFile.text = """#!/bin/bash
+set -e
+./gradlew ${taskName}
 docker-compose -f \"$relPath\" \"\$@\""""
         try {
           ['chmod', 'a+x', scriptFile.absolutePath].execute()
