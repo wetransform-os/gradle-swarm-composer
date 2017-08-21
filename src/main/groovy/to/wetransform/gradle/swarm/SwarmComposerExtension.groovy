@@ -11,7 +11,8 @@ import org.gradle.util.ConfigureUtil
 import to.wetransform.gradle.swarm.actions.assemble.AssembleDefaultConfig;
 import to.wetransform.gradle.swarm.actions.assemble.AssembleRunner
 import to.wetransform.gradle.swarm.actions.assemble.template.PebbleAssembler;
-import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
+import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler
+import to.wetransform.gradle.swarm.config.SetupConfigurations;
 import to.wetransform.gradle.swarm.tasks.Assemble;;
 
 class SwarmComposerExtension {
@@ -60,5 +61,7 @@ class SwarmComposerExtension {
   // internal
 
   final Project project
+
+//  final SetupConfigurations configs = new SetupConfigurations();
 
 }

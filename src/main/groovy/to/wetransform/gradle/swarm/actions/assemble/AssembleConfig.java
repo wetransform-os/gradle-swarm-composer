@@ -47,14 +47,15 @@ public interface AssembleConfig {
    *
    * @return the configuration files
    */
-  List<Object> getConfigFiles();
+  List<Object> getConfig();
 
   /**
-   * Set the file list of configuration files.
+   * Set the file list of configuration files or configuration maps.
    *
-   * @param configFiles the list of configuration files, each should be a File or String with the file path
+   * @param config the list of configurations, each should be a File or
+   *   String with the file path, or an already loaded configuration map
    */
-  void setConfigFiles(List<Object> configFiles);
+  void setConfig(List<Object> config);
 
   /**
    * Get the target file.

@@ -18,7 +18,7 @@ class AssembleDefaultConfig implements AssembleConfig {
 
   def template
 
-  List<Object> configFiles = []
+  List<Object> config = []
 
   def target
 
