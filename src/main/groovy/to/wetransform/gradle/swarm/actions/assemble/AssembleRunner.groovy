@@ -53,36 +53,8 @@ class AssembleRunner implements AssembleConfig {
     assert targetFile
     assert !targetFile.isDirectory()
 
-    // config files
-    def configs = configFiles.collect { cfg ->
-      Map<String, Object> result = [:]
-      File configFile = toFile(cfg)
-      if (configFile && configFile.exists()) {
-        if (configFile.name.endsWith('.env')) {
-          // load environment file
-          result.env = loadEnvironment(configFile)
-        }
-        else if (configFile.name.endsWith('.yml') || configFile.name.endsWith('.yaml')) {
-          result = loadYaml(configFile)
-        }
-      }
-      result
-    }
-
-    // merge configuration files
-    Map<String, Object> context = mergeConfigs(configs)
-
-    // evaluate configuration
-    ConfigEvaluator evaluator = new PebbleEvaluator()
-    context = evaluator.evaluate(context)
-
-    // stack and setup names
-    if (stackName) {
-      context.stack = stackName
-    }
-    if (setupName) {
-      context.setup = setupName
-    }
+    // load configuration
+    Map<String, Object> context = loadConfig(config, stackName, setupName)
 
     if (project.logger.infoEnabled) {
       project.logger.info('Context for assembling:\n' +

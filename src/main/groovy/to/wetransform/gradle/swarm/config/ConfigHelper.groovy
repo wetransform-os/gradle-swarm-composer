@@ -10,12 +10,57 @@ import java.nio.charset.StandardCharsets
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
 
+import to.wetransform.gradle.swarm.config.pebble.PebbleEvaluator
+import to.wetransform.gradle.swarm.util.Helpers;;
+
 /**
  * Helpers for configurations based on maps and lists.
  *
  * @author Simon Templer
  */
 class ConfigHelper {
+
+  static Map<String, Object> loadConfig(List configFiles, String stackName = null, String setupName = null) {
+    // config files
+    def configs = configFiles.collect { cfg ->
+
+      if (cfg instanceof Map) {
+        // already a loaded configuration
+        cfg
+      }
+      else {
+        Map<String, Object> result = [:]
+        File configFile = Helpers.toFile(cfg)
+        if (configFile && configFile.exists()) {
+          if (configFile.name.endsWith('.env')) {
+            // load environment file
+            result.env = loadEnvironment(configFile)
+          }
+          else if (configFile.name.endsWith('.yml') || configFile.name.endsWith('.yaml')) {
+            result = loadYaml(configFile)
+          }
+        }
+        result
+      }
+    }
+
+    // merge configuration files
+    Map<String, Object> context = mergeConfigs(configs)
+
+    // evaluate configuration
+    ConfigEvaluator evaluator = new PebbleEvaluator()
+    context = evaluator.evaluate(context)
+
+    // stack and setup names
+    if (stackName) {
+      context.stack = stackName
+    }
+    if (setupName) {
+      context.setup = setupName
+    }
+
+    context
+  }
 
   /**
    * Merge configuration maps together.

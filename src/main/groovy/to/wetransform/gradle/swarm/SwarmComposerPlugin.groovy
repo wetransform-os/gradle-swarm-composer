@@ -9,7 +9,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
 
-import to.wetransform.gradle.swarm.config.ConfigHelper;
+import to.wetransform.gradle.swarm.config.ConfigHelper
+import to.wetransform.gradle.swarm.config.SetupConfiguration;
 import to.wetransform.gradle.swarm.tasks.Assemble;
 
 class SwarmComposerPlugin implements Plugin<Project> {
@@ -37,10 +38,25 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
         def stackConfigFiles = []
 
+        def stackSettings = loadSettings(dir)
+        def extendedStacks = collectExtendedConfigs(project, stacksDir, name, stackSettings)
+        project.logger.info("Stack $name extends these stacks: $extendedStacks")
+
+        // add configuration for extended stacks
+        try {
+          extendedStacks.each { extended ->
+            stackConfigFiles.addAll(collectSetupConfigFiles(project, stacksDir, extended,
+              ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml']))
+          }
+        } catch (e) {
+          throw new RuntimeException('Error collecting configuration files from extended setups', e)
+        }
+
         // stack base configuration
         def stackConfig = project.fileTree(
           dir: dir,
-          includes: ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml'])
+          includes: ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml'],
+          excludes: ['swarm-composer.yml'])
         stackConfigFiles.addAll(stackConfig.asCollection())
 
         def stackFile = new File(dir, 'stack.yml')
@@ -56,9 +72,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
               configFiles.addAll(stackConfigFiles)
 
               // load swarm composer config for setup
-              def scConfig = loadSetupConfig(setupDir)
+              def scConfig = loadSettings(setupDir)
 
-              def extendedSetups = collectExtendedSetups(project, setupsDir, setup, scConfig)
+              def extendedSetups = collectExtendedConfigs(project, setupsDir, setup, scConfig)
               project.logger.info("Setup $setup extends these setups: $extendedSetups")
 
               // add configuration for extended setups
@@ -75,7 +91,14 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
               project.logger.info("Setup $setup uses these configuration files:\n${configFiles.join('\n')}")
 
-              configureSetup(project, stackFile, name, setup, configFiles, scConfig)
+              def sc = new SetupConfiguration(
+                stackFile: stackFile,
+                stackName: name,
+                setupName: setup,
+                configFiles: configFiles,
+                settings: scConfig)
+
+              configureSetup(project, sc)
             }
           }
           else {
@@ -85,7 +108,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
             configFiles.addAll(stackConfigFiles)
 
             // load swarm composer config for setup
-            def scConfig = loadSetupConfig(project.projectDir)
+            def scConfig = loadSettings(project.projectDir)
 
             // collect setup configuration files
             def defaultConfig = project.fileTree(
@@ -94,7 +117,14 @@ class SwarmComposerPlugin implements Plugin<Project> {
               excludes: ['swarm-composer.yml'])
             configFiles.addAll(defaultConfig.asCollection())
 
-            configureSetup(project, stackFile, name, 'default', configFiles, scConfig)
+            def sc = new SetupConfiguration(
+              stackFile: stackFile,
+              stackName: name,
+              setupName: 'default',
+              configFiles: configFiles,
+              settings: scConfig)
+
+            configureSetup(project, sc)
           }
         }
       }
@@ -102,12 +132,12 @@ class SwarmComposerPlugin implements Plugin<Project> {
     }
   }
 
-  Map loadSetupConfig(File setupDir) {
+  Map loadSettings(File setupDir) {
     def scConfigFile = new File(setupDir, 'swarm-composer.yml')
     scConfigFile.exists() ? (ConfigHelper.loadYaml(scConfigFile)) : DEFAULT_SC_CONFIG
   }
 
-  Collection collectExtendedSetups(Project project, File setupsDir, String setupName, Map scConfig) {
+  Collection collectExtendedConfigs(Project project, File setupsDir, String setupName, Map scConfig) {
     def extend = scConfig['extends']
     if (extend) {
       Deque<String> toProcess = new LinkedList<>()
@@ -123,7 +153,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
           result << candidate
 
           // check candidate for direct dependencies
-          def candConfig = loadSetupConfig(new File(setupsDir, candidate))
+          def candConfig = loadSettings(new File(setupsDir, candidate))
           def candExtend = candConfig['extends']
           if (candExtend) {
             candExtend.reverse().each {
@@ -140,54 +170,67 @@ class SwarmComposerPlugin implements Plugin<Project> {
     }
   }
 
-  Collection collectSetupConfigFiles(Project project, File setupsDir, String setupName) {
+  Collection collectSetupConfigFiles(Project project, File setupsDir, String setupName,
+    List includes = ['*.env', '*.yml', '*.yaml']) {
+
     File setupDir = new File(setupsDir, setupName)
 
     // collect setup configuration files
     def setupConfig = project.fileTree(
       dir: setupDir,
-      includes: ['*.env', '*.yml', '*.yaml'],
+      includes: includes,
       excludes: ['swarm-composer.yml'])
 
     setupConfig.asCollection()
   }
 
-  void configureSetup(Project project, File stackFile, String stack, String setup,
-    List cfgFiles, Map scConfig) {
+  void configureSetup(Project project, final SetupConfiguration sc) {
+    // store configuration in extension
+//    project.composer.configs.add(sc)
 
-    def dcConfig = scConfig['docker-compose']
-    boolean composeSupported = dcConfig == null ? false : dcConfig
 
-    def desc = "Generates compose file for stack $stack with setup $setup"
-    if (scConfig.description) {
-      desc = scConfig.description.trim()
-    }
+    // task loading the configuration
+//    def configTaskName = "config-${sc.stackName}-${sc.setupName}"
+//    def configTask = project.task(configTaskName).doFirst {
+//      // load configuration -> write somewhere?
+//      sc.config
+//    }
 
-    // default target file
-    def composeFile = new File(stackFile.parentFile, "${setup}-stack.yml")
-
-    // custom target file
-    def targetFile = scConfig['target-file']
-    if (targetFile) {
-      composeFile = project.file(targetFile)
+    def desc = "Generates compose file for stack ${sc.stackName} with setup ${sc.setupName}"
+    if (sc.settings?.description) {
+      desc = sc.settings?.description.trim()
     }
 
     // task for assembling compose file
-    def taskName = "assemble-${stack}-${setup}"
-    def task = project.task(taskName, type: Assemble) {
-      template = stackFile
-      configFiles = cfgFiles ?: []
-      target = composeFile
-
+    def taskName = "assemble-${sc.stackName}-${sc.setupName}"
+    def task = project.task(taskName) {
       group 'Assemble compose file'
       description desc
-    }
+    }.doFirst {
+      def dcConfig = sc.settings['docker-compose']
+      boolean composeSupported = dcConfig == null ? false : dcConfig
 
-    boolean createScript = true
-    if (createScript) {
-      task.doLast {
+      // default target file
+      def composeFile = new File(sc.stackFile.parentFile, "${sc.setupName}-stack.yml")
+
+      // custom target file
+      def targetFile = sc.settings['target-file']
+      if (targetFile) {
+        composeFile = project.file(targetFile)
+      }
+
+      // run actual assembly of the compose/stack file
+      project.composer.assemble {
+        template = sc.stackFile
+        config = [sc.config]
+        target = composeFile
+      }
+
+      // create helper script
+      boolean createScript = true
+      if (createScript) {
         // add a script file for convenient Docker Compose calls
-        File scriptFile = project.file(composeSupported ? "${stack}-${setup}.sh" : "deploy-${stack}-${setup}.sh")
+        File scriptFile = project.file(composeSupported ? "${sc.stackName}-${sc.setupName}.sh" : "deploy-${sc.stackName}-${sc.setupName}.sh")
         def relPath = project.projectDir.toPath().relativize( composeFile.toPath() ).toFile().toString()
 
         def run
@@ -195,7 +238,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
           run = "docker-compose -f \"$relPath\" \"\$@\""
         }
         else {
-          run = "docker stack deploy --compose-file \"$relPath\" --with-registry-auth $stack"
+          run = "docker stack deploy --compose-file \"$relPath\" --with-registry-auth ${sc.stackName}"
         }
 
         scriptFile.text = """#!/bin/bash
