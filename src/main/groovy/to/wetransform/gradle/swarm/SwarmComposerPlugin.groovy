@@ -237,8 +237,6 @@ class SwarmComposerPlugin implements Plugin<Project> {
       desc = customDesc
     }
 
-    configureBuilds(project, sc)
-
     // task for assembling compose file
     def taskName = "assemble-${sc.stackName}-${sc.setupName}"
     def task = project.task(taskName) {
@@ -291,9 +289,12 @@ $run"""
       }
     }
 
+    // configre Docker image build tasks
+    configureBuilds(project, sc, task)
+
   }
 
-  void configureBuilds(Project project, final SetupConfiguration sc) {
+  void configureBuilds(Project project, final SetupConfiguration sc, def assembleTask) {
     if (!project.composer.enableBuilds) {
       return
     }
@@ -303,6 +304,8 @@ $run"""
       group 'Build docker images'
       description "Build all Docker Images for stack ${sc.stackName} with setup ${sc.setupName}"
     }
+
+    assembleTask.dependsOn(allTask)
 
     sc.builds.each { dFile ->
       if (dFile instanceof File && dFile.exists()) {
