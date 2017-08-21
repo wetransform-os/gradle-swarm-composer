@@ -38,10 +38,25 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
         def stackConfigFiles = []
 
+        def stackSettings = loadSettings(dir)
+        def extendedStacks = collectExtendedConfigs(project, stacksDir, name, stackSettings)
+        project.logger.info("Stack $name extends these stacks: $extendedStacks")
+
+        // add configuration for extended stacks
+        try {
+          extendedStacks.each { extended ->
+            stackConfigFiles.addAll(collectSetupConfigFiles(project, stacksDir, extended,
+              ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml']))
+          }
+        } catch (e) {
+          throw new RuntimeException('Error collecting configuration files from extended setups', e)
+        }
+
         // stack base configuration
         def stackConfig = project.fileTree(
           dir: dir,
-          includes: ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml'])
+          includes: ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml'],
+          excludes: ['swarm-composer.yml'])
         stackConfigFiles.addAll(stackConfig.asCollection())
 
         def stackFile = new File(dir, 'stack.yml')
@@ -57,9 +72,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
               configFiles.addAll(stackConfigFiles)
 
               // load swarm composer config for setup
-              def scConfig = loadSetupConfig(setupDir)
+              def scConfig = loadSettings(setupDir)
 
-              def extendedSetups = collectExtendedSetups(project, setupsDir, setup, scConfig)
+              def extendedSetups = collectExtendedConfigs(project, setupsDir, setup, scConfig)
               project.logger.info("Setup $setup extends these setups: $extendedSetups")
 
               // add configuration for extended setups
@@ -93,7 +108,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
             configFiles.addAll(stackConfigFiles)
 
             // load swarm composer config for setup
-            def scConfig = loadSetupConfig(project.projectDir)
+            def scConfig = loadSettings(project.projectDir)
 
             // collect setup configuration files
             def defaultConfig = project.fileTree(
@@ -117,12 +132,12 @@ class SwarmComposerPlugin implements Plugin<Project> {
     }
   }
 
-  Map loadSetupConfig(File setupDir) {
+  Map loadSettings(File setupDir) {
     def scConfigFile = new File(setupDir, 'swarm-composer.yml')
     scConfigFile.exists() ? (ConfigHelper.loadYaml(scConfigFile)) : DEFAULT_SC_CONFIG
   }
 
-  Collection collectExtendedSetups(Project project, File setupsDir, String setupName, Map scConfig) {
+  Collection collectExtendedConfigs(Project project, File setupsDir, String setupName, Map scConfig) {
     def extend = scConfig['extends']
     if (extend) {
       Deque<String> toProcess = new LinkedList<>()
@@ -138,7 +153,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
           result << candidate
 
           // check candidate for direct dependencies
-          def candConfig = loadSetupConfig(new File(setupsDir, candidate))
+          def candConfig = loadSettings(new File(setupsDir, candidate))
           def candExtend = candConfig['extends']
           if (candExtend) {
             candExtend.reverse().each {
@@ -155,13 +170,15 @@ class SwarmComposerPlugin implements Plugin<Project> {
     }
   }
 
-  Collection collectSetupConfigFiles(Project project, File setupsDir, String setupName) {
+  Collection collectSetupConfigFiles(Project project, File setupsDir, String setupName,
+    List includes = ['*.env', '*.yml', '*.yaml']) {
+
     File setupDir = new File(setupsDir, setupName)
 
     // collect setup configuration files
     def setupConfig = project.fileTree(
       dir: setupDir,
-      includes: ['*.env', '*.yml', '*.yaml'],
+      includes: includes,
       excludes: ['swarm-composer.yml'])
 
     setupConfig.asCollection()
