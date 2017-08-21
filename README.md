@@ -40,11 +40,15 @@ root
 ├──stacks
 │  ├──stack1
 │  │  ├─ stack.yml
+│  │  ├──builds
+│  │  │  └──mycustom
+│  │  │     └─ Dockerfile
 │  │  └──config
 │  │     ├─ config1.yml
 │  │     └─ config2.env
 │  │
 │  └──stack2
+│     ├─ swarm-composer.yml
 │     └─ stack.yml
 │
 └──setups
@@ -96,3 +100,4 @@ Some variables are provided by swarm-composer and will override any variables yo
 
 - **stack** - The name of the stack
 - **setup** - The name of the setup
+- **builds** - Under this key information on Docker images built individually for a setup can be found, for example `builds.mycustom.image_tag`

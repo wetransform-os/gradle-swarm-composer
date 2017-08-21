@@ -5,10 +5,15 @@
 
 package to.wetransform.gradle.swarm
 
+import java.util.function.Supplier;
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.bundling.Jar
 
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
 import to.wetransform.gradle.swarm.config.ConfigHelper
 import to.wetransform.gradle.swarm.config.SetupConfiguration;
 import to.wetransform.gradle.swarm.tasks.Assemble;
@@ -22,6 +27,17 @@ class SwarmComposerPlugin implements Plugin<Project> {
     project.extensions.create('composer', SwarmComposerExtension, project)
 
     project.afterEvaluate { p ->
+      if (project.composer.enableBuilds) {
+        project.apply(plugin: 'com.bmuschko.docker-remote-api')
+        project.repositories {
+          jcenter()
+        }
+
+        if (project.composer.dockerConfig) {
+          project.docker(project.composer.dockerConfig)
+        }
+      }
+
       addDefaultTasks(p)
     }
   }
@@ -45,19 +61,36 @@ class SwarmComposerPlugin implements Plugin<Project> {
         // add configuration for extended stacks
         try {
           extendedStacks.each { extended ->
-            stackConfigFiles.addAll(collectSetupConfigFiles(project, stacksDir, extended,
+            stackConfigFiles.addAll(collectConfigFiles(project, stacksDir, extended,
               ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml']))
           }
         } catch (e) {
-          throw new RuntimeException('Error collecting configuration files from extended setups', e)
+          throw new RuntimeException('Error collecting configuration files from extended stacks', e)
         }
 
         // stack base configuration
-        def stackConfig = project.fileTree(
-          dir: dir,
-          includes: ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml'],
-          excludes: ['swarm-composer.yml'])
-        stackConfigFiles.addAll(stackConfig.asCollection())
+        stackConfigFiles.addAll(collectConfigFiles(project, stacksDir, name,
+          ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml']))
+
+        // identify builds
+        def stackBuilds = []
+        if (project.composer.enableBuilds) {
+          // add builds from extended stacks
+          try {
+            extendedStacks.each { extended ->
+              stackBuilds.addAll(collectConfigFiles(project, stacksDir, extended,
+                ['builds/*/Dockerfile']))
+            }
+          } catch (e) {
+            throw new RuntimeException('Error collecting Dockerfile builds from extended stacks', e)
+          }
+
+          // add builds from stack
+          stackBuilds.addAll(collectConfigFiles(project, stacksDir, name,
+            ['builds/*/Dockerfile']))
+
+          project.logger.info("Stack $name includes these builds:\n${stackBuilds.join('\n')}\n")
+        }
 
         def stackFile = new File(dir, 'stack.yml')
         if (stackFile.exists()) {
@@ -80,23 +113,24 @@ class SwarmComposerPlugin implements Plugin<Project> {
               // add configuration for extended setups
               try {
                 extendedSetups.each { extended ->
-                  configFiles.addAll(collectSetupConfigFiles(project, setupsDir, extended))
+                  configFiles.addAll(collectConfigFiles(project, setupsDir, extended))
                 }
               } catch (e) {
                 throw new RuntimeException('Error collecting configuration files from extended setups', e)
               }
 
               // add configuration for this setup
-              configFiles.addAll(collectSetupConfigFiles(project, setupsDir, setup))
+              configFiles.addAll(collectConfigFiles(project, setupsDir, setup))
 
-              project.logger.info("Setup $setup uses these configuration files:\n${configFiles.join('\n')}")
+              project.logger.info("Setup $setup uses these configuration files:\n${configFiles.join('\n')}\n")
 
               def sc = new SetupConfiguration(
                 stackFile: stackFile,
                 stackName: name,
                 setupName: setup,
                 configFiles: configFiles,
-                settings: scConfig)
+                settings: scConfig,
+                builds: stackBuilds.asImmutable())
 
               configureSetup(project, sc)
             }
@@ -122,7 +156,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
               stackName: name,
               setupName: 'default',
               configFiles: configFiles,
-              settings: scConfig)
+              settings: scConfig,
+              builds: stackBuilds.asImmutable())
 
             configureSetup(project, sc)
           }
@@ -170,7 +205,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
     }
   }
 
-  Collection collectSetupConfigFiles(Project project, File setupsDir, String setupName,
+  Collection collectConfigFiles(Project project, File setupsDir, String setupName,
     List includes = ['*.env', '*.yml', '*.yaml']) {
 
     File setupDir = new File(setupsDir, setupName)
@@ -197,9 +232,12 @@ class SwarmComposerPlugin implements Plugin<Project> {
 //    }
 
     def desc = "Generates compose file for stack ${sc.stackName} with setup ${sc.setupName}"
-    if (sc.settings?.description) {
-      desc = sc.settings?.description.trim()
+    def customDesc = sc.settings?.description?.trim()
+    if (customDesc) {
+      desc = customDesc
     }
+
+    configureBuilds(project, sc)
 
     // task for assembling compose file
     def taskName = "assemble-${sc.stackName}-${sc.setupName}"
@@ -253,6 +291,106 @@ $run"""
       }
     }
 
+  }
+
+  void configureBuilds(Project project, final SetupConfiguration sc) {
+    if (!project.composer.enableBuilds) {
+      return
+    }
+
+    def allName = "build-${sc.stackName}-${sc.setupName}"
+    def allTask = project.task(allName) {
+      group 'Build docker images'
+      description "Build all Docker Images for stack ${sc.stackName} with setup ${sc.setupName}"
+    }
+
+    sc.builds.each { dFile ->
+      if (dFile instanceof File && dFile.exists()) {
+        final File parentDir = dFile.parentFile
+        final File tempDir = new File(parentDir, '.sc-build')
+        final String buildName = parentDir.name
+
+        def settings = loadSettings(parentDir)
+
+        //FIXME better configurable, other sources
+        String imageName = settings.image_name
+        boolean buildSpecificName = true
+        assert imageName
+        String imageTag
+        if (buildSpecificName) {
+          // relation to build already contained in name
+          imageTag = "${imageName}:sc-${sc.stackName}-${sc.setupName}"
+        }
+        else {
+          // build name should be included in tag
+          imageTag = "${imageName}:sc-${sc.stackName}-${sc.setupName}-${buildName}"
+        }
+
+        def setupTask = project.task("setup-build-${sc.stackName}-${sc.setupName}-${buildName}").doFirst {
+          // setup Docker build context
+          tempDir.deleteDir()
+          tempDir.mkdir()
+
+          project.copy {
+            from parentDir
+            into tempDir
+            include '**/*'
+            exclude tempDir.name
+            exclude 'swarm-composer.yml'
+          }
+
+          // evaluate templates
+          TemplateAssembler processor = project.composer.templateEngine
+          assert processor
+
+          project.fileTree(dir: tempDir, includes: ['**/*'])
+            .filter { File f -> !f.isDirectory() }
+            .each { File f ->
+              ByteArrayOutputStream result
+              def supplier = {
+                result = new ByteArrayOutputStream()
+                result
+              } as Supplier<OutputStream>
+              processor.compile(f, sc.config, supplier)
+              if (result != null) {
+                f.withOutputStream {
+                  result.writeTo(it)
+                }
+              }
+            }
+        }
+
+        def task = project.task("build-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerBuildImage) {
+          dependsOn setupTask
+
+          dockerFile = new File(tempDir, dFile.name)
+          inputDir = tempDir
+          labels = ['sc-stack': sc.stackName, 'sc-setup': sc.setupName, 'sc-build': buildName]
+          tag = imageTag
+
+          group 'Build individual image'
+          description "Build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
+        }.doLast {
+          // post processing
+
+          // extend configuration with info on build image
+          def results = [
+            builds:
+              [(buildName): [
+                  image_tag: imageTag
+                ]
+              ]
+            ]
+          sc.addConfig(results)
+
+          //TODO delete temporary artifacts?
+        }
+
+        allTask.dependsOn(task)
+
+        //TODO add push tasks
+      }
+    }
   }
 
 }

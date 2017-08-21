@@ -26,6 +26,9 @@ dependencies{
   
   // YAML processing
   compile 'org.yaml:snakeyaml:1.18'
+  
+  // Docker plugin
+  compile 'com.bmuschko:gradle-docker-plugin:3.1.0'
 
   // testing
   testCompile 'junit:junit:4.12'

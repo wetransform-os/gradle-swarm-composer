@@ -21,6 +21,7 @@ class SetupConfiguration {
   List configFiles
 
   private Map config
+
   Map getConfig() {
     if (config == null) {
       assert stackName
@@ -30,6 +31,12 @@ class SetupConfiguration {
     config
   }
 
+  void addConfig(Map conf) {
+    config = ConfigHelper.mergeConfigs([config, conf])
+  }
+
   Map settings
+
+  List builds
 
 }
