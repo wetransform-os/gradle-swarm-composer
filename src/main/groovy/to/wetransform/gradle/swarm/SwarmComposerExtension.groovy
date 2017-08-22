@@ -28,6 +28,19 @@ class SwarmComposerExtension {
   // public API
 
   /**
+   * If Docker image builds are enabled. Applies in addition the Gradle Docker plugin
+   * (https://github.com/bmuschko/gradle-docker-plugin).
+   */
+  boolean enableBuilds = true
+
+  /**
+   * Docker configuration applied to the Gradle Docker plugin.
+   */
+  void docker(Closure cl) {
+    dockerConfig = cl.clone()
+  }
+
+  /**
    * Template engine, defaults to Pebble.
    */
   TemplateAssembler templateEngine = new PebbleAssembler()
@@ -61,6 +74,8 @@ class SwarmComposerExtension {
   // internal
 
   final Project project
+
+  Closure dockerConfig
 
 //  final SetupConfigurations configs = new SetupConfigurations();
 
