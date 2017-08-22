@@ -12,6 +12,8 @@ package to.wetransform.gradle.swarm.config
  */
 class SetupConfiguration {
 
+  private boolean configInitialized = false
+
   File stackFile
 
   String stackName
@@ -23,16 +25,23 @@ class SetupConfiguration {
   private Map config
 
   Map getConfig() {
-    if (config == null) {
+    if (!configInitialized) {
       assert stackName
       assert setupName
-      config = ConfigHelper.loadConfig(configFiles, stackName, setupName)
+      def loaded = ConfigHelper.loadConfig(configFiles, stackName, setupName)
+      if (config != null) {
+        config = ConfigHelper.mergeConfigs([loaded, config])
+      }
+      else {
+        config = loaded
+      }
+      configInitialized = true
     }
     config
   }
 
   void addConfig(Map conf) {
-    config = ConfigHelper.mergeConfigs([config, conf])
+    config = ConfigHelper.mergeConfigs([config ?: [:], conf])
   }
 
   Map settings

@@ -277,8 +277,14 @@ class SwarmComposerPlugin implements Plugin<Project> {
           run = "docker stack deploy --compose-file \"$relPath\" --with-registry-auth ${sc.stackName}"
         }
 
+        def images = "./gradlew -Pquiet=true build-${sc.stackName}-${sc.setupName}"
+        if (!composeSupported) {
+          //TODO also push?!
+        }
+
         scriptFile.text = """#!/bin/bash
 set -e
+$images
 ./gradlew ${taskName}
 $run"""
         try {
@@ -305,8 +311,6 @@ $run"""
       description "Build all Docker Images for stack ${sc.stackName} with setup ${sc.setupName}"
     }
 
-    assembleTask.dependsOn(allTask)
-
     sc.builds.each { dFile ->
       if (dFile instanceof File && dFile.exists()) {
         final File parentDir = dFile.parentFile
@@ -315,7 +319,7 @@ $run"""
 
         def settings = loadSettings(parentDir)
 
-        //FIXME better configurable, other sources
+        //FIXME better configurable, other sources - for instance one image/repo for all stack images (e.g. to protect secrets)
         String imageName = settings.image_name
         boolean buildSpecificName = true
         assert imageName
@@ -328,6 +332,16 @@ $run"""
           // build name should be included in tag
           imageTag = "${imageName}:sc-${sc.stackName}-${sc.setupName}-${buildName}"
         }
+
+        // extend configuration with info on build image
+        def results = [
+          builds:
+            [(buildName): [
+                image_tag: imageTag
+              ]
+            ]
+          ]
+        sc.addConfig(results)
 
         def setupTask = project.task("setup-build-${sc.stackName}-${sc.setupName}-${buildName}").doFirst {
           // setup Docker build context
@@ -363,6 +377,8 @@ $run"""
             }
         }
 
+        boolean quietMode = Boolean.parseBoolean(project.findProperty('quiet') ?: 'false')
+
         def task = project.task("build-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerBuildImage) {
           dependsOn setupTask
 
@@ -371,20 +387,13 @@ $run"""
           labels = ['sc-stack': sc.stackName, 'sc-setup': sc.setupName, 'sc-build': buildName]
           tag = imageTag
 
+          //XXX quiet seems to break build
+          //quiet = quietMode
+
           group 'Build individual image'
           description "Build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
         }.doLast {
           // post processing
-
-          // extend configuration with info on build image
-          def results = [
-            builds:
-              [(buildName): [
-                  image_tag: imageTag
-                ]
-              ]
-            ]
-          sc.addConfig(results)
 
           //TODO delete temporary artifacts?
         }
