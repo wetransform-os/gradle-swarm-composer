@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.Jar
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
@@ -223,7 +224,6 @@ class SwarmComposerPlugin implements Plugin<Project> {
     // store configuration in extension (for access for other tasks etc.)
     project.composer.configs.add(sc)
 
-
     // task loading the configuration
 //    def configTaskName = "config-${sc.stackName}-${sc.setupName}"
 //    def configTask = project.task(configTaskName).doFirst {
@@ -295,6 +295,8 @@ $run"""
       }
     }
 
+    setupPrepareTasks(project, task, sc)
+
     // configure Docker image build tasks
     configureBuilds(project, sc, task)
 
@@ -305,6 +307,7 @@ $run"""
       return
     }
 
+    // task for all builds for a stack-setup combination
     def allName = "build-${sc.stackName}-${sc.setupName}"
     def allTask = project.task(allName) {
       group 'Build docker images'
@@ -377,6 +380,8 @@ $run"""
             }
         }
 
+        setupPrepareTasks(project, setupTask, sc, buildName)
+
         boolean quietMode = Boolean.parseBoolean(project.findProperty('quiet') ?: 'false')
 
         def task = project.task("build-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerBuildImage) {
@@ -403,6 +408,51 @@ $run"""
         //TODO add push tasks
       }
     }
+  }
+
+  private void ensureTask(String name, String groupName, String descr, Project project) {
+    if (project.tasks.findByPath(name) == null) {
+      project.task(name) {
+        group groupName
+        description descr
+      }
+    }
+  }
+
+  private void setupPrepareTasks(Project project, Task task, SetupConfiguration sc, String build = null) {
+    // prepare tasks allow for easily adding custom logic/configuration
+    // in preparation for assemble and build tasks
+
+    def groupName = 'Prepare for build and assemble'
+    def groupBuild = 'Build preparation'
+
+    // overall
+
+    ensureTask('prepare', groupName, 'Preparation for all stacks and setups', project)
+    task.dependsOn('prepare')
+
+    if (build) {
+      ensureTask('prepareBuild', groupBuild, 'Preparation for all stacks and setups', project)
+      task.dependsOn('prepareBuild')
+    }
+
+    // stack
+
+    ensureTask("prepare-${sc.stackName}", groupName, "Preparation for ${sc.stackName} stack", project)
+    task.dependsOn("prepare-${sc.stackName}")
+
+    if (build) {
+      ensureTask("prepareBuild-${sc.stackName}", groupBuild, "Preparation for ${sc.stackName} stack", project)
+      task.dependsOn("prepareBuild-${sc.stackName}")
+
+      ensureTask("prepareBuild-${sc.stackName}-${build}", groupBuild, "Preparation for build ${build} in ${sc.stackName} stack", project)
+      task.dependsOn("prepareBuild-${sc.stackName}-${build}")
+    }
+
+    // setup
+
+    ensureTask("prepareSetup-${sc.setupName}", groupName, "Preparation for setup ${sc.setupName}", project)
+    task.dependsOn("prepareSetup-${sc.setupName}")
   }
 
 }
