@@ -71,12 +71,14 @@ class SwarmComposerExtension {
     }
   }
 
+  // advanced users
+
+  final SetupConfigurations configs = new SetupConfigurations()
+
   // internal
 
   final Project project
 
   Closure dockerConfig
-
-//  final SetupConfigurations configs = new SetupConfigurations();
 
 }

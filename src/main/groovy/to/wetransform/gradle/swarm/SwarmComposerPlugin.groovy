@@ -220,8 +220,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
   }
 
   void configureSetup(Project project, final SetupConfiguration sc) {
-    // store configuration in extension
-//    project.composer.configs.add(sc)
+    // store configuration in extension (for access for other tasks etc.)
+    project.composer.configs.add(sc)
 
 
     // task loading the configuration
@@ -295,7 +295,7 @@ $run"""
       }
     }
 
-    // configre Docker image build tasks
+    // configure Docker image build tasks
     configureBuilds(project, sc, task)
 
   }

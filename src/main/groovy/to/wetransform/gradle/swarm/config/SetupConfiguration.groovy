@@ -37,7 +37,7 @@ class SetupConfiguration {
       }
       configInitialized = true
     }
-    config
+    config.asImmutable()
   }
 
   void addConfig(Map conf) {
