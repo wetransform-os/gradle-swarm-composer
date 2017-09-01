@@ -20,7 +20,8 @@ import to.wetransform.gradle.swarm.util.Helpers;;
  */
 class ConfigHelper {
 
-  static Map<String, Object> loadConfig(List configFiles, String stackName = null, String setupName = null) {
+  static Map<String, Object> loadConfig(List configFiles, String stackName = null, String setupName = null,
+      Map initialConfig = null) {
     // config files
     def configs = configFiles.collect { cfg ->
 
@@ -45,7 +46,18 @@ class ConfigHelper {
     }
 
     // merge configuration files
-    Map<String, Object> context = mergeConfigs(configs)
+    def clist
+    if (initialConfig) {
+      //XXX should this configuration override config from files?
+      //XXX for now let it override, otherwise external tasks cannot override configuration
+      clist = []
+      clist.addAll(configs)
+      clist << initialConfig
+    }
+    else {
+      clist = configs
+    }
+    Map<String, Object> context = mergeConfigs(clist)
 
     // evaluate configuration
     ConfigEvaluator evaluator = new PebbleEvaluator()

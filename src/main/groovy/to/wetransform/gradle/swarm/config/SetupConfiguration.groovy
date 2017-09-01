@@ -28,13 +28,7 @@ class SetupConfiguration {
     if (!configInitialized) {
       assert stackName
       assert setupName
-      def loaded = ConfigHelper.loadConfig(configFiles, stackName, setupName)
-      if (config != null) {
-        config = ConfigHelper.mergeConfigs([loaded, config])
-      }
-      else {
-        config = loaded
-      }
+      config = ConfigHelper.loadConfig(configFiles, stackName, setupName, config)
       configInitialized = true
     }
     config.asImmutable()
