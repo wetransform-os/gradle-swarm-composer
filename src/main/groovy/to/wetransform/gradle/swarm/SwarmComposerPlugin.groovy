@@ -311,7 +311,13 @@ $run"""
     def allName = "build-${sc.stackName}-${sc.setupName}"
     def allTask = project.task(allName) {
       group 'Build docker images'
-      description "Build all Docker Images for stack ${sc.stackName} with setup ${sc.setupName}"
+      description "Build all Docker images for stack ${sc.stackName} with setup ${sc.setupName}"
+    }
+
+    def pushAllName = "push-${sc.stackName}-${sc.setupName}"
+    def pushAllTask = project.task(pushAllName) {
+      group 'Push docker images'
+      description "Push all Docker images for stack ${sc.stackName} with setup ${sc.setupName}"
     }
 
     sc.builds.each { dFile ->
@@ -323,17 +329,17 @@ $run"""
         def settings = loadSettings(parentDir)
 
         //FIXME better configurable, other sources - for instance one image/repo for all stack images (e.g. to protect secrets)
-        String imageName = settings.image_name
+        String image = settings.image_name
         boolean buildSpecificName = true
-        assert imageName
+        assert image
         String imageTag
         if (buildSpecificName) {
           // relation to build already contained in name
-          imageTag = "${imageName}:sc-${sc.stackName}-${sc.setupName}"
+          imageTag = "${image}:sc-${sc.stackName}-${sc.setupName}"
         }
         else {
           // build name should be included in tag
-          imageTag = "${imageName}:sc-${sc.stackName}-${sc.setupName}-${buildName}"
+          imageTag = "${image}:sc-${sc.stackName}-${sc.setupName}-${buildName}"
         }
 
         // extend configuration with info on build image
@@ -405,7 +411,24 @@ $run"""
 
         allTask.dependsOn(task)
 
-        //TODO add push tasks
+        // add push tasks
+
+        def pushTask = project.task("push-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerBuildImage) {
+          // should it depend on build?
+          dependsOn task
+
+          image = imageTag.split(':')[0]
+          tag = imageTag.split(':')[1]
+
+          //XXX quiet seems to break build
+          //quiet = quietMode
+
+          group 'Push individual image'
+          description "Push \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
+        }
+
+        pushAllTask.dependsOn(pushTask)
+
       }
     }
   }
