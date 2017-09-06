@@ -170,7 +170,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
   Map loadSettings(File setupDir) {
     def scConfigFile = new File(setupDir, 'swarm-composer.yml')
-    scConfigFile.exists() ? (ConfigHelper.loadYaml(scConfigFile)) : DEFAULT_SC_CONFIG
+    scConfigFile.exists() ? (ConfigHelper.loadYaml(scConfigFile) ?: DEFAULT_SC_CONFIG) : DEFAULT_SC_CONFIG
   }
 
   Collection collectExtendedConfigs(Project project, File setupsDir, String setupName, Map scConfig) {
@@ -328,9 +328,21 @@ $run"""
 
         def settings = loadSettings(parentDir)
 
-        //FIXME better configurable, other sources - for instance one image/repo for all stack images (e.g. to protect secrets)
+        //TODO better configurable (also tag name), other sources - for instance one image/repo for all stack images (e.g. to protect secrets)
         String image = settings.image_name
         boolean buildSpecificName = true
+
+        if (!image) {
+          // check if there is a global image configured
+          // use unevaluated because config may not be accessed at configuration time
+          //XXX or allow inheritance also for swarm-composer.yml files?
+          def globalImage = sc.unevaluated.builds?.image_name
+          if (globalImage) {
+            image = globalImage
+            buildSpecificName = false
+          }
+        }
+
         assert image
         String imageTag
         if (buildSpecificName) {

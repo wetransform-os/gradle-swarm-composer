@@ -21,7 +21,7 @@ import to.wetransform.gradle.swarm.util.Helpers;;
 class ConfigHelper {
 
   static Map<String, Object> loadConfig(List configFiles, String stackName = null, String setupName = null,
-      Map initialConfig = null) {
+      Map initialConfig = null, boolean evaluate = true) {
     // config files
     def configs = configFiles.collect { cfg ->
 
@@ -60,8 +60,10 @@ class ConfigHelper {
     Map<String, Object> context = mergeConfigs(clist)
 
     // evaluate configuration
-    ConfigEvaluator evaluator = new PebbleEvaluator()
-    context = evaluator.evaluate(context)
+    if (evaluate) {
+      ConfigEvaluator evaluator = new PebbleEvaluator()
+      context = evaluator.evaluate(context)
+    }
 
     // stack and setup names
     if (stackName) {
