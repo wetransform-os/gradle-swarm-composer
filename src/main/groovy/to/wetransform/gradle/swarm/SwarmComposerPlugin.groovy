@@ -13,6 +13,7 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.Jar
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage;
 
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
 import to.wetransform.gradle.swarm.config.ConfigHelper
@@ -22,6 +23,8 @@ import to.wetransform.gradle.swarm.tasks.Assemble;
 class SwarmComposerPlugin implements Plugin<Project> {
 
   private static final Map<String, Object> DEFAULT_SC_CONFIG = [:]
+
+  private final def groovyEngine = new groovy.text.SimpleTemplateEngine()
 
   void apply(Project project) {
     // register extension
@@ -331,12 +334,17 @@ $run"""
 
         def settings = loadSettings(parentDir)
 
-        //TODO better configurable (also tag name), other sources - for instance one image/repo for all stack images (e.g. to protect secrets)
+        def settingBinding = [:]
+        settingBinding.putAll(sc.unevaluated)
+        // add fixed bindings
+        settingBinding.putAll([stack: sc.stackName, setup: sc.setupName, build: buildName])
+
+        // build configured image
         String image = settings.image_name
         boolean buildSpecificName = true
 
         if (!image) {
-          // check if there is a global image configured
+          // check if there is a global image configured (for all builds)
           // use unevaluated because config may not be accessed at configuration time
           //XXX or allow inheritance also for swarm-composer.yml files?
           def globalImage = sc.unevaluated.builds?.image_name
@@ -347,14 +355,36 @@ $run"""
         }
 
         assert image
+        image = evaluateSetting(image, settingBinding)
+
+        // build configured image version
+        String imageVersion = settings.image_version
+        if (!imageVersion) {
+          // try "global" configuration (for all builds)
+          imageVersion = sc.unevaluated.builds?.image_version
+        }
+        if (imageVersion) {
+          // evaluate
+          imageVersion = evaluateSetting(imageVersion, settingBinding)
+        }
+        else {
+          // use defaults
+          if (buildSpecificName) {
+            imageVersion = "sc-${sc.stackName}-${sc.setupName}"
+          }
+          else {
+            imageVersion = "sc-${sc.stackName}-${sc.setupName}-${buildName}"
+          }
+        }
+
         String imageTag
         if (buildSpecificName) {
           // relation to build already contained in name
-          imageTag = "${image}:sc-${sc.stackName}-${sc.setupName}"
+          imageTag = "${image}:${imageVersion}"
         }
         else {
           // build name should be included in tag
-          imageTag = "${image}:sc-${sc.stackName}-${sc.setupName}-${buildName}"
+          imageTag = "${image}:${imageVersion}"
         }
 
         // extend configuration with info on build image
@@ -428,12 +458,9 @@ $run"""
 
         // add push tasks
 
-        def pushTask = project.task("push-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerBuildImage) {
-          image = imageTag.split(':')[0]
+        def pushTask = project.task("push-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerPushImage) {
+          imageName = imageTag.split(':')[0]
           tag = imageTag.split(':')[1]
-
-          //XXX quiet seems to break build
-          //quiet = quietMode
 
           group 'Push individual image'
           description "Push image for build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
@@ -488,6 +515,21 @@ $run"""
 
     ensureTask("prepareSetup-${sc.setupName}", groupName, "Preparation for setup ${sc.setupName}", project)
     task.dependsOn("prepareSetup-${sc.setupName}")
+  }
+
+  /**
+   * Evaluate a setting using a GString like template.
+   *
+   * That a different syntax than for the stack/setup configuration is used is
+   * by intention, to make clear that the settings follow different rules.
+   *
+   * @param setting the setting
+   * @param binding the binding for the evaluation
+   * @return the evaluated setting
+   */
+  private String evaluateSetting(String setting, Map binding) {
+    def template = groovyEngine.createTemplate(setting).make(binding)
+    template.toString()
   }
 
 }
