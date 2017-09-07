@@ -28,6 +28,10 @@ class SetupConfigurations implements Iterable<SetupConfiguration> {
     this([:])
   }
 
+  def getSetups() {
+    setups.keySet().asImmutable()
+  }
+
   void add(SetupConfiguration setup) {
     def stacks = setups[setup.setupName]
     if (stacks == null) {
