@@ -263,7 +263,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
       }
 
       // create helper script
-      boolean createScript = true
+      def scriptConfig = sc.settings['generate-scripts']
+      boolean createScript = scriptConfig == null ? true : scriptConfig
+
       if (createScript) {
         // add a script file for convenient Docker Compose calls
         File scriptFile = project.file(composeSupported ? "${sc.stackName}-${sc.setupName}.sh" : "deploy-${sc.stackName}-${sc.setupName}.sh")
