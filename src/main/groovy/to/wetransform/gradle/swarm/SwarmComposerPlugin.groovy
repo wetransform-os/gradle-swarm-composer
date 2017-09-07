@@ -281,7 +281,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
         def images = "./gradlew -Pquiet=true build-${sc.stackName}-${sc.setupName}"
         if (!composeSupported) {
-          //TODO also push?!
+          // also add push
+          images += "\n./gradlew -Pquiet=true push-${sc.stackName}-${sc.setupName}"
         }
 
         scriptFile.text = """#!/bin/bash
@@ -428,9 +429,6 @@ $run"""
         // add push tasks
 
         def pushTask = project.task("push-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerBuildImage) {
-          // should it depend on build?
-          dependsOn task
-
           image = imageTag.split(':')[0]
           tag = imageTag.split(':')[1]
 
@@ -438,7 +436,7 @@ $run"""
           //quiet = quietMode
 
           group 'Push individual image'
-          description "Push \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
+          description "Push image for build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
         }
 
         pushAllTask.dependsOn(pushTask)
