@@ -28,7 +28,7 @@ class SetupConfigurations implements Iterable<SetupConfiguration> {
     this([:])
   }
 
-  def getSetups() {
+  def getSetupNames() {
     setups.keySet().asImmutable()
   }
 
