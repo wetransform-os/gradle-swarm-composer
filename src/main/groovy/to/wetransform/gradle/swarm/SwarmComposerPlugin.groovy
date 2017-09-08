@@ -435,6 +435,8 @@ $run"""
 
         boolean quietMode = Boolean.parseBoolean(project.findProperty('quiet') ?: 'false')
 
+        boolean pullImage = Boolean.parseBoolean(project.findProperty('pull') ?: 'true')
+
         def task = project.task("build-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerBuildImage) {
           dependsOn setupTask
 
@@ -445,6 +447,8 @@ $run"""
 
           //XXX quiet seems to break build
           //quiet = quietMode
+
+          pull = pullImage
 
           group 'Build individual image'
           description "Build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
