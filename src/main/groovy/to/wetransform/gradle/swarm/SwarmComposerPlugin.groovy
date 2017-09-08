@@ -282,16 +282,20 @@ class SwarmComposerPlugin implements Plugin<Project> {
           run = "docker stack deploy --compose-file \"$relPath\" --with-registry-auth ${sc.stackName}"
         }
 
-        def images = "./gradlew -Pquiet=true build-${sc.stackName}-${sc.setupName}"
+        def gradleArgs = []
+
+        gradleArgs.add(0, '-Pquiet=true')
+        gradleArgs << "build-${sc.stackName}-${sc.setupName}"
         if (!composeSupported) {
           // also add push
-          images += "\n./gradlew -Pquiet=true push-${sc.stackName}-${sc.setupName}"
+          gradleArgs << "push-${sc.stackName}-${sc.setupName}"
         }
+
+        gradleArgs << taskName
 
         scriptFile.text = """#!/bin/bash
 set -e
-$images
-./gradlew ${taskName}
+./gradlew ${gradleArgs.join(' ')}
 $run"""
         try {
           ['chmod', 'a+x', scriptFile.absolutePath].execute()
