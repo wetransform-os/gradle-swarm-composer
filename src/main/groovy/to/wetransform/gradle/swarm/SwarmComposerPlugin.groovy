@@ -17,7 +17,10 @@ import com.bmuschko.gradle.docker.tasks.image.DockerPushImage;
 
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
 import to.wetransform.gradle.swarm.config.ConfigHelper
-import to.wetransform.gradle.swarm.config.SetupConfiguration;
+import to.wetransform.gradle.swarm.config.SetupConfiguration
+import to.wetransform.gradle.swarm.crypt.ConfigCryptor
+import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor;
+import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor;
 import to.wetransform.gradle.swarm.tasks.Assemble;
 
 class SwarmComposerPlugin implements Plugin<Project> {
@@ -134,7 +137,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
                 setupName: setup,
                 configFiles: configFiles,
                 settings: scConfig,
-                builds: stackBuilds.asImmutable())
+                builds: stackBuilds.asImmutable(),
+                setupDir: setupDir)
 
               configureSetup(project, sc)
             }
@@ -161,7 +165,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
               setupName: 'default',
               configFiles: configFiles,
               settings: scConfig,
-              builds: stackBuilds.asImmutable())
+              builds: stackBuilds.asImmutable(),
+              setupDir: null)
 
             configureSetup(project, sc)
           }
@@ -220,7 +225,19 @@ class SwarmComposerPlugin implements Plugin<Project> {
       includes: includes,
       excludes: ['swarm-composer.yml'])
 
-    setupConfig.asCollection()
+    setupConfig.asCollection().collect { file ->
+      def name = file.name
+
+      // for secret files use plain counterpart
+      if (name.contains('.secret.')) {
+        def plain = name.replaceAll(/\.secret\./, '.tmp.')
+        def neighbor = new File(file.parentFile, plain)
+        neighbor
+      }
+      else {
+        file
+      }
+    }.unique()
   }
 
   void configureSetup(Project project, final SetupConfiguration sc) {
@@ -234,6 +251,70 @@ class SwarmComposerPlugin implements Plugin<Project> {
 //      sc.config
 //    }
 
+    def decryptTask
+    if (sc.setupDir) {
+      // encryption / decryption tasks
+
+      // get password
+      def password = project.findProperty("vault_password_${sc.setupName}")
+      if (!password) {
+        password = project.findProperty("vault_password")
+      }
+
+      if (password) {
+        def encryptName = "encrypt-${sc.setupName}"
+        if (!project.tasks.findByPath(encryptName)) {
+          def encryptTask = project.task(encryptName) {
+            group = 'Encrypt setup configuration'
+          }.doFirst {
+            ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
+
+            def files = project.fileTree(
+              dir: sc.setupDir,
+              includes: ['*.tmp.*']).asCollection()
+
+            files.each { plainFile ->
+              def name = plainFile.name.replaceAll(/\.tmp\./, '.secret.')
+              def secretFile = new File(plainFile.parentFile, name)
+
+              // read, encrypt, write
+              //XXX only YAML supported right now
+              def config = ConfigHelper.loadYaml(plainFile)
+              config = cryptor.encrypt(config, password)
+              ConfigHelper.saveYaml(config, secretFile)
+            }
+          }
+        }
+
+        def decryptName = "decrypt-${sc.setupName}"
+        if (!project.tasks.findByPath(decryptName)) {
+          decryptTask = project.task(decryptName) {
+            group = 'Decrypt setup configuration'
+          }.doFirst {
+            ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
+
+            def files = project.fileTree(
+              dir: sc.setupDir,
+              includes: ['*.secret.*']).asCollection()
+
+            files.each { secretFile ->
+              def name = secretFile.name.replaceAll(/\.secret\./, '.tmp.')
+              def plainFile = new File(secretFile.parentFile, name)
+
+              // read, decrypt, write
+              //XXX only YAML supported right now
+              def config = ConfigHelper.loadYaml(secretFile)
+              config = cryptor.decrypt(config, password)
+              ConfigHelper.saveYaml(config, plainFile)
+            }
+          }
+        }
+
+      }
+    }
+
+
+    // assemble description
     def desc = "Generates compose file for stack ${sc.stackName} with setup ${sc.setupName}"
     def customDesc = sc.settings?.description?.trim()
     if (customDesc) {
@@ -306,6 +387,11 @@ $run"""
     }
 
     setupPrepareTasks(project, task, sc)
+
+    // make sure decrypt task runs as part of preparation
+    if (decryptTask) {
+      project.tasks."prepareSetup-${sc.setupName}".dependsOn(decryptTask)
+    }
 
     // configure Docker image build tasks
     configureBuilds(project, sc, task)
@@ -480,13 +566,15 @@ $run"""
     }
   }
 
-  private void ensureTask(String name, String groupName, String descr, Project project) {
-    if (project.tasks.findByPath(name) == null) {
-      project.task(name) {
+  private Task ensureTask(String name, String groupName, String descr, Project project) {
+    def task = project.tasks.findByPath(name)
+    if (task == null) {
+      task = project.task(name) {
         group groupName
         description descr
       }
     }
+    task
   }
 
   private void setupPrepareTasks(Project project, Task task, SetupConfiguration sc, String build = null) {
