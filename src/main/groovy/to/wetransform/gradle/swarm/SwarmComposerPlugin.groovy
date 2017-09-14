@@ -277,6 +277,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
               def name = plainFile.name.replaceAll(/\.tmp\./, '.secret.')
               def secretFile = new File(plainFile.parentFile, name)
 
+              //FIXME either encrypt whole file or only update changed entries in secrets file?
+
               // read, encrypt, write
               //XXX only YAML supported right now
               def config = ConfigHelper.loadYaml(plainFile)
