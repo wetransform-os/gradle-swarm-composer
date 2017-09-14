@@ -26,6 +26,8 @@ class AliceCryptorTest {
     String decrypted = c.decrypt(encrypted, password)
 
     assert plain == decrypted
+
+    assert encrypted != decrypted
   }
 
 }
