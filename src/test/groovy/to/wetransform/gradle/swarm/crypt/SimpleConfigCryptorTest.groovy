@@ -38,7 +38,7 @@ ipsum - or what?'''
 
     String password = "Goodbye"
 
-    def encrypted = c.encrypt(copy, password)
+    def encrypted = c.encrypt(copy, password, null)
     def copyEncrypted = new JsonSlurper().parseText(JsonOutput.toJson(encrypted))
 
     assert encrypted == copyEncrypted
