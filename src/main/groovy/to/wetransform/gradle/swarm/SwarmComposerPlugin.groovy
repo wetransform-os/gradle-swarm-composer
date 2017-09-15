@@ -27,6 +27,10 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
   private static final Map<String, Object> DEFAULT_SC_CONFIG = [:]
 
+  private static final String PLAIN_FILE_IDENTIFIER = 'secret'
+
+  private static final String ENCRYPTED_FILE_IDENTIFIER = 'vault'
+
   private final def groovyEngine = new groovy.text.SimpleTemplateEngine()
 
   void apply(Project project) {
@@ -229,8 +233,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
       def name = file.name
 
       // for secret files use plain counterpart
-      if (name.contains('.secret.')) {
-        def plain = name.replaceAll(/\.secret\./, '.tmp.')
+      if (name.contains(".${ENCRYPTED_FILE_IDENTIFIER}.")) {
+        def plain = name.replaceAll("\\.${ENCRYPTED_FILE_IDENTIFIER}\\.",
+          ".${PLAIN_FILE_IDENTIFIER}.")
         def neighbor = new File(file.parentFile, plain)
         neighbor
       }
@@ -271,10 +276,10 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
             def files = project.fileTree(
               dir: sc.setupDir,
-              includes: ['*.tmp.*']).asCollection()
+              includes: ["*.${PLAIN_FILE_IDENTIFIER}.*"]).asCollection()
 
             files.each { plainFile ->
-              def name = plainFile.name.replaceAll(/\.tmp\./, '.secret.')
+              def name = plainFile.name.replaceAll("\\.${PLAIN_FILE_IDENTIFIER}\\.", ".${ENCRYPTED_FILE_IDENTIFIER}.")
               def secretFile = new File(plainFile.parentFile, name)
 
               /*
@@ -322,10 +327,11 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
             def files = project.fileTree(
               dir: sc.setupDir,
-              includes: ['*.secret.*']).asCollection()
+              includes: ["*.${ENCRYPTED_FILE_IDENTIFIER}.*"]).asCollection()
 
             files.each { secretFile ->
-              def name = secretFile.name.replaceAll(/\.secret\./, '.tmp.')
+              def name = secretFile.name.replaceAll("\\.${ENCRYPTED_FILE_IDENTIFIER}\\.",
+                ".${PLAIN_FILE_IDENTIFIER}.")
               def plainFile = new File(secretFile.parentFile, name)
 
               // read, decrypt, write
@@ -333,6 +339,11 @@ class SwarmComposerPlugin implements Plugin<Project> {
               def config = ConfigHelper.loadYaml(secretFile)
               config = cryptor.decrypt(config, password)
               ConfigHelper.saveYaml(config, plainFile)
+              // add comment to file
+              def now = new Date().toInstant().toString()
+              def comment = "# Decrypted configuration last updated on ${now}\n" +
+                '# DO NOT ADD TO VERSION CONTROL'
+              plainFile.text = comment + '\n' + plainFile.text
             }
           }
         }
