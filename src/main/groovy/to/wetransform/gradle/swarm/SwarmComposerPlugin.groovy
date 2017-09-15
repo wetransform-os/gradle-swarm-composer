@@ -495,6 +495,25 @@ $run"""
         // add fixed bindings
         settingBinding.putAll([stack: sc.stackName, setup: sc.setupName, build: buildName])
 
+        // check if build is enabled
+        def enabled = settings.enabled
+        if (enabled == null) {
+          enabled = true
+        }
+        else if (enabled != true && enabled != false) {
+          // expecting a string
+          def str = enabled.toString()
+          enabled = evaluateSetting(str, settingBinding)
+          if (enabled instanceof String) {
+            enabled = Boolean.parseBoolean(enabled)
+          }
+        }
+
+        if (!enabled) {
+          // only configure build if it is enabled
+          return
+        }
+
         // build configured image
         String image = settings.image_name
         boolean buildSpecificName = true
