@@ -21,11 +21,17 @@ buildscript {
   repositories {
     jcenter()
     maven {
+      url 'https://artifactory.wetransform.to/artifactory/libs-release-local'
+    }
+    maven {
       url 'https://artifactory.wetransform.to/artifactory/libs-snapshot-local'
+    }
+    maven {
+      url 'https://jitpack.io'
     }
   }
   dependencies {
-    classpath 'to.wetransform:gradle-swarm-composer:1.0.0-SNAPSHOT'
+    classpath 'to.wetransform:gradle-swarm-composer:0.1.0'
   }
 }
 
