@@ -256,6 +256,17 @@ class SwarmComposerPlugin implements Plugin<Project> {
 //      sc.config
 //    }
 
+    def vaultGroup = 'Configuration vault'
+
+    def purgeSecretsName = 'purgeSecrets'
+    def purgeSecretsTask = project.tasks.findByPath(purgeSecretsName)
+    if (!purgeSecretsTask) {
+      purgeSecretsTask = project.task(purgeSecretsName) {
+        group = vaultGroup
+        description = 'Delete all plain text secret files'
+      }
+    }
+
     def decryptTask
     if (sc.setupDir) {
       // encryption / decryption tasks
@@ -270,7 +281,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
         def encryptName = "encrypt-${sc.setupName}"
         if (!project.tasks.findByPath(encryptName)) {
           def encryptTask = project.task(encryptName) {
-            group = 'Encrypt setup configuration'
+            group = vaultGroup
+            description = "Create encrypted vault files from plain text secret files for setup ${sc.setupName}"
           }.doFirst {
             ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
 
@@ -321,7 +333,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
         def decryptName = "decrypt-${sc.setupName}"
         if (!project.tasks.findByPath(decryptName)) {
           decryptTask = project.task(decryptName) {
-            group = 'Decrypt setup configuration'
+            group = vaultGroup
+            description = "Create plain text secret files from encrypted vault files for setup ${sc.setupName}"
           }.doFirst {
             ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
 
@@ -346,6 +359,21 @@ class SwarmComposerPlugin implements Plugin<Project> {
               plainFile.text = comment + '\n' + plainFile.text
             }
           }
+        }
+
+        // purge task
+        def purgeName = "purgeSecrets-${sc.setupName}"
+        if (!project.tasks.findByPath(purgeName)) {
+          def purgeTask = project.task(purgeName) {
+            group = vaultGroup
+            description = "Delete all plain text secret files for setup ${sc.setupName}"
+          }.doLast {
+            project.fileTree(dir: sc.setupDir,
+                includes: ["*.${PLAIN_FILE_IDENTIFIER}.*"]).each { File file ->
+              file.delete()
+            }
+          }
+          purgeSecretsTask.dependsOn(purgeTask)
         }
 
       }
