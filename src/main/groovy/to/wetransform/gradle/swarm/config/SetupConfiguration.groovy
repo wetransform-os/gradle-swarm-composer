@@ -18,6 +18,8 @@ class SetupConfiguration {
 
   File stackFile
 
+  File setupDir
+
   String stackName
 
   String setupName

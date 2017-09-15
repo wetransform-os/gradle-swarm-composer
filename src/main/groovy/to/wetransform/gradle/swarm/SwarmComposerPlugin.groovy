@@ -17,12 +17,19 @@ import com.bmuschko.gradle.docker.tasks.image.DockerPushImage;
 
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
 import to.wetransform.gradle.swarm.config.ConfigHelper
-import to.wetransform.gradle.swarm.config.SetupConfiguration;
+import to.wetransform.gradle.swarm.config.SetupConfiguration
+import to.wetransform.gradle.swarm.crypt.ConfigCryptor
+import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor;
+import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor;
 import to.wetransform.gradle.swarm.tasks.Assemble;
 
 class SwarmComposerPlugin implements Plugin<Project> {
 
   private static final Map<String, Object> DEFAULT_SC_CONFIG = [:]
+
+  private static final String PLAIN_FILE_IDENTIFIER = 'secret'
+
+  private static final String ENCRYPTED_FILE_IDENTIFIER = 'vault'
 
   private final def groovyEngine = new groovy.text.SimpleTemplateEngine()
 
@@ -134,7 +141,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
                 setupName: setup,
                 configFiles: configFiles,
                 settings: scConfig,
-                builds: stackBuilds.asImmutable())
+                builds: stackBuilds.asImmutable(),
+                setupDir: setupDir)
 
               configureSetup(project, sc)
             }
@@ -161,7 +169,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
               setupName: 'default',
               configFiles: configFiles,
               settings: scConfig,
-              builds: stackBuilds.asImmutable())
+              builds: stackBuilds.asImmutable(),
+              setupDir: null)
 
             configureSetup(project, sc)
           }
@@ -220,7 +229,20 @@ class SwarmComposerPlugin implements Plugin<Project> {
       includes: includes,
       excludes: ['swarm-composer.yml'])
 
-    setupConfig.asCollection()
+    setupConfig.asCollection().collect { file ->
+      def name = file.name
+
+      // for secret files use plain counterpart
+      if (name.contains(".${ENCRYPTED_FILE_IDENTIFIER}.")) {
+        def plain = name.replaceAll("\\.${ENCRYPTED_FILE_IDENTIFIER}\\.",
+          ".${PLAIN_FILE_IDENTIFIER}.")
+        def neighbor = new File(file.parentFile, plain)
+        neighbor
+      }
+      else {
+        file
+      }
+    }.unique()
   }
 
   void configureSetup(Project project, final SetupConfiguration sc) {
@@ -234,6 +256,131 @@ class SwarmComposerPlugin implements Plugin<Project> {
 //      sc.config
 //    }
 
+    def vaultGroup = 'Configuration vault'
+
+    def purgeSecretsName = 'purgeSecrets'
+    def purgeSecretsTask = project.tasks.findByPath(purgeSecretsName)
+    if (!purgeSecretsTask) {
+      purgeSecretsTask = project.task(purgeSecretsName) {
+        group = vaultGroup
+        description = 'Delete all plain text secret files'
+      }
+    }
+
+    def decryptTask
+    if (sc.setupDir) {
+      // encryption / decryption tasks
+
+      // get password
+      def password = project.findProperty("vault_password_${sc.setupName}")
+      if (!password) {
+        password = project.findProperty("vault_password")
+      }
+
+      if (password) {
+        def encryptName = "encrypt-${sc.setupName}"
+        if (!project.tasks.findByPath(encryptName)) {
+          def encryptTask = project.task(encryptName) {
+            group = vaultGroup
+            description = "Create encrypted vault files from plain text secret files for setup ${sc.setupName}"
+          }.doFirst {
+            ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
+
+            def files = project.fileTree(
+              dir: sc.setupDir,
+              includes: ["*.${PLAIN_FILE_IDENTIFIER}.*"]).asCollection()
+
+            files.each { plainFile ->
+              def name = plainFile.name.replaceAll("\\.${PLAIN_FILE_IDENTIFIER}\\.", ".${ENCRYPTED_FILE_IDENTIFIER}.")
+              def secretFile = new File(plainFile.parentFile, name)
+
+              /*
+               * XXX instead encrypt whole file?
+               *
+               * Advantages:
+               * - structure and comments preserved exactly
+               * - independent of file format
+               * Disadvantages:
+               * - not transparent which settings were changed in the encrypted file
+               *
+               * Both the file and the current implementation would allow handling
+               * encrypted configuration in memory without creating plain files.
+               * What stands in the way there is the fact that extended setups
+               * may have a different password protecting it.
+               */
+
+              // read, encrypt (with reference), write
+              //XXX only YAML supported right now
+              def config = ConfigHelper.loadYaml(plainFile)
+              def reference
+              if (secretFile.exists()) {
+                try {
+                  reference = ConfigHelper.loadYaml(secretFile)
+                } catch (e) {
+                  // ignore
+                }
+              }
+              config = cryptor.encrypt(config, password, reference)
+              ConfigHelper.saveYaml(config, secretFile)
+              // add comment to file
+              def now = new Date().toInstant().toString()
+              def comment = "# Encrypted configuration last updated on ${now}"
+              secretFile.text = comment + '\n' + secretFile.text
+            }
+          }
+        }
+
+        def decryptName = "decrypt-${sc.setupName}"
+        if (!project.tasks.findByPath(decryptName)) {
+          decryptTask = project.task(decryptName) {
+            group = vaultGroup
+            description = "Create plain text secret files from encrypted vault files for setup ${sc.setupName}"
+          }.doFirst {
+            ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
+
+            def files = project.fileTree(
+              dir: sc.setupDir,
+              includes: ["*.${ENCRYPTED_FILE_IDENTIFIER}.*"]).asCollection()
+
+            files.each { secretFile ->
+              def name = secretFile.name.replaceAll("\\.${ENCRYPTED_FILE_IDENTIFIER}\\.",
+                ".${PLAIN_FILE_IDENTIFIER}.")
+              def plainFile = new File(secretFile.parentFile, name)
+
+              // read, decrypt, write
+              //XXX only YAML supported right now
+              def config = ConfigHelper.loadYaml(secretFile)
+              config = cryptor.decrypt(config, password)
+              ConfigHelper.saveYaml(config, plainFile)
+              // add comment to file
+              def now = new Date().toInstant().toString()
+              def comment = "# Decrypted configuration last updated on ${now}\n" +
+                '# DO NOT ADD TO VERSION CONTROL'
+              plainFile.text = comment + '\n' + plainFile.text
+            }
+          }
+        }
+
+        // purge task
+        def purgeName = "purgeSecrets-${sc.setupName}"
+        if (!project.tasks.findByPath(purgeName)) {
+          def purgeTask = project.task(purgeName) {
+            group = vaultGroup
+            description = "Delete all plain text secret files for setup ${sc.setupName}"
+          }.doLast {
+            project.fileTree(dir: sc.setupDir,
+                includes: ["*.${PLAIN_FILE_IDENTIFIER}.*"]).each { File file ->
+              file.delete()
+            }
+          }
+          purgeSecretsTask.dependsOn(purgeTask)
+        }
+
+      }
+    }
+
+
+    // assemble description
     def desc = "Generates compose file for stack ${sc.stackName} with setup ${sc.setupName}"
     def customDesc = sc.settings?.description?.trim()
     if (customDesc) {
@@ -306,6 +453,11 @@ $run"""
     }
 
     setupPrepareTasks(project, task, sc)
+
+    // make sure decrypt task runs as part of preparation
+    if (decryptTask) {
+      project.tasks."prepareSetup-${sc.setupName}".dependsOn(decryptTask)
+    }
 
     // configure Docker image build tasks
     configureBuilds(project, sc, task)
@@ -480,13 +632,15 @@ $run"""
     }
   }
 
-  private void ensureTask(String name, String groupName, String descr, Project project) {
-    if (project.tasks.findByPath(name) == null) {
-      project.task(name) {
+  private Task ensureTask(String name, String groupName, String descr, Project project) {
+    def task = project.tasks.findByPath(name)
+    if (task == null) {
+      task = project.task(name) {
         group groupName
         description descr
       }
     }
+    task
   }
 
   private void setupPrepareTasks(Project project, Task task, SetupConfiguration sc, String build = null) {

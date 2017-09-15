@@ -45,7 +45,8 @@ root
 │  │  │     └─ Dockerfile
 │  │  └──config
 │  │     ├─ config1.yml
-│  │     └─ config2.env
+│  │     ├─ config2.vault.yml
+│  │     └─ config3.env
 │  │
 │  └──stack2
 │     ├─ swarm-composer.yml
@@ -93,6 +94,27 @@ YAML configurations are accessible via their property path (segments separated s
 **TODO:** Configuration that controls swarm-composer behavior (e.g. which modes are enabled, if another setup should be extended, if a custom file name should be used, etc.)
 
 Restrictions for variable evaluation in configuration files: Simple value insertions/replacements work, for conditions only boolean variables are supported right now. 
+
+#### Secret variables
+
+Sensible information like passwords can be stored in encrypted configuration files.
+These files then also for instance can be added to version control.
+
+For encrypted configuration files right now only the YAML format is supported, variables must be string values.
+
+To create an encrypted configuration file, first create its plain counterpart in the setup folder.
+The file names of the plain configuration files should end with `.secret.yml`.
+
+You also need to provide the password to use for the encryption.
+It can be provided as Gradle property, either for all setups (`vault_password`) or for individual setups (`vault_password_<setup>`).
+
+To encrypt the configuration file, run the encryption task for the respective setup (e.g. `./gradlew encrypt-<setup>`).
+Encrypted vault files have a file name that ends with `.vault.yml`.
+
+Note that when accessing the setup configuration, the plain files are recreated.
+If you want to remove them after a task, also add the `purgeSecrets` task.
+
+If you want to edit a vault file, you can either add encrpyted entries there, or simply decrypt the file with the task `decrypt-<setup>` and encrypt it after you completed your changes.
 
 #### Reserved variable names
 

@@ -7,6 +7,7 @@ package to.wetransform.gradle.swarm.config
 
 import java.nio.charset.StandardCharsets
 
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
 
@@ -174,6 +175,24 @@ class ConfigHelper {
     Map result
     yamlFile.withInputStream {
       result = yaml.load(it)
+    }
+    result ?: [:]
+  }
+
+  /**
+   * Load a configuration from a YAML file.
+   *
+   * @param yamlFile the YAML file
+   * @return the loaded configuration map
+   */
+  static void saveYaml(Map config, File yamlFile) {
+    DumperOptions options = new DumperOptions()
+//    options.explicitStart = true
+    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
+    Yaml yaml = new Yaml(options);
+    Map result
+    yamlFile.withWriter(StandardCharsets.UTF_8.name()) {
+      result = yaml.dump(config, it)
     }
   }
 
