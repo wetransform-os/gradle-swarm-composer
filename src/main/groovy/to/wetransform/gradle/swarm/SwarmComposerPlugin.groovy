@@ -277,13 +277,38 @@ class SwarmComposerPlugin implements Plugin<Project> {
               def name = plainFile.name.replaceAll(/\.tmp\./, '.secret.')
               def secretFile = new File(plainFile.parentFile, name)
 
-              //FIXME either encrypt whole file or only update changed entries in secrets file?
+              /*
+               * XXX instead encrypt whole file?
+               *
+               * Advantages:
+               * - structure and comments preserved exactly
+               * - independent of file format
+               * Disadvantages:
+               * - not transparent which settings were changed in the encrypted file
+               *
+               * Both the file and the current implementation would allow handling
+               * encrypted configuration in memory without creating plain files.
+               * What stands in the way there is the fact that extended setups
+               * may have a different password protecting it.
+               */
 
-              // read, encrypt, write
+              // read, encrypt (with reference), write
               //XXX only YAML supported right now
               def config = ConfigHelper.loadYaml(plainFile)
-              config = cryptor.encrypt(config, password)
+              def reference
+              if (secretFile.exists()) {
+                try {
+                  reference = ConfigHelper.loadYaml(secretFile)
+                } catch (e) {
+                  // ignore
+                }
+              }
+              config = cryptor.encrypt(config, password, reference)
               ConfigHelper.saveYaml(config, secretFile)
+              // add comment to file
+              def now = new Date().toInstant().toString()
+              def comment = "# Encrypted configuration last updated on ${now}"
+              secretFile.text = comment + '\n' + secretFile.text
             }
           }
         }

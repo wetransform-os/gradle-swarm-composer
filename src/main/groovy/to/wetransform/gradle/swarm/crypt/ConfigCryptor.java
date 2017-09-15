@@ -7,6 +7,8 @@ package to.wetransform.gradle.swarm.crypt;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Interface for configuration encryption/decryption.
  *
@@ -21,9 +23,10 @@ public interface ConfigCryptor {
    *
    * @param config the configuration
    * @param password the password
+   * @param reference an already encrypted reference configuration (to reuse existing encryptions)
    * @return the encrypted configuration
    */
-  Map<String, Object> encrypt(Map<String, Object> config, String password) throws Exception;
+  Map<String, Object> encrypt(Map<String, Object> config, String password, @Nullable Map<String, Object> reference) throws Exception;
 
   /**
    * Decrypt the (string) settings in the given configuration and return the

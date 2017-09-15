@@ -30,7 +30,9 @@ public class AliceCryptor implements Cryptor {
 
     AliceContext aliceContext = new AliceContextBuilder()
         .setAlgorithm(AliceContext.Algorithm.AES)
-        .setKeyLength(KeyLength.BITS_128)
+        // on Oracle Java may require to install
+        // http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
+        .setKeyLength(KeyLength.BITS_256)
         .setMode(AliceContext.Mode.GCM)
         .setIvLength(12)
         .setGcmTagLength(AliceContext.GcmTagLength.BITS_128)
