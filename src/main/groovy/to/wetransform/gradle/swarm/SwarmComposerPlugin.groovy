@@ -589,7 +589,7 @@ $run"""
           TemplateAssembler processor = project.composer.templateEngine
           assert processor
 
-          project.fileTree(dir: tempDir, includes: ['**/*'])
+          project.fileTree(dir: tempDir, includes: ['**/*'], excludes: ['**/*.inc.*'])
             .filter { File f -> !f.isDirectory() }
             .each { File f ->
               ByteArrayOutputStream result
