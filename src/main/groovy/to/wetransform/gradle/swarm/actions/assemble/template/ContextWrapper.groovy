@@ -5,7 +5,8 @@
 
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
-import java.text.MessageFormat;
+import java.text.MessageFormat
+import java.util.Iterator;
 import java.util.Map
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ import com.mitchellbosecke.pebble.utils.Pair;;
  *
  * @author Simon Templer
  */
-public class ContextWrapper implements DynamicAttributeProvider {
+public class ContextWrapper implements DynamicAttributeProvider, Iterable<Object> {
 
   private final String path;
 
@@ -74,6 +75,11 @@ public class ContextWrapper implements DynamicAttributeProvider {
     else {
       return value;
     }
+  }
+
+  @Override
+  Iterator<Object> iterator() {
+    contextMap.entrySet().iterator();
   }
 
 }
