@@ -29,6 +29,7 @@ public class PebbleAssembler implements TemplateAssembler {
       .newLineTrimming(false)
       .autoEscaping(false)
       .strictVariables(true)
+      .addEscapingStrategy("doublequotes", new DoubleQuotesEscaper())
       .build();
 
   @Override
