@@ -323,8 +323,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
               config = cryptor.encrypt(config, password, reference)
               ConfigHelper.saveYaml(config, secretFile)
               // add comment to file
-              def now = new Date().toInstant().toString()
-              def comment = "# Encrypted configuration last updated on ${now}"
+              def comment = "# Encrypted configuration"
               secretFile.text = comment + '\n' + secretFile.text
             }
           }
