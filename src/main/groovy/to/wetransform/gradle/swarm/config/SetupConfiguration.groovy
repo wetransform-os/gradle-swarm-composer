@@ -77,4 +77,17 @@ class SetupConfiguration {
 
   List builds
 
+  /**
+   * Add a post-processor that can modify the YAML structure.
+   *
+   * @param processor the post-processor, a closure that takes the YAML
+   *   map/list structure as argument and returns a boolean the states
+   *   if any changes were made
+   */
+  def processYaml(Closure processor) {
+    yamlPostProcessors << processor
+  }
+
+  final List yamlPostProcessors = []
+
 }

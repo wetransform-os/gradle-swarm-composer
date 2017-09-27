@@ -411,6 +411,19 @@ class SwarmComposerPlugin implements Plugin<Project> {
         target = composeFile
       }
 
+      // YAML post processors
+      if (!sc.yamlPostProcessors.empty) {
+        sc.yamlPostProcessors.each { Closure processor ->
+          Closure c = processor.clone()
+          // load yaml
+          def yaml = ConfigHelper.loadYaml(composeFile)
+          def changed = c(yaml)
+          if (changed) {
+            ConfigHelper.saveYaml(yaml, composeFile)
+          }
+        }
+      }
+
       // create helper script
       def scriptConfig = sc.settings['generate-scripts']
       boolean createScript = scriptConfig == null ? true : scriptConfig

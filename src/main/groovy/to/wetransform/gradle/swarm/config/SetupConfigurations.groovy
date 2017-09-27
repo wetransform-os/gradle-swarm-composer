@@ -9,7 +9,9 @@ import java.util.Iterator
 import java.util.Map;
 import java.util.stream.Collectors
 
-import org.gradle.internal.impldep.bsh.This;;;
+import org.gradle.internal.impldep.bsh.This
+
+import groovy.lang.Closure;;;;
 
 /**
  * Collection of configurations for setups and stacks.
@@ -78,8 +80,24 @@ class SetupConfigurations implements Iterable<SetupConfiguration> {
     all.iterator()
   }
 
+  /**
+   * Add configuration for the setups.
+   *
+   * @param conf the configuration to add
+   */
   void addConfig(Map conf) {
     this.toList()*.addConfig(conf)
+  }
+
+  /**
+   * Add a post-processor that can modify the YAML structure.
+   *
+   * @param processor the post-processor, a closure that takes the YAML
+   *   map/list structure as argument and returns a boolean the states
+   *   if any changes were made
+   */
+  void processYaml(Closure processor) {
+    this.toList()*.processYaml(processor)
   }
 
 }
