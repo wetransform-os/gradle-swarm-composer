@@ -434,11 +434,38 @@ class SwarmComposerPlugin implements Plugin<Project> {
         def relPath = project.projectDir.toPath().relativize( composeFile.toPath() ).toFile().toString()
 
         def run
+        def check = ''
+
+        boolean includeCheck = project.composer.swarmSetupChecks
+
         if (composeSupported) {
           run = "docker-compose -f \"$relPath\" \"\$@\""
+          if (includeCheck) {
+            check = """echo "Checking if connected to a Swarm..."
+              |docker node ls
+              |if [ \$? -ne 0 ]; then
+              |  echo "Not connected to a Swarm node - continuing..."
+              |else
+              |  echo "You are connected to a Swarm node."
+              |  echo "Use Docker service or stack commands to interact with the Swarm instead of docker-compose."
+              |  exit 1
+              |fi
+              |""".stripMargin()
+          }
         }
         else {
           run = "docker stack deploy --compose-file \"$relPath\" --with-registry-auth ${sc.stackName}"
+          if (includeCheck) {
+            check = """echo "Checking \\"sc-setup\\" label to check if Docker is connected to the correct Swarm..."
+              |SETUP=\$(docker node inspect self --format "{{ index .Spec.Labels \\"sc-setup\\"}}")
+              |if [ "\$SETUP" != "${sc.setupName}" ]; then
+              |  echo "Found label for setup \\"\$SETUP\\" instead of \\"${sc.setupName}\\""
+              |  echo "Please make sure you are connected to the right swarm"
+              |  exit 1
+              |fi
+              |echo "Found setup label \\"\$SETUP\\""
+              |""".stripMargin()
+          }
         }
 
         def gradleArgs = []
@@ -453,6 +480,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
         gradleArgs << taskName
 
         scriptFile.text = """#!/bin/bash
+$check
 set -e
 ./gradlew ${gradleArgs.join(' ')}
 $run"""
