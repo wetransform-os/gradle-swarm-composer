@@ -37,7 +37,8 @@ class SwarmComposerExtension {
    * Enables checking if Docker is connected to the right swarm for
    * a specific setup by checking the node label <code>sc-setup</code>.
    *
-   * Currently only applies for the generated scripts for Swarm setups.
+   * Currently only applies for the generated scripts for Swarm setups
+   * and Docker Compose.
    */
   boolean swarmSetupChecks = true
 
