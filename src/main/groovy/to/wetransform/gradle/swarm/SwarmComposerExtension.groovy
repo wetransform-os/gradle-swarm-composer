@@ -34,6 +34,14 @@ class SwarmComposerExtension {
   boolean enableBuilds = true
 
   /**
+   * Enables checking if Docker is connected to the right swarm for
+   * a specific setup by checking the node label <code>sc-setup</code>.
+   *
+   * Currently only applies for the generated scripts for Swarm setups.
+   */
+  boolean swarmSetupChecks = true
+
+  /**
    * Docker configuration applied to the Gradle Docker plugin.
    */
   void docker(Closure cl) {
