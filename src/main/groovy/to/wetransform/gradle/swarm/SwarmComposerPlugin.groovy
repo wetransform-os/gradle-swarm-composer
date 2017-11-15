@@ -417,7 +417,15 @@ class SwarmComposerPlugin implements Plugin<Project> {
           Closure c = processor.clone()
           // load yaml
           def yaml = ConfigHelper.loadYaml(composeFile)
-          def changed = c(yaml)
+          def changed
+          if (c.maximumNumberOfParameters == 1) {
+            // only provide yaml
+            changed = c(yaml)
+          }
+          else {
+            // provide yaml and configuration
+            changed = c(yaml, sc.config)
+          }
           if (changed) {
             ConfigHelper.saveYaml(yaml, composeFile)
           }
