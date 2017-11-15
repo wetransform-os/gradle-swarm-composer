@@ -60,18 +60,18 @@ class ConfigHelper {
     }
     Map<String, Object> context = mergeConfigs(clist)
 
-    // evaluate configuration
-    if (evaluate) {
-      ConfigEvaluator evaluator = new PebbleEvaluator()
-      context = evaluator.evaluate(context)
-    }
-
     // stack and setup names
     if (stackName) {
       context.stack = stackName
     }
     if (setupName) {
       context.setup = setupName
+    }
+
+    // evaluate configuration
+    if (evaluate) {
+      ConfigEvaluator evaluator = new PebbleEvaluator()
+      context = evaluator.evaluate(context)
     }
 
     context
