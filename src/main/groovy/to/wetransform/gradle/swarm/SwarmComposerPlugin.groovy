@@ -466,6 +466,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
           if (includeCheck) {
             check = """echo "Checking \\"sc-setup\\" label to check if Docker is connected to the correct Swarm..."
               |SETUP=\$(docker node inspect self --format "{{ index .Spec.Labels \\"sc-setup\\"}}")
+              |if [ -z "\$SETUP" ]; then
+              |  SETUP=\$(docker node inspect self --format "{{ index .Description.Engine.Labels \\"sc-setup\\"}}")
+              |fi
               |if [ "\$SETUP" != "${sc.setupName}" ]; then
               |  echo "Found label for setup \\"\$SETUP\\" instead of \\"${sc.setupName}\\""
               |  echo "Please make sure you are connected to the right swarm"
