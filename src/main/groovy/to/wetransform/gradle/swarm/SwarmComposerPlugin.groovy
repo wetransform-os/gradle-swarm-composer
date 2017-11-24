@@ -422,9 +422,13 @@ class SwarmComposerPlugin implements Plugin<Project> {
             // only provide yaml
             changed = c(yaml)
           }
-          else {
+          else if (c.maximumNumberOfParameters == 2) {
             // provide yaml and configuration
             changed = c(yaml, sc.config)
+          }
+          else {
+            // provide yaml, configuration and target file
+            changed = c(yaml, sc.config, composeFile)
           }
           if (changed) {
             ConfigHelper.saveYaml(yaml, composeFile)
