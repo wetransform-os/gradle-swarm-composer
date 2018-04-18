@@ -93,4 +93,8 @@ public class ContextWrapper implements DynamicAttributeProvider, Iterable<Object
     contextMap.entrySet().iterator();
   }
 
+  Map getInternalMap() {
+    return contextMap;
+  }
+
 }
