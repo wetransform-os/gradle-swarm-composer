@@ -29,7 +29,7 @@ import groovy.json.JsonOutput;
  *
  * @author Simon Templer
  */
-public class JsonFilter implements Filter {
+public class PrettyJsonFilter implements Filter {
 
   @Override
   public List<String> getArgumentNames() {
@@ -42,7 +42,7 @@ public class JsonFilter implements Filter {
       input = ((ContextWrapper) input).getInternalMap();
     }
 
-    return JsonOutput.toJson(input);
+    return JsonOutput.prettyPrint(JsonOutput.toJson(input));
   }
 
 }
