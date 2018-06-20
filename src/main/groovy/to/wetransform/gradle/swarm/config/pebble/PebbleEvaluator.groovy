@@ -47,15 +47,28 @@ import to.wetransform.gradle.swarm.config.ConfigHelper
  */
 class PebbleEvaluator implements ConfigEvaluator {
 
-  private final PebbleEngine engine = new PebbleEngine.Builder()
+  private final PebbleEngine engine
+
+  private static final Logger log = LoggerFactory.getLogger(PebbleEvaluator)
+
+  private final boolean lenient
+
+  PebbleEvaluator() {
+    this(false)
+  }
+
+  PebbleEvaluator(boolean lenient) {
+    super()
+    this.lenient = lenient
+
+    engine = new PebbleEngine.Builder()
     .newLineTrimming(true)
-    .strictVariables(true)
+    .strictVariables(!lenient)
     .autoEscaping(false)
     .extension(new SwarmComposerExtension())
     .loader(new StringLoader())
     .build()
-
-  private static final Logger log = LoggerFactory.getLogger(PebbleEvaluator)
+  }
 
   @Override
   public Map<String, Object> evaluate(Map<String, Object> config) {
@@ -82,7 +95,7 @@ class PebbleEvaluator implements ConfigEvaluator {
     }
     //FIXME improvement: use info on keys still to be evaluated
 
-    if (!toEvaluate.empty) {
+    if (!toEvaluate.empty && !lenient) {
       throw new IllegalStateException('The following configuration keys could not be evaluated: ' +
         toEvaluate.join(', '))
     }
@@ -135,7 +148,12 @@ class PebbleEvaluator implements ConfigEvaluator {
     PebbleTemplate compiledTemplate = engine.getTemplate(value as String);
     StringWriter writer = new StringWriter()
     try {
-      compiledTemplate.evaluate(writer, ContextWrapper.create(context))
+      if (lenient) {
+        compiledTemplate.evaluate(writer, context)
+      }
+      else {
+        compiledTemplate.evaluate(writer, ContextWrapper.create(context))
+      }
     } catch (ClassCastException e) {
       //XXX hack: try again next iteration (until for instance boolean is correctly resolved)
       return value

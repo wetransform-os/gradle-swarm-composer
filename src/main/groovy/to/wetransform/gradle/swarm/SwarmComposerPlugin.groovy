@@ -26,9 +26,12 @@ import org.gradle.api.tasks.bundling.Jar
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage;
 
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
 import to.wetransform.gradle.swarm.config.ConfigHelper
 import to.wetransform.gradle.swarm.config.SetupConfiguration
+import to.wetransform.gradle.swarm.config.pebble.PebbleEvaluator
 import to.wetransform.gradle.swarm.crypt.ConfigCryptor
 import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor;
 import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor;
@@ -548,6 +551,16 @@ $run"""
       description "Push all Docker images for stack ${sc.stackName} with setup ${sc.setupName}"
     }
 
+    def config = sc.unevaluated
+    // hacky way to create a copy of the config
+    config = new JsonSlurper().parseText(JsonOutput.toJson(config))
+    // try to evaluate config as good as possible
+    try {
+      config = new PebbleEvaluator(true).evaluate(config)
+    } catch (e) {
+      project.logger.error("Error evaluating configuration for builds of stack ${sc.stackName} with setup ${sc.setupName}", e)
+    }
+
     sc.builds.each { dFile ->
       if (dFile instanceof File && dFile.exists()) {
         final File parentDir = dFile.parentFile
@@ -557,7 +570,7 @@ $run"""
         def settings = loadSettings(parentDir)
 
         def settingBinding = [:]
-        settingBinding.putAll(sc.unevaluated)
+        settingBinding.putAll(config)
         // add fixed bindings
         settingBinding.putAll([stack: sc.stackName, setup: sc.setupName, build: buildName])
 
