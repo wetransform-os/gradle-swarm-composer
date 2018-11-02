@@ -22,6 +22,7 @@ import java.util.Map;
 
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
+import com.mitchellbosecke.pebble.extension.Function;
 
 /**
  * Custom Pebble extension.
@@ -30,8 +31,8 @@ import com.mitchellbosecke.pebble.extension.Filter;
  */
 public class SwarmComposerExtension extends AbstractExtension {
 
-
   private Map<String, Filter> filters = new HashMap<>();
+  private Map<String, Function> functions = new HashMap<>();
 
   public SwarmComposerExtension() {
     super();
@@ -40,11 +41,18 @@ public class SwarmComposerExtension extends AbstractExtension {
     filters.put("yaml", new YamlFilter());
     filters.put("json", new JsonFilter());
     filters.put("prettyJson", new PrettyJsonFilter());
+
+    functions.put("generatePassword", new GeneratePasswordFunction());
   }
 
   @Override
   public Map<String, Filter> getFilters() {
     return Collections.unmodifiableMap(filters);
+  }
+
+  @Override
+  public Map<String, Function> getFunctions() {
+    return Collections.unmodifiableMap(functions);
   }
 
 }
