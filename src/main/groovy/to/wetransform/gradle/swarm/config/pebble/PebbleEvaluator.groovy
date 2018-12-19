@@ -87,11 +87,14 @@ class PebbleEvaluator implements ConfigEvaluator {
      * variables.
      */
 
+    Set<String> ignoreKeys = new HashSet<>()
     // do a first evaluation pass
-    toEvaluate = doEvaluationPass([], config, config)
+    log.info('First evaluation pass...')
+    toEvaluate = doEvaluationPass([], ignoreKeys, config, config)
     // do additional evaluation passes while there is still stuff to be evaluated (maximum 5 passes)
     for (int i = 0; !toEvaluate.empty && i < 5; i++) {
-      toEvaluate = doEvaluationPass([], config, config)
+      log.info("Evaluation pass ${i + 2}...")
+      toEvaluate = doEvaluationPass([], ignoreKeys, config, config)
     }
     //FIXME improvement: use info on keys still to be evaluated
 
@@ -103,7 +106,7 @@ class PebbleEvaluator implements ConfigEvaluator {
     return config
   }
 
-  private Set<String> doEvaluationPass(List<String> path, Map config, Map overall) {
+  private Set<String> doEvaluationPass(List<String> path, Set<String> ignoreKeys, Map config, Map overall) {
     def keys = new LinkedHashSet(config.keySet())
     Set<String> toEvaluateAfter = new HashSet<>()
 
@@ -120,23 +123,35 @@ class PebbleEvaluator implements ConfigEvaluator {
       childPath.add(key)
       def childKey = childPath.join('.')
 
-      if (value != null) {
+      if (value != null && !ignoreKeys.contains(childKey)) {
         if (value instanceof List) {
           //FIXME lists are not supported ATM
         }
         else if (value instanceof String || value instanceof GString) {
           // evaluate value
 
+          boolean isVerbatim = isVerbatim(value as String)
+
           def newValue = evaluateValue(value, evalConfig)
+          if (isVerbatim) {
+            // the wrapping is necessary because in some cases a config
+            // is reevaluated later on
+            newValue = new VerbatimWrapper(newValue)
+          }
           config.put(key, newValue)
+          if (isVerbatim) {
+            // ignore in future passes
+            log.info "Ignoring $childKey"
+            ignoreKeys.add(childKey)
+          }
           // is the result still dynamic? -> try again in next iteration
-          if (newValue instanceof String && isDynamicValue(newValue)) {
+          else if (newValue instanceof String && isDynamicValue(newValue)) {
             toEvaluateAfter.add(childKey)
           }
         }
         // proceed to child maps
         else if (value instanceof Map) {
-          toEvaluateAfter.addAll(doEvaluationPass(childPath, value, overall))
+          toEvaluateAfter.addAll(doEvaluationPass(childPath, ignoreKeys, value, overall))
         }
       }
     }
@@ -190,6 +205,21 @@ class PebbleEvaluator implements ConfigEvaluator {
     } catch (e) {
       log.warn("Could not determine if expression is dynamic: $value", e)
       false
+    }
+  }
+
+  /**
+   * Determines if there should only be one pass to evaluate this configuration value.
+   */
+  boolean isVerbatim(String value) {
+    //XXX more sophisticated check?
+    //XXX for now just a simple check if the whole text is wrapped with verbatim
+    if (value != null) {
+      String trimmed = value.trim();
+      return trimmed.startsWith('{% verbatim %}') && trimmed.endsWith('{% endverbatim %}')
+    }
+    else {
+      return true;
     }
   }
 
