@@ -30,7 +30,15 @@ public class DoubleQuotesEscaper implements EscapingStrategy {
 
   @Override
   public String escape(String input) {
-    return input.replaceAll(Pattern.quote("\""), Matcher.quoteReplacement("\\\""));
+    String res = input;
+    
+    res = res.replaceAll(Pattern.quote("\\"), Matcher.quoteReplacement("\\\\\\\\"));
+    
+    res = res.replaceAll(Pattern.quote("\""), Matcher.quoteReplacement("\\\""));
+    res = res.replaceAll(Pattern.quote("$"), Matcher.quoteReplacement("\\$"));
+    res = res.replaceAll(Pattern.quote("&"), Matcher.quoteReplacement("\\&"));
+      
+    return res;
   }
 
 }
