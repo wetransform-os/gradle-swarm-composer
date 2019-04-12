@@ -43,6 +43,10 @@ public class SwarmComposerExtension extends AbstractExtension {
     filters.put("prettyJson", new PrettyJsonFilter());
 
     functions.put("generatePassword", new GeneratePasswordFunction());
+
+    functions.put("toInt", new ToIntFunction());
+    functions.put("toDouble", new ToDoubleFunction());
+    functions.put("toBoolean", new ToBooleanFunction());
   }
 
   @Override
