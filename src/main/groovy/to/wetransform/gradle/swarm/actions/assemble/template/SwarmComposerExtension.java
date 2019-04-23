@@ -41,6 +41,7 @@ public class SwarmComposerExtension extends AbstractExtension {
     filters.put("yaml", new YamlFilter());
     filters.put("json", new JsonFilter());
     filters.put("prettyJson", new PrettyJsonFilter());
+    filters.put("ifNull", new IfNullFilter());
 
     functions.put("generatePassword", new GeneratePasswordFunction());
 
