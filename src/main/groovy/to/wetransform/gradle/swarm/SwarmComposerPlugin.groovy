@@ -421,6 +421,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
       def dcConfig = sc.settings['docker-compose']
       boolean composeSupported = dcConfig == null ? false : dcConfig
 
+      def k8sConfig = sc.settings['kubernetes']
+      boolean k8sSupported = k8sConfig == null ? false : k8sConfig
+
       // default target file
       def composeFile = new File(sc.stackFile.parentFile, "${sc.setupName}-stack.yml")
 
@@ -438,7 +441,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
       }
 
       // YAML post processors
-      if (!sc.yamlPostProcessors.empty) {
+      // XXX post processing disabled for kubernetes
+      if (!sc.yamlPostProcessors.empty && !k8sSupported) {
         sc.yamlPostProcessors.each { Closure processor ->
           Closure c = processor.clone()
           // load yaml
@@ -465,6 +469,11 @@ class SwarmComposerPlugin implements Plugin<Project> {
       // create helper script
       def scriptConfig = sc.settings['generate-scripts']
       boolean createScript = scriptConfig == null ? true : scriptConfig
+
+      //XXX disable script generation for kubernetes until we have code for that
+      if (k8sSupported) {
+        createScript = false
+      }
 
       if (createScript) {
         // add a script file for convenient Docker Compose calls
