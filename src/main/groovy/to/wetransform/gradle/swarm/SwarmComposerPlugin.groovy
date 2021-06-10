@@ -117,8 +117,8 @@ class SwarmComposerPlugin implements Plugin<Project> {
           project.logger.info("Stack $name includes these builds:\n${stackBuilds.join('\n')}\n")
         }
 
-        def stackFile = new File(dir, 'stack.yml')
-        if (stackFile.exists()) {
+        def defaultStackFile = new File(dir, 'stack.yml')
+        if (defaultStackFile.exists()) {
           // build tasks for the stack
 
           if (setupsDir?.exists()) {
@@ -131,6 +131,18 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
               // load swarm composer config for setup
               def scConfig = loadSettings(setupDir)
+
+              def stackFile = defaultStackFile
+              // support alternate stack file
+              if (scConfig['stack-file']) {
+                def altFile = new File(defaultStackFile.parentFile, scConfig['stack-file'])
+                if (altFile.exists()) {
+                  stackFile = altFile
+                }
+                else {
+                  project.logger.warn("Alternate stack file ${scConfig['stack-file']} for setup $setup does not exist in stack $name - using default")
+                }
+              }
 
               def extendedSetups = collectExtendedConfigs(project, setupsDir, setup, scConfig)
               project.logger.info("Setup $setup extends these setups: $extendedSetups")
