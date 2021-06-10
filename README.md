@@ -31,7 +31,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'to.wetransform:gradle-swarm-composer:0.2.0'
+    classpath 'to.wetransform:gradle-swarm-composer:0.3.0'
   }
 }
 
