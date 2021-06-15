@@ -21,9 +21,8 @@ import java.nio.charset.StandardCharsets
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
-
-import to.wetransform.gradle.swarm.config.pebble.PebbleEvaluator
-import to.wetransform.gradle.swarm.util.Helpers;;
+import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
+import to.wetransform.gradle.swarm.util.Helpers
 
 /**
  * Helpers for configurations based on maps and lists.
@@ -81,7 +80,7 @@ class ConfigHelper {
 
     // evaluate configuration
     if (evaluate) {
-      ConfigEvaluator evaluator = new PebbleEvaluator()
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
       context = evaluator.evaluate(context)
     }
 

@@ -31,7 +31,9 @@ import groovy.json.JsonSlurper
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
 import to.wetransform.gradle.swarm.config.ConfigHelper
 import to.wetransform.gradle.swarm.config.SetupConfiguration
+import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
 import to.wetransform.gradle.swarm.config.pebble.PebbleEvaluator
+import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap
 import to.wetransform.gradle.swarm.crypt.ConfigCryptor
 import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor;
 import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor;
@@ -577,7 +579,7 @@ $run"""
     config = new JsonSlurper().parseText(JsonOutput.toJson(config))
     // try to evaluate config as good as possible
     try {
-      config = new PebbleEvaluator(true).evaluate(config)
+      config = new PebbleCachingEvaluator(true).evaluate(config)
     } catch (e) {
       project.logger.error("Error evaluating configuration for builds of stack ${sc.stackName} with setup ${sc.setupName}", e)
     }
@@ -590,10 +592,15 @@ $run"""
 
         def settings = loadSettings(parentDir)
 
-        def settingBinding = [:]
-        settingBinding.putAll(config)
-        // add fixed bindings
-        settingBinding.putAll([stack: sc.stackName, setup: sc.setupName, build: buildName])
+        def fixed = [stack: sc.stackName, setup: sc.setupName, build: buildName]
+        def settingBinding = config == null ? fixed : new RootOrLocalMap(
+          // add fixed bindings as root (to override values)
+          fixed,
+          // main config
+          config,
+          // allow extending root map
+          true
+          )
 
         // check if build is enabled
         def enabled = settings.enabled
@@ -810,7 +817,12 @@ $run"""
    */
   private String evaluateSetting(String setting, Map binding) {
     def template = groovyEngine.createTemplate(setting).make(binding)
-    template.toString()
+    try {
+      template.toString()
+    } catch (Exception e) {
+      // catch and rethrow to add more details
+      throw new RuntimeException("Error evaluating setting script:\n$setting\n\nBinding keys: ${binding.keySet()}", e)
+    }
   }
 
 }
