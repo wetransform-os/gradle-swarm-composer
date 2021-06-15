@@ -26,6 +26,8 @@ import to.wetransform.gradle.swarm.config.ConfigEvaluator;
 
 import static org.junit.Assert.*
 
+import java.lang.reflect.UndeclaredThrowableException
+
 import org.junit.After
 
 /**
@@ -68,6 +70,17 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     assert evaluated == expected
   }
 
+  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  void testEvalConfigMissing() {
+    def config = [
+      hello: 'Hello {{ name }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    evaluated.hello
+  }
+
   @Test
   void testEvalConfigNested() {
     def config = [
@@ -91,6 +104,44 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       ]
 
     assert evaluated == expected
+  }
+
+  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  void testEvalConfigNestedMissing() {
+    def config = [
+      name: 'World',
+      letter: 'To {{name}}: {{ down.phrase }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    evaluated.letter
+  }
+
+  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  void testEvalConfigNestedMissing2() {
+    def config = [
+      name: 'World',
+      down: [:],
+      letter: 'To {{name}}: {{ down.phrase }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    evaluated.letter
+  }
+
+  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  void testEvalConfigNestedMissing3() {
+    def config = [
+      name: 'World',
+      down: 'NotAnObect',
+      letter: 'To {{name}}: {{ down.phrase }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    evaluated.letter
   }
 
   @Test
@@ -192,7 +243,6 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     assert evaluated == expected
   }
 
-  @Ignore
   @Test
   void testEvalConfigIfString() {
     def config = [

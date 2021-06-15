@@ -44,30 +44,20 @@ import to.wetransform.gradle.swarm.config.ConfigHelper
  * Evaluates config based on Pebble templates.
  *
  * @author Simon Templer
+ *
+ * @deprecated Use PebbleCachingEvaluator instead.
  */
-class PebbleEvaluator implements ConfigEvaluator {
-
-  private final PebbleEngine engine
+@Deprecated
+class PebbleEvaluator extends AbstractPebbleEvaluator {
 
   private static final Logger log = LoggerFactory.getLogger(PebbleEvaluator)
 
-  private final boolean lenient
-
   PebbleEvaluator() {
-    this(false)
+    super()
   }
 
   PebbleEvaluator(boolean lenient) {
-    super()
-    this.lenient = lenient
-
-    engine = new PebbleEngine.Builder()
-    .newLineTrimming(true)
-    .strictVariables(!lenient)
-    .autoEscaping(false)
-    .extension(new SwarmComposerExtension())
-    .loader(new StringLoader())
-    .build()
+    super(lenient)
   }
 
   @Override
@@ -184,27 +174,6 @@ class PebbleEvaluator implements ConfigEvaluator {
     }
     else {
       result
-    }
-  }
-
-  boolean isDynamicValue(String value) {
-    //XXX this function uses Pebble internal API
-
-    try {
-      LexerImpl lexer = new LexerImpl(engine.syntax, engine.extensionRegistry.getUnaryOperators().values(),
-        engine.extensionRegistry.getBinaryOperators().values())
-      Reader templateReader = new StringReader(value)
-      TokenStream tokenStream = lexer.tokenize(templateReader, 'dynamic')
-
-      Parser parser = new ParserImpl(engine.extensionRegistry.getUnaryOperators(),
-        engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers());
-      RootNode root = parser.parse(tokenStream)
-      def visitor = new DynamicCheckVisitor()
-      root.accept(visitor)
-      visitor.dynamic
-    } catch (e) {
-      log.warn("Could not determine if expression is dynamic: $value", e)
-      false
     }
   }
 
