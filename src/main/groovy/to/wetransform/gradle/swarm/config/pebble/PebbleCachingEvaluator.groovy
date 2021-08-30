@@ -74,6 +74,10 @@ class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
     private Object evaluate(Object key) {
       def value = original.get(key)
 
+      return evaluateObject(value)
+    }
+
+    private def evaluateObject(Object value) {
       if (value == null) {
         return null
       }
@@ -81,8 +85,9 @@ class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
         return new PebbleCachingConfig(value, root ?: this)
       }
       else if (value instanceof List) {
-        //FIXME currently not supported
-        return value
+        return value.collect { Object obj ->
+          this.evaluateObject(obj)
+        }.toList()
       }
       else if (value instanceof String || value instanceof GString) {
         return evaluateValue(value as String)
