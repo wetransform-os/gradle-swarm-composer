@@ -70,6 +70,54 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     assert evaluated == expected
   }
 
+  @Test
+  void testEvalConfigList() {
+    def config = [
+      name: 'World',
+      list: [
+        'Hello {{ name }}',
+        'Bye {{ name }}',
+        '{{ name }}?'
+        ]
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      name: 'World',
+      list: [
+        'Hello World',
+        'Bye World',
+        'World?'
+        ]
+      ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testEvalConfigListRelative() {
+    def config = [
+      list: [
+        [name: 'Peter', text: 'Hello {{ name }}'],
+        [name: 'Tom', text: 'Hello {{ name }}!'],
+        [name: 'Sven', text: '{{ name }}?']
+        ]
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      list: [
+        [name: 'Peter', text: 'Hello Peter'],
+        [name: 'Tom', text: 'Hello Tom!'],
+        [name: 'Sven', text: 'Sven?']
+        ]
+      ]
+
+    assert evaluated == expected
+  }
+
   @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
   void testEvalConfigMissing() {
     def config = [
