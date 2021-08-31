@@ -45,6 +45,13 @@ class SwarmComposerExtension {
   boolean enableBuilds = true
 
   /**
+   * If tasks for exporting configurations are enabled.
+   * Mainly intended for debugging.
+   * Create files in folder of respective stack that likely contains secrets.
+   */
+  boolean enableConfigExport = false
+
+  /**
    * Enables checking if Docker is connected to the right swarm for
    * a specific setup by checking the node label <code>sc-setup</code>.
    *
