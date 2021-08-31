@@ -65,6 +65,7 @@ class SetupConfiguration {
    */
   void addConfig(Map conf) {
     config = ConfigHelper.mergeConfigs([config ?: [:], conf])
+    unevaluated = ConfigHelper.mergeConfigs([unevaluated ?: [:], conf])
   }
 
   /**

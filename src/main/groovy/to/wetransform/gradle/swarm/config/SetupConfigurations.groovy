@@ -22,7 +22,7 @@ import java.util.stream.Collectors
 
 import org.gradle.internal.impldep.bsh.This
 
-import groovy.lang.Closure;;;;
+import groovy.lang.Closure
 
 /**
  * Collection of configurations for setups and stacks.
@@ -33,12 +33,24 @@ class SetupConfigurations implements Iterable<SetupConfiguration> {
 
   private final Map<String, Map<String, SetupConfiguration>> setups
 
+  // not use SwarmComposerExtension type as Gradle uses a different (decorated) type of object at runtime
+  private final def extension
+
   SetupConfigurations(Map<String, Map<String, SetupConfiguration>> setups) {
+    this(setups, null)
+  }
+
+  SetupConfigurations(Map<String, Map<String, SetupConfiguration>> setups, def extension) {
     this.setups = setups
+    this.extension = extension
+  }
+
+  SetupConfigurations(def extension) {
+    this([:], extension)
   }
 
   SetupConfigurations() {
-    this([:])
+    this([:], null)
   }
 
   def getSetupNames() {
@@ -52,6 +64,16 @@ class SetupConfigurations implements Iterable<SetupConfiguration> {
       setups[setup.setupName] = stacks
     }
     stacks[setup.stackName] = setup
+
+    if (extension != null) {
+      // run custom configuration adaptions
+      for (Closure cl : extension.configureClosures) {
+        Closure conf = cl.clone()
+        conf.delegate = setup
+        conf.directive = Closure.DELEGATE_FIRST
+        conf.call()
+      }
+    }
   }
 
   SetupConfiguration get(String stack, String setup) {
