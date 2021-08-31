@@ -277,12 +277,26 @@ class SwarmComposerPlugin implements Plugin<Project> {
     // store configuration in extension (for access for other tasks etc.)
     project.composer.configs.add(sc)
 
-    // task loading the configuration
-//    def configTaskName = "config-${sc.stackName}-${sc.setupName}"
-//    def configTask = project.task(configTaskName).doFirst {
-//      // load configuration -> write somewhere?
-//      sc.config
-//    }
+    if (project.composer.enableConfigExport) {
+      // task exporting the configuration (mainly for debugging purposes)
+      def configTaskName = "export-config-${sc.stackName}-${sc.setupName}"
+      def exportConfigTask = project.task(configTaskName) {
+        group 'Export configuration'
+      }.doFirst {
+        // export unevaluated configuration
+        def unevaluatedFile = new File(sc.stackFile.parentFile, "${sc.setupName}-unevaluated-config.yml")
+        ConfigHelper.saveYaml(sc.unevaluated, unevaluatedFile)
+
+        // export evaluated configuration
+        def evaluatedFile = new File(sc.stackFile.parentFile, "${sc.setupName}-evaluated-config.yml")
+        // lenient evaluation so a failure does not prevent the export
+        def config = new PebbleCachingEvaluator(true).evaluate(sc.unevaluated)
+        ConfigHelper.saveYaml(config, evaluatedFile)
+      }
+
+      // make sure preparation tasks are run before export, as well as decryption
+      setupPrepareTasks(project, exportConfigTask, sc)
+    }
 
     def vaultGroup = 'Configuration vault'
 
