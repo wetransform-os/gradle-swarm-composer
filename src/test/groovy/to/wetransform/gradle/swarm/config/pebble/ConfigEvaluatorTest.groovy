@@ -218,6 +218,60 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
   }
 
   @Test
+  void testEvalConfigRootBeforeRelative() {
+    // resolving via root takes precedence over resolving locally/relative
+
+    def config = [
+      name: 'World',
+      down: [
+          name: 'Pete',
+          hello: 'Hello {{ name }}'
+        ],
+      letter: 'To {{name}}: {{ down.hello }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      name: 'World',
+      down: [
+          name: 'Pete',
+          hello: 'Hello World'
+        ],
+      letter: 'To World: Hello World'
+      ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testEvalConfigExplicitRelative() {
+    // resolving locally/relative can be forced with the special underscore key
+
+    def config = [
+      name: 'World',
+      down: [
+          name: 'Pete',
+          hello: 'Hello {{ _.name }}'
+        ],
+      letter: 'To {{name}}: {{ down.hello }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      name: 'World',
+      down: [
+          name: 'Pete',
+          hello: 'Hello Pete'
+        ],
+      letter: 'To World: Hello Pete'
+      ]
+
+    assert evaluated == expected
+  }
+
+  @Test
   void testEvalConfigNumber() {
     def config = [
       number: 1,

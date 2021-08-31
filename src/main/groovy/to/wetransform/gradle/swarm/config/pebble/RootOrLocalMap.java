@@ -33,12 +33,15 @@ import com.google.common.base.Preconditions;
  */
 public class RootOrLocalMap implements Map<String, Object> {
 
+  public static final String LOCAL_ACCESS_KEY = "_";
+
   private final Map<String, Object> root;
   private final Map<String, Object> local;
 
   private final boolean allowPut;
+  private final boolean localAccess;
 
-  public RootOrLocalMap(Map<String, Object> root, Map<String, Object> local, boolean allowPut) {
+  public RootOrLocalMap(Map<String, Object> root, Map<String, Object> local, boolean allowPut, boolean localAccess) {
     super();
 
     Preconditions.checkNotNull(root);
@@ -47,6 +50,7 @@ public class RootOrLocalMap implements Map<String, Object> {
     this.root = root;
     this.local = local;
     this.allowPut = allowPut;
+    this.localAccess = localAccess;
   }
 
   @Override
@@ -71,6 +75,10 @@ public class RootOrLocalMap implements Map<String, Object> {
 
   @Override
   public Object get(Object key) {
+    if (localAccess && LOCAL_ACCESS_KEY.equals(key) && !root.containsKey(LOCAL_ACCESS_KEY) && !local.containsKey(LOCAL_ACCESS_KEY)) {
+      return local;
+    }
+
     if (root.containsKey(key)) {
       return root.get(key);
     }

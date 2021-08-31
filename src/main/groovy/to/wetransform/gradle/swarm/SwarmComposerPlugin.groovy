@@ -613,7 +613,9 @@ $run"""
           // main config
           config,
           // allow extending root map
-          true
+          true,
+          // don't make local available in addition on special key
+          false
           )
 
         // check if build is enabled
