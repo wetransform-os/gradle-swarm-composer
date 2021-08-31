@@ -61,6 +61,14 @@ class SwarmComposerExtension {
   }
 
   /**
+   * Adapt a setup configuration after it was initialized.
+   * Called with the respective SetupConfiguration object as delegate.
+   */
+  void configureSetup(Closure cl) {
+    configureClosures << cl.clone()
+  }
+
+  /**
    * Template engine, defaults to Pebble.
    */
   TemplateAssembler templateEngine = new PebbleAssembler()
@@ -93,12 +101,14 @@ class SwarmComposerExtension {
 
   // advanced users
 
-  final SetupConfigurations configs = new SetupConfigurations()
+  final SetupConfigurations configs = new SetupConfigurations(this)
 
   // internal
 
   final Project project
 
   Closure dockerConfig
+
+  final List<Closure> configureClosures = []
 
 }
