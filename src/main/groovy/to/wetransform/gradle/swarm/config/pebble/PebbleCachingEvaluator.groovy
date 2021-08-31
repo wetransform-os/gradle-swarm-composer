@@ -106,7 +106,7 @@ class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
       }
       else {
         // this is local
-        context = new RootOrLocalMap(root, this, false)
+        context = new RootOrLocalMap(root, this, false, true)
       }
 
       PebbleTemplate compiledTemplate = PebbleCachingEvaluator.this.engine.getTemplate(value);
