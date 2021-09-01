@@ -52,6 +52,82 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
   }
 
   @Test
+  void testEvalVerbatim() {
+    def config = [
+      autofillRule: '{% verbatim %}{{dataset.name}}{% endverbatim %}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      autofillRule: '{{dataset.name}}'
+      ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testEvalVerbatim2() {
+    def config = [
+      autofillRule: '{% verbatim %}{{dataset.name}}{% endverbatim %}',
+      otherRule: '{{ autofillRule }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      autofillRule: '{{dataset.name}}',
+      otherRule: '{{dataset.name}}'
+      ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testEvalVerbatimFilter() {
+    def config = [
+      config: [
+        autofillRule: '{% verbatim %}{{dataset.name}}{% endverbatim %}',
+      ],
+      json: '{{ config | json }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      config: [
+        autofillRule: '{{dataset.name}}',
+      ],
+      json: '{"autofillRule":"{{dataset.name}}"}'
+      ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testEvalVerbatimFilterReuse() {
+    def config = [
+      config: [
+        autofillRule: '{% verbatim %}{{dataset.name}}{% endverbatim %}',
+      ],
+      json: '{{ config | json }}',
+      reuse: '{{ json }}'
+      ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      config: [
+        autofillRule: '{{dataset.name}}',
+      ],
+      json: '{"autofillRule":"{{dataset.name}}"}',
+      reuse: '{"autofillRule":"{{dataset.name}}"}'
+      ]
+
+    assert evaluated == expected
+  }
+
+  @Test
   void testEvalConfig() {
     def config = [
       name: 'World',
