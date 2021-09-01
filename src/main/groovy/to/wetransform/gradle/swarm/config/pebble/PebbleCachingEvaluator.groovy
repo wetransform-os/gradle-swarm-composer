@@ -66,6 +66,8 @@ class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
     private final PebbleCachingConfig root
 
     PebbleCachingConfig(Map<String, Object> original, PebbleCachingConfig root) {
+      if (original instanceof PebbleCachingConfig) throw new IllegalStateException('Cannot wrap a PebbleCachingConfig (would result in multiple evaluations)')
+
       this.original = original
       this.evaluated = new HashMap<>()
       this.root = root
@@ -80,6 +82,10 @@ class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
     private def evaluateObject(Object value) {
       if (value == null) {
         return null
+      }
+      else if (value instanceof PebbleCachingConfig) {
+        // prevent double evaluation
+        return value
       }
       else if (value instanceof Map) {
         return new PebbleCachingConfig(value, root ?: this)
