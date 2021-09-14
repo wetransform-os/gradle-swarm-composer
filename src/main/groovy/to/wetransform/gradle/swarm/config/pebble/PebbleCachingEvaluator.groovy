@@ -203,9 +203,7 @@ class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
       for (String key : keySet()) {
         Object value = this.get(key)
-        if (value != null) {
-          result.add(new SimpleEntry(key, value))
-        }
+        result.add(new SimpleEntry(key, value))
       }
 
       return result
