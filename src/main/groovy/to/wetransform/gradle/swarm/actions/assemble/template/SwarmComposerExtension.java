@@ -23,6 +23,7 @@ import java.util.Map;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
+import com.mitchellbosecke.pebble.extension.Test;
 
 /**
  * Custom Pebble extension.
@@ -33,6 +34,7 @@ public class SwarmComposerExtension extends AbstractExtension {
 
   private Map<String, Filter> filters = new HashMap<>();
   private Map<String, Function> functions = new HashMap<>();
+  private Map<String, Test> tests = new HashMap<>();
 
   public SwarmComposerExtension() {
     super();
@@ -48,6 +50,10 @@ public class SwarmComposerExtension extends AbstractExtension {
     functions.put("toInt", new ToIntFunction());
     functions.put("toDouble", new ToDoubleFunction());
     functions.put("toBoolean", new ToBooleanFunction());
+
+    tests.put("String", new IsStringTest());
+    tests.put("Map", new IsMapTest());
+    tests.put("List", new IsListTest());
   }
 
   @Override
@@ -58,6 +64,11 @@ public class SwarmComposerExtension extends AbstractExtension {
   @Override
   public Map<String, Function> getFunctions() {
     return Collections.unmodifiableMap(functions);
+  }
+
+  @Override
+  public Map<String, Test> getTests() {
+    return Collections.unmodifiableMap(tests);
   }
 
 }
