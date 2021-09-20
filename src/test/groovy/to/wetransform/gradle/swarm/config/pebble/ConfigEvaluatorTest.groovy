@@ -22,6 +22,8 @@ import org.junit.BeforeClass
 import org.junit.Ignore;
 import org.junit.Test
 
+import com.mitchellbosecke.pebble.error.AttributeNotFoundException
+
 import to.wetransform.gradle.swarm.config.ConfigEvaluator;
 
 import static org.junit.Assert.*
@@ -194,7 +196,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     assert evaluated == expected
   }
 
-  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  @Test(expected = AttributeNotFoundException)
   void testEvalConfigMissing() {
     def config = [
       hello: 'Hello {{ name }}'
@@ -230,7 +232,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     assert evaluated == expected
   }
 
-  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  @Test(expected = AttributeNotFoundException)
   void testEvalConfigNestedMissing() {
     def config = [
       name: 'World',
@@ -242,7 +244,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     evaluated.letter
   }
 
-  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  @Test(expected = AttributeNotFoundException)
   void testEvalConfigNestedMissing2() {
     def config = [
       name: 'World',
@@ -255,7 +257,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     evaluated.letter
   }
 
-  @Test(expected = UndeclaredThrowableException) // wrapped AttributeNotFoundException
+  @Test(expected = AttributeNotFoundException)
   void testEvalConfigNestedMissing3() {
     def config = [
       name: 'World',

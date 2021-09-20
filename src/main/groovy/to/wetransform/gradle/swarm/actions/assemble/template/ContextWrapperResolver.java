@@ -16,30 +16,24 @@
 
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
-import java.util.List;
-import java.util.Map;
-
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.template.EvaluationContext;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import com.mitchellbosecke.pebble.attributes.AttributeResolver;
+import com.mitchellbosecke.pebble.attributes.ResolvedAttribute;
+import com.mitchellbosecke.pebble.node.ArgumentsNode;
+import com.mitchellbosecke.pebble.template.EvaluationContextImpl;
 
 /**
- * Simple tests to check if an input is a list.
+ * @author simon
  *
- * @author Simon Templer
  */
-public class IsListTest implements Test {
+public class ContextWrapperResolver implements AttributeResolver {
 
   @Override
-  public List<String> getArgumentNames() {
+  public ResolvedAttribute resolve(Object instance, Object attributeNameValue, Object[] argumentValues,
+      ArgumentsNode args, EvaluationContextImpl context, String filename, int lineNumber) {
+    if (instance instanceof ContextWrapper) {
+      return new ResolvedAttribute(((ContextWrapper) instance).getDynamicAttribute(attributeNameValue, argumentValues));
+    }
     return null;
-  }
-
-  @Override
-  public boolean apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
-    return input instanceof List;
   }
 
 }

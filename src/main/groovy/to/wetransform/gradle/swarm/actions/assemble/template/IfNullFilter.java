@@ -19,7 +19,10 @@ package to.wetransform.gradle.swarm.actions.assemble.template;
 import java.util.Map;
 
 import com.mitchellbosecke.pebble.error.AttributeNotFoundException;
+import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.extension.core.DefaultFilter;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Filter that returns a provided default value if the input is <code>null</code>.
@@ -30,13 +33,14 @@ import com.mitchellbosecke.pebble.extension.core.DefaultFilter;
 public class IfNullFilter extends DefaultFilter {
 
   @Override
-  public Object apply(Object input, Map<String, Object> args) {
-      Object defaultObj = args.get("default");
+  public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
+      int lineNumber) throws PebbleException {
+    Object defaultObj = args.get("default");
 
-      if (input == null) {
-          return defaultObj;
-      }
-      return input;
+    if (input == null) {
+        return defaultObj;
+    }
+    return input;
   }
 
 }

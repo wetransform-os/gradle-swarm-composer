@@ -67,4 +67,205 @@ class PebbleAssemblerTest {
     }
   }
 
+  @Test
+  void testIterateFilter() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{% for item in list | filter('it.enabled | default(false)') %}
+      |{{ item.name }}
+      |{% endfor %}
+      '''.stripMargin().trim()
+
+      def context = [
+        list: [
+          [name: 'Test1', enabled: true],
+          [name: 'Test2', enabled: false],
+          [name: 'Test3'],
+          [name: 'Test4', enabled: true]
+        ]
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['Test1', 'Test4']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testIterateFilterUsingContext() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{% for item in list | filter('tests[it.name].enabled | default(false)') %}
+      |{{ item.name }}
+      |{% endfor %}
+      '''.stripMargin().trim()
+
+      def context = [
+        list: [
+          [name: 'Test1'],
+          [name: 'Test2'],
+          [name: 'Test3'],
+          [name: 'Test4']
+        ],
+        tests: [
+          Test1: [enabled: true],
+          Test2: [:],
+          Test3: [enabled: true],
+          Test4: [enabled: false]
+        ]
+
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['Test1', 'Test3']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testIterateAnyMatchUsingContext() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{% if list | anyMatch('tests[it.name].enabled | default(false)') %}
+      |Yes
+      |{% else %}
+      |No
+      |{% endif %}
+      '''.stripMargin().trim()
+
+      def context = [
+        list: [
+          [name: 'Test1'],
+          [name: 'Test2'],
+          [name: 'Test3'],
+          [name: 'Test4']
+        ],
+        tests: [
+          Test1: [enabled: true],
+          Test2: [:],
+          Test3: [enabled: true],
+          Test4: [enabled: false]
+        ]
+
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['Yes']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testFindFirst() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ (items | findFirst('it.expose | default(false)')).name }}
+      '''.stripMargin().trim()
+
+      def context = [
+        items: [
+          [name: 'Test1'],
+          [name: 'Test2', expose: false],
+          [name: 'Test3', expose: true],
+          [name: 'Test4', expose: true]
+        ]
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['Test3']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testFindFirstMap() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ (items | findFirst('it.value.expose | default(false)')).key }}
+      '''.stripMargin().trim()
+
+      def context = [
+        items: [
+          Test1: [name: 'Test1'],
+          Test2: [name: 'Test2', expose: false],
+          Test3: [name: 'Test3', expose: true]
+        ]
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['Test3']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
 }

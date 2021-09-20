@@ -47,7 +47,8 @@ import to.wetransform.gradle.swarm.config.ConfigHelper
  */
 abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
 
-  protected final PebbleEngine engine
+  protected PebbleEngine engine
+  private final SwarmComposerExtension extension
 
   private static final Logger log = LoggerFactory.getLogger(AbstractPebbleEvaluator)
 
@@ -58,19 +59,29 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
   }
 
   AbstractPebbleEvaluator(boolean lenient) {
+    this(false, new SwarmComposerExtension())
+  }
+
+  AbstractPebbleEvaluator(boolean lenient, SwarmComposerExtension extension) {
     super()
     this.lenient = lenient
+    this.extension = extension
+  }
 
-    engine = new PebbleEngine.Builder()
-    .newLineTrimming(true)
-    .strictVariables(!lenient)
-    .autoEscaping(false)
-    .extension(new SwarmComposerExtension())
-    .loader(new StringLoader())
-    .build()
+  protected void init() {
+    if (engine == null) {
+      engine = new PebbleEngine.Builder()
+      .newLineTrimming(true)
+      .strictVariables(!lenient)
+      .autoEscaping(false)
+      .extension(this.extension)
+      .loader(new StringLoader())
+      .build()
+    }
   }
 
   boolean isDynamicValue(String value) {
+    init()
     //XXX this function uses Pebble internal API
 
     try {
@@ -92,6 +103,7 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
   }
 
   Collection<List<String>> getDependencies(String value) {
+    init()
     //XXX this function uses Pebble internal API
 
     try {

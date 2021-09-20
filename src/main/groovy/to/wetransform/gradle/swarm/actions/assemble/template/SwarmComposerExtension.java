@@ -16,14 +16,20 @@
 
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.mitchellbosecke.pebble.attributes.AttributeResolver;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.extension.Test;
+
+import to.wetransform.gradle.swarm.actions.assemble.template.PredicateFilter.PredicateFilterType;
+import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator;
 
 /**
  * Custom Pebble extension.
@@ -35,6 +41,9 @@ public class SwarmComposerExtension extends AbstractExtension {
   private Map<String, Filter> filters = new HashMap<>();
   private Map<String, Function> functions = new HashMap<>();
   private Map<String, Test> tests = new HashMap<>();
+  private List<AttributeResolver> resolvers = new ArrayList<>();
+
+  private boolean smartFiltersInitialized = false;
 
   public SwarmComposerExtension() {
     super();
@@ -51,6 +60,8 @@ public class SwarmComposerExtension extends AbstractExtension {
     functions.put("toDouble", new ToDoubleFunction());
     functions.put("toBoolean", new ToBooleanFunction());
 
+    resolvers.add(new ContextWrapperResolver());
+
     tests.put("String", new IsStringTest());
     tests.put("Map", new IsMapTest());
     tests.put("List", new IsListTest());
@@ -58,6 +69,19 @@ public class SwarmComposerExtension extends AbstractExtension {
 
   @Override
   public Map<String, Filter> getFilters() {
+    synchronized (this) {
+      if (!smartFiltersInitialized) {
+        PebbleCachingEvaluator evaluator = new PebbleCachingEvaluator(false, this);
+        filters.put("filter", new PredicateFilter(evaluator, PredicateFilterType.FILTER));
+        filters.put("anyMatch", new PredicateFilter(evaluator, PredicateFilterType.ANY_MATCH));
+        filters.put("allMatch", new PredicateFilter(evaluator, PredicateFilterType.ALL_MATCH));
+        filters.put("noneMatch", new PredicateFilter(evaluator, PredicateFilterType.NONE_MATCH));
+        filters.put("findFirst", new PredicateFilter(evaluator, PredicateFilterType.FIRST));
+
+        smartFiltersInitialized = true;
+      }
+    }
+
     return Collections.unmodifiableMap(filters);
   }
 
@@ -69,6 +93,11 @@ public class SwarmComposerExtension extends AbstractExtension {
   @Override
   public Map<String, Test> getTests() {
     return Collections.unmodifiableMap(tests);
+  }
+
+  @Override
+  public List<AttributeResolver> getAttributeResolver() {
+    return Collections.unmodifiableList(resolvers);
   }
 
 }

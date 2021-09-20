@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.mitchellbosecke.pebble.extension.Function;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Simple function that tries to convert a value to a boolean.
@@ -34,8 +36,11 @@ public class ToBooleanFunction implements Function {
     return Collections.singletonList("value");
   }
 
+  /* (non-Javadoc)
+   * @see com.mitchellbosecke.pebble.extension.Function#execute(java.util.Map, com.mitchellbosecke.pebble.template.PebbleTemplate, com.mitchellbosecke.pebble.template.EvaluationContext, int)
+   */
   @Override
-  public Boolean execute(Map<String, Object> args) {
+  public Boolean execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
     Object value = args.get("value");
     if (value instanceof Boolean) {
       return (Boolean) value;
