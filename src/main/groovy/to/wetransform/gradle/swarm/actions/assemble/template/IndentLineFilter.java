@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.extension.Filter;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Filter that indents new lines.
@@ -36,7 +39,8 @@ public class IndentLineFilter implements Filter {
   }
 
   @Override
-  public Object apply(Object input, Map<String, Object> args) {
+  public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
+      int lineNumber) throws PebbleException {
     if (input == null) {
       return null;
     }

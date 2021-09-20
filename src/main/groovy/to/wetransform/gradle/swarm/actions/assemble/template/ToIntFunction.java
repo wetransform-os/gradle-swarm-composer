@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.mitchellbosecke.pebble.extension.Function;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Simple function that tries to convert a value to an integer.
@@ -35,7 +37,7 @@ public class ToIntFunction implements Function {
   }
 
   @Override
-  public Integer execute(Map<String, Object> args) {
+  public Integer execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
     Number result;
     Object value = args.get("value");
     if (value instanceof Number) {

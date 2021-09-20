@@ -19,8 +19,10 @@ package to.wetransform.gradle.swarm.actions.assemble.template;
 import java.util.List;
 import java.util.Map;
 
-import com.mitchellbosecke.pebble.extension.DynamicAttributeProvider;
+import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.extension.Test;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Simple tests to check if an input is a map or dynamic attribute provider (e.g. a context wrapper).
@@ -35,8 +37,9 @@ public class IsMapTest implements Test {
   }
 
   @Override
-  public boolean apply(Object input, Map<String, Object> args) {
-    return input instanceof Map || input instanceof DynamicAttributeProvider;
+  public boolean apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
+      int lineNumber) throws PebbleException {
+    return input instanceof Map || input instanceof ContextWrapper;
   }
 
 }

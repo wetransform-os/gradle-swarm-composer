@@ -55,7 +55,7 @@ import to.wetransform.gradle.swarm.config.ConfigHelper
  * @author Simon Templer
  */
 @CompileStatic
-class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
+public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
   class PebbleCachingConfig implements Map<String, Object> {
 
@@ -211,16 +211,22 @@ class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
   }
 
-  PebbleCachingEvaluator() {
+  public PebbleCachingEvaluator() {
     super()
   }
 
-  PebbleCachingEvaluator(boolean lenient) {
+  public PebbleCachingEvaluator(boolean lenient) {
     super(lenient)
+  }
+
+  public PebbleCachingEvaluator(boolean lenient, SwarmComposerExtension sce) {
+    super(lenient, sce)
   }
 
   @Override
   public Map<String, Object> evaluate(Map<String, Object> config) {
+    init()
+
     return new PebbleCachingConfig(config, null)
   }
 

@@ -19,7 +19,10 @@ package to.wetransform.gradle.swarm.actions.assemble.template;
 import java.util.List;
 import java.util.Map;
 
+import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.extension.Test;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 import groovy.lang.GString;
 
@@ -36,7 +39,8 @@ public class IsStringTest implements Test {
   }
 
   @Override
-  public boolean apply(Object input, Map<String, Object> args) {
+  public boolean apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
+      int lineNumber) throws PebbleException {
     return input instanceof String || input instanceof GString;
   }
 

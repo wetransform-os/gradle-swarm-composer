@@ -22,8 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.base.Preconditions;
-
 /**
  * Map that delegates to two maps, a root one and a local one, where the later one is
  * intended for local/relative resolving. Resolving via root takes precedence over
@@ -44,8 +42,8 @@ public class RootOrLocalMap implements Map<String, Object> {
   public RootOrLocalMap(Map<String, Object> root, Map<String, Object> local, boolean allowPut, boolean localAccess) {
     super();
 
-    Preconditions.checkNotNull(root);
-    Preconditions.checkNotNull(local);
+    if (root == null) throw new IllegalArgumentException("root should not be null");
+    if (local == null) throw new IllegalArgumentException("local should not be null");
 
     this.root = root;
     this.local = local;

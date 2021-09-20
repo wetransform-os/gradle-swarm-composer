@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.mitchellbosecke.pebble.extension.Function;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Function that generates a random password.
@@ -42,8 +44,12 @@ public class GeneratePasswordFunction implements Function {
     return Arrays.asList("length", "characters", "alphabetic", "numeric", "special");
   }
 
-  @Override
   public Object execute(Map<String, Object> args) {
+    return execute(args, null, null, -1);
+  }
+
+  @Override
+  public Object execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
     // defaults
     int length = 16;
     String characters = null;

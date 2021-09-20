@@ -24,7 +24,10 @@ import java.util.Map;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
+import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.extension.Filter;
+import com.mitchellbosecke.pebble.template.EvaluationContext;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Filter that produces YAML from input.
@@ -39,7 +42,8 @@ public class YamlFilter implements Filter {
   }
 
   @Override
-  public Object apply(Object input, Map<String, Object> args) {
+  public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
+      int lineNumber) throws PebbleException {
     if (input instanceof ContextWrapper) {
       input = ((ContextWrapper) input).getInternalMap();
     }
