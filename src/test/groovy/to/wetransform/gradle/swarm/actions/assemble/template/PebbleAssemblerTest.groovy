@@ -17,6 +17,10 @@
 package to.wetransform.gradle.swarm.actions.assemble.template
 
 import org.junit.Test
+
+import com.mitchellbosecke.pebble.error.AttributeNotFoundException
+import com.mitchellbosecke.pebble.error.PebbleException
+
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
 import java.nio.file.Files
@@ -263,6 +267,40 @@ class PebbleAssemblerTest {
       def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
 
       assert list == ['Test3']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testOrError() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ service.path | orError('No path for service ' + serviceId) }}
+      '''.stripMargin().trim()
+
+      def context = [
+        service: [
+          name: 'Test'
+        ],
+        serviceId: 'test'
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      try {
+        assembler.compile(tmpFile, context) { out }
+      } catch (e) {
+        assert e instanceof PebbleException
+        assert !(e instanceof AttributeNotFoundException)
+        assert e.message.startsWith('No path for service test')
+      }
     } finally {
       tmpFile.delete()
     }
