@@ -26,7 +26,9 @@ import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 /**
  * Filter that returns a provided default value if the input is <code>null</code>.
- * Extends {@link DefaultFilter} to prevent a possible {@link AttributeNotFoundException} to be thrown.
+ *
+ * Extends {@link DefaultFilter} to prevent a possible {@link AttributeNotFoundException}
+ * to be thrown (because of internal instanceof check in Pebble).
  *
  * @author Simon Templer
  */
