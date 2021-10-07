@@ -273,6 +273,46 @@ class PebbleAssemblerTest {
   }
 
   @Test
+  void testNoneMatchMapDefault() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ (items | noneMatch('it.value.expose | default(false)')) }}
+      '''.stripMargin().trim()
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+
+      // explicitly wrap one item in PebbleCachingConfig (because the error in production mentioned the class for the item explicitly)
+      def test1 = [name: 'Test1']
+      test1 = evaluator.evaluate(test1)
+
+      def context = [
+        items: [
+          Test1: test1,
+          Test2: [name: 'Test2', expose: false],
+          Test3: [name: 'Test3']
+        ]
+      ]
+
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['true']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
   void testOrError() {
     def assembler =  new PebbleAssembler()
 
