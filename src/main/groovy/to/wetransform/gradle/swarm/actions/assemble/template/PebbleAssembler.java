@@ -42,7 +42,7 @@ public class PebbleAssembler implements TemplateAssembler {
       .strictVariables(true)
       .addEscapingStrategy("doublequotes", new DoubleQuotesEscaper())
       .addEscapingStrategy("hcl", new HclEscaper())
-      .extension(new SwarmComposerExtension())
+      .extension(new SwarmComposerExtension(false))
       .build();
 
   @Override

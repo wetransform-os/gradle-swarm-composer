@@ -117,7 +117,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
       PebbleTemplate compiledTemplate = PebbleCachingEvaluator.this.engine.getTemplate(value);
       StringWriter writer = new StringWriter()
-      if (lenient) {
+      if (PebbleCachingEvaluator.this.lenient) {
         compiledTemplate.evaluate(writer, context)
       }
       else {

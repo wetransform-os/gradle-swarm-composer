@@ -43,10 +43,13 @@ public class SwarmComposerExtension extends AbstractExtension {
   private Map<String, Test> tests = new HashMap<>();
   private List<AttributeResolver> resolvers = new ArrayList<>();
 
+  private final boolean lenient;
+
   private boolean smartFiltersInitialized = false;
 
-  public SwarmComposerExtension() {
+  public SwarmComposerExtension(boolean lenient) {
     super();
+    this.lenient = lenient;
 
     filters.put("indent", new IndentLineFilter());
     filters.put("yaml", new YamlFilter());
@@ -73,7 +76,7 @@ public class SwarmComposerExtension extends AbstractExtension {
   public Map<String, Filter> getFilters() {
     synchronized (this) {
       if (!smartFiltersInitialized) {
-        PebbleCachingEvaluator evaluator = new PebbleCachingEvaluator(false, this);
+        PebbleCachingEvaluator evaluator = new PebbleCachingEvaluator(lenient, this);
         filters.put("filter", new PredicateFilter(evaluator, PredicateFilterType.FILTER));
         filters.put("anyMatch", new PredicateFilter(evaluator, PredicateFilterType.ANY_MATCH));
         filters.put("allMatch", new PredicateFilter(evaluator, PredicateFilterType.ALL_MATCH));
