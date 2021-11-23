@@ -25,6 +25,8 @@ dependencies{
   // https://github.com/PebbleTemplates/pebble
   compile 'io.pebbletemplates:pebble:3.1.5'
   
+  compile 'com.vdurmont:semver4j:3.1.0'
+  
   // YAML processing
   compile 'org.yaml:snakeyaml:1.18'
   

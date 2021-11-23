@@ -60,6 +60,7 @@ public class SwarmComposerExtension extends AbstractExtension {
     functions.put("toInt", new ToIntFunction());
     functions.put("toDouble", new ToDoubleFunction());
     functions.put("toBoolean", new ToBooleanFunction());
+    functions.put("checkVersion", new VersionIsAtLeastFunction());
 
     resolvers.add(new ContextWrapperResolver());
 
