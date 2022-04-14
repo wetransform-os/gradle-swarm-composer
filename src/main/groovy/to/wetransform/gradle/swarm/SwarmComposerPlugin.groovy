@@ -298,6 +298,71 @@ class SwarmComposerPlugin implements Plugin<Project> {
       setupPrepareTasks(project, exportConfigTask, sc)
     }
 
+    def getConfigValue = { Map config, String varname ->
+      Deque parts = new LinkedList(varname.split(/\./).toList())
+      def value = config
+      while (!parts.empty) {
+        String part = parts.poll()
+        if (value instanceof Map) {
+          value = value[part]
+        }
+        else {
+          throw new IllegalStateException("$varname not found")
+        }
+      }
+
+      return value
+    }
+
+    if (project.composer.enableConfigExport) {
+      // task exporting the specific configuration variables
+      def configTaskName = "export-vars-${sc.stackName}-${sc.setupName}"
+      def exportConfigTask = project.task(configTaskName) {
+        group 'Export configuration variables to a file'
+      }.doFirst {
+        def exportFile = project.properties.'export-file' as String
+        def vars = project.properties.'export-vars' as String
+        assert exportFile
+        assert vars
+
+        def format = (project.properties.'export-format' as String)?.toLowerCase()
+        if (!format) {
+          // try to use file extension
+          int lastDot = exportFile.lastIndexOf('.')
+          if (lastDot >= 0) {
+            format = exportFile.substring(lastDot + 1)
+          }
+        }
+
+        def varList = vars.split(/,/).collect{ it.trim() }
+
+        def config = new PebbleCachingEvaluator(false).evaluate(sc.unevaluated)
+        def varMap = varList.collectEntries { varname ->
+          [(varname): getConfigValue(config, varname)]
+        }
+
+        def writeTo = new File(exportFile)
+        if (format == 'shell' || format == 'sh') {
+          def lines = varMap.collect { String varname, value ->
+            def var = varname.replaceAll(/\W/, '_')
+            def val = JsonOutput.toJson(value)
+            //TODO properly escape/quote?
+
+            "${var}=${val}"
+          }
+
+          writeTo.text = lines.join('\n') + '\n'
+        }
+        else {
+          // default to yaml
+          ConfigHelper.saveYaml(varMap, writeTo)
+        }
+      }
+
+      // make sure preparation tasks are run before export, as well as decryption
+      setupPrepareTasks(project, exportConfigTask, sc)
+    }
+
     def vaultGroup = 'Configuration vault'
 
     def purgeSecretsName = 'purgeSecrets'
