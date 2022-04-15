@@ -142,7 +142,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
                   stackFile = altFile
                 }
                 else {
-                  project.logger.warn("Alternate stack file ${scConfig['stack-file']} for setup $setup does not exist in stack $name - using default")
+                  project.logger.info("Alternate stack file ${scConfig['stack-file']} for setup $setup does not exist in stack $name - using default")
                 }
               }
 
