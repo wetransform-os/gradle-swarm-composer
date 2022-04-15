@@ -273,6 +273,39 @@ class SwarmComposerPlugin implements Plugin<Project> {
     }.unique()
   }
 
+  String toHcl(Object config) {
+    // rudimentary hcl export
+    // currently used to create tfvars files for terraspace (terraform actually supports tfvars.json files, but terraspace does not)
+
+    def res = new StringBuilder()
+
+    if (config instanceof Map) {
+      config.each { key, value ->
+        res.append(key)
+        res.append(' = ')
+        res.append(toHcl(value))
+        res.append('\n')
+      }
+    }
+    else if (config instanceof List) {
+      res.append('[')
+      config.eachWithIndex { value, index ->
+        if (index > 0) {
+          res.append(',')
+        }
+        res.append('\n  ')
+        res.append(toHcl(value))
+      }
+      res.append('\n]')
+    }
+    else {
+      // otherwise use Json representation
+      res.append(JsonOutput.toJson(config))
+    }
+
+    res.toString()
+  }
+
   void configureSetup(Project project, final SetupConfiguration sc) {
     // store configuration in extension (for access for other tasks etc.)
     project.composer.configs.add(sc)
@@ -317,7 +350,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
     if (project.composer.enableConfigExport) {
       // task exporting the specific configuration variables
       def configTaskName = "export-vars-${sc.stackName}-${sc.setupName}"
-      def exportConfigTask = project.task(configTaskName) {
+      def exportVarsTask = project.task(configTaskName) {
         group 'Export configuration variables to a file'
       }.doFirst {
         def exportFile = project.properties.'export-file' as String
@@ -336,7 +369,15 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
         def varList = vars.split(/,/).collect{ it.trim() }
 
-        def config = new PebbleCachingEvaluator(false).evaluate(sc.unevaluated)
+        /*
+         * Note: when using the unevaluated config as in the export-config task
+         * for some reason references (e.g. to vault) can't be resolved.
+         *
+         * So using the evaluated config directly instead of the unevaluated one.
+         */
+        //new PebbleCachingEvaluator(false).evaluate(sc.unevaluated)
+        def config = sc.config
+
         def varMap = varList.collectEntries { varname ->
           [(varname): getConfigValue(config, varname)]
         }
@@ -347,20 +388,52 @@ class SwarmComposerPlugin implements Plugin<Project> {
             def var = varname.replaceAll(/\W/, '_')
             def val = JsonOutput.toJson(value)
             //TODO properly escape/quote?
+            if (value instanceof Map || value instanceof List) {
+              // attempt to properly quote lists and maps, and wrap them in strings
+              val = JsonOutput.toJson(val)
+            }
 
             "${var}=${val}"
           }
 
           writeTo.text = lines.join('\n') + '\n'
         }
+        else if (format == 'json') {
+          if (varMap.size() == 1 && varMap.values().iterator().next() instanceof Map) {
+            // if there is only one variable and it's value is a map, write only the value map
+            writeTo.text = JsonOutput.prettyPrint(JsonOutput.toJson(varMap.values().iterator().next()))
+          }
+          else {
+            // write variable map
+            writeTo.text = JsonOutput.prettyPrint(JsonOutput.toJson(varMap))
+          }
+        }
+        else if (format == 'tfvars' || format == 'hcl') {
+          if (varMap.size() == 1 && varMap.values().iterator().next() instanceof Map) {
+            // if there is only one variable and it's value is a map, write only the value map
+            writeTo.text = toHcl(varMap.values().iterator().next())
+          }
+          else {
+            // write variable map
+            writeTo.text = toHcl(varMap)
+          }
+        }
         else {
           // default to yaml
-          ConfigHelper.saveYaml(varMap, writeTo)
+
+          if (varMap.size() == 1 && varMap.values().iterator().next() instanceof Map) {
+            // if there is only one variable and it's value is a map, write only the value map
+            ConfigHelper.saveYaml(varMap.values().iterator().next(), writeTo)
+          }
+          else {
+            // write variable map
+            ConfigHelper.saveYaml(varMap, writeTo)
+          }
         }
       }
 
       // make sure preparation tasks are run before export, as well as decryption
-      setupPrepareTasks(project, exportConfigTask, sc)
+      setupPrepareTasks(project, exportVarsTask, sc)
     }
 
     def vaultGroup = 'Configuration vault'
