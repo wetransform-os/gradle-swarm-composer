@@ -43,6 +43,7 @@ import com.mitchellbosecke.pebble.template.PebbleTemplate
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode
 import to.wetransform.gradle.swarm.actions.assemble.template.ContextWrapper;
+import to.wetransform.gradle.swarm.actions.assemble.template.ExpandFilter
 import to.wetransform.gradle.swarm.actions.assemble.template.LazyContextWrapper
 import to.wetransform.gradle.swarm.actions.assemble.template.SwarmComposerExtension
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
@@ -133,7 +134,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
         false
       }
       else {
-        result
+        ExpandFilter.expandString(result)
       }
     }
 
