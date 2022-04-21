@@ -221,4 +221,131 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     assert evaluated == expected
   }
 
+  @Test
+  void testExpandList() {
+    def config = [
+      name: 'Jim',
+      list: ['Hello {{ name }}', 'Bye {{ name }}'],
+      copy: '{{ list | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      name: 'Jim',
+      list: ['Hello Jim', 'Bye Jim'],
+      copy: ['Hello Jim', 'Bye Jim']
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testExpandNumber() {
+    def config = [
+      number: 12,
+      copy: '{{ number | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      number: 12,
+      copy: 12
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testNotExpandNumber() {
+    def config = [
+      number: 12,
+      copy: '{{ number }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      number: 12,
+      copy: '12'
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testExpandMap() {
+    def config = [
+      name: 'Jim',
+      map: [
+        name: '{{ name }}',
+        hello: 'Hello {{ name }}',
+        there: 'Tom',
+        helloThere: 'Hello {{ _.there }}'
+      ],
+      copy: '{{ map | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      name: 'Jim',
+      map: [
+        name: 'Jim',
+        hello: 'Hello Jim',
+        there: 'Tom',
+        helloThere: 'Hello Tom'
+      ],
+      copy: [
+        name: 'Jim',
+        hello: 'Hello Jim',
+        there: 'Tom',
+        helloThere: 'Hello Tom'
+      ]
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testExpandMix() {
+    def config = [
+      name: 'Jim',
+      map: [
+        hello: 'Hello {{ name }}',
+        list: ['{{ map.hello }}', 'Bye {{ name }}'],
+        more: [
+          foo: 'bar',
+          story: '{{ name }} went to a bar.'
+        ]
+      ],
+      copy: '{{ map | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      name: 'Jim',
+      map: [
+        hello: 'Hello Jim',
+        list: ['Hello Jim', 'Bye Jim'],
+        more: [
+          foo: 'bar',
+          story: 'Jim went to a bar.'
+        ]
+      ],
+      copy: [
+        hello: 'Hello Jim',
+        list: ['Hello Jim', 'Bye Jim'],
+        more: [
+          foo: 'bar',
+          story: 'Jim went to a bar.'
+        ]
+      ]
+    ]
+
+    assert evaluated == expected
+  }
+
 }

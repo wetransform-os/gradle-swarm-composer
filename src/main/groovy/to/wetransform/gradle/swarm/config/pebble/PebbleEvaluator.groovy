@@ -36,6 +36,7 @@ import com.mitchellbosecke.pebble.parser.ParserImpl
 import com.mitchellbosecke.pebble.template.PebbleTemplate
 
 import to.wetransform.gradle.swarm.actions.assemble.template.ContextWrapper;
+import to.wetransform.gradle.swarm.actions.assemble.template.ExpandFilter
 import to.wetransform.gradle.swarm.actions.assemble.template.SwarmComposerExtension
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.ConfigHelper
@@ -173,7 +174,7 @@ class PebbleEvaluator extends AbstractPebbleEvaluator {
       false
     }
     else {
-      result
+      ExpandFilter.expandString(result)
     }
   }
 
