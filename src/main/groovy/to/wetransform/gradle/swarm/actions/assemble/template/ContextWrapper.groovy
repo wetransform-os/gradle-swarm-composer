@@ -73,6 +73,18 @@ public class ContextWrapper implements Iterable<Object> {
     }
   }
 
+  /**
+   * Get a property.
+   *
+   * Implemented to support getting a property from Groovy.
+   *
+   * @param name the property name
+   * @return the property value
+   */
+  public Object getProperty(String name) {
+    return getDynamicAttribute(name, null);
+  }
+
   @Override
   Iterator<Object> iterator() {
     contextMap.entrySet().iterator();
