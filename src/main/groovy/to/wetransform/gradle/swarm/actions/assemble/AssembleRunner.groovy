@@ -64,7 +64,7 @@ class AssembleRunner implements AssembleConfig {
     assert !targetFile.isDirectory()
 
     // load configuration
-    Map<String, Object> context = loadConfig(config, stackName, setupName)
+    Map<String, Object> context = loadConfig(project.rootDir, config, stackName, setupName)
 
     if (project.logger.infoEnabled) {
       project.logger.info('Context for assembling:\n' +

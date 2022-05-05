@@ -273,6 +273,142 @@ class PebbleAssemblerTest {
   }
 
   @Test
+  void testApplyGroovyScript() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ items | apply('it[1].name') }}
+      '''.stripMargin().trim()
+
+      def context = [
+        items: [
+          [name: 'Test1'],
+          [name: 'Test2'],
+          [name: 'Test3']
+        ]
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['Test2']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testMapGroovyScript() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{% for item in items | map('it.name') %}
+      |{{ item }}
+      |{% endfor %}
+      '''.stripMargin().trim()
+
+      def context = [
+        items: [
+          [name: 'Test1'],
+          [name: 'Test2'],
+          [name: 'Test3']
+        ]
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['Test1', 'Test2', 'Test3']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testApplyGroovyScriptBinding() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ what | apply(code='"${foo*bar} is $it"',with={'foo': 7, 'bar': 6}) }}
+      '''.stripMargin().trim()
+
+      def context = [
+        foo: 42,
+        what: 'the answer to everything'
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['42 is the answer to everything']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
+  void testRunGroovyScriptBinding() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ run(code='"${foo*bar} is $what"',with={'foo': 7, 'bar': 6}) }}
+      '''.stripMargin().trim()
+
+      def context = [
+        foo: 42,
+        what: 'the answer to everything'
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
+
+      assert list == ['42 is the answer to everything']
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
   void testNoneMatchMapDefault() {
     def assembler =  new PebbleAssembler()
 

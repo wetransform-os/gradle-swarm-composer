@@ -61,6 +61,10 @@ public class SwarmComposerExtension extends AbstractExtension {
     filters.put("ifNull", new IfNullFilter());
     filters.put("orError", new OrErrorFilter());
 
+    filters.put("apply", new GroovyScriptFilter(rootDir));
+    filters.put("map", new GroovyScriptMapFilter(rootDir));
+    functions.put("run", new GroovyScriptFunction(rootDir));
+
     functions.put("generatePassword", new GeneratePasswordFunction());
 
     functions.put("toInt", new ToIntFunction());

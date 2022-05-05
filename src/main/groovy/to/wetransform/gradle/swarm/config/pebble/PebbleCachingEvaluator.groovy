@@ -210,6 +210,11 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
       return result
     }
 
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+      return new LinkedHashMap(this);
+    }
+
   }
 
   public PebbleCachingEvaluator() {
