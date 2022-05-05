@@ -53,6 +53,7 @@ public class SwarmComposerExtension extends AbstractExtension {
 
     filters.put("indent", new IndentLineFilter());
     filters.put("yaml", new YamlFilter());
+    filters.put("parseYaml", new ParseYamlFilter());
     filters.put("json", new JsonFilter());
     filters.put("expand", new ExpandFilter());
     filters.put("prettyJson", new PrettyJsonFilter());
