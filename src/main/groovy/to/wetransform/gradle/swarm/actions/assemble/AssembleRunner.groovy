@@ -27,7 +27,6 @@ import groovy.json.JsonOutput;
 import groovy.lang.Delegate
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
-import to.wetransform.gradle.swarm.config.pebble.PebbleEvaluator;;
 
 /**
  * Assembles a configuration template.

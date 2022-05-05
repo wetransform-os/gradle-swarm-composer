@@ -78,7 +78,7 @@ class SwarmComposerExtension {
   /**
    * Template engine, defaults to Pebble.
    */
-  TemplateAssembler templateEngine = new PebbleAssembler()
+  TemplateAssembler templateEngine = new PebbleAssembler(project.projectDir)
 
   /**
    * Folder holding stacks directory structure.

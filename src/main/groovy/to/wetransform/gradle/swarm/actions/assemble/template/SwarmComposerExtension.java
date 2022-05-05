@@ -16,6 +16,7 @@
 
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class SwarmComposerExtension extends AbstractExtension {
 
   private boolean smartFiltersInitialized = false;
 
-  public SwarmComposerExtension(boolean lenient) {
+  public SwarmComposerExtension(boolean lenient, File rootDir) {
     super();
     this.lenient = lenient;
 
@@ -66,8 +67,8 @@ public class SwarmComposerExtension extends AbstractExtension {
     functions.put("toDouble", new ToDoubleFunction());
     functions.put("toBoolean", new ToBooleanFunction());
     functions.put("checkVersion", new VersionIsAtLeastFunction());
-    functions.put("file", new ReadFileFunction());
-    functions.put("template", new ReadTemplateFunction());
+    functions.put("file", new ReadFileFunction(rootDir));
+    functions.put("template", new ReadTemplateFunction(rootDir));
 
     resolvers.add(new ContextWrapperResolver());
 

@@ -16,6 +16,7 @@
 
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collections;
@@ -35,6 +36,15 @@ import com.mitchellbosecke.pebble.template.PebbleTemplateImpl;
  * @author Simon Templer
  */
 public class ReadTemplateFunction implements Function {
+
+  private final File rootDir;
+
+  /**
+   * @param rootDir the project root directory for resolving absolute references
+   */
+  public ReadTemplateFunction(File rootDir) {
+    this.rootDir = rootDir;
+  }
 
   @Override
   public List<String> getArgumentNames() {
@@ -57,6 +67,11 @@ public class ReadTemplateFunction implements Function {
 
       StringWriter writer = new StringWriter();
       try {
+        if (templateName.startsWith("/")) {
+          // absolute path
+          templateName = ReadFileFunction.resolvePath((PebbleTemplateImpl) self, rootDir, templateName);
+          //FIXME test if this actually works with includeTemplate below
+        }
         ((PebbleTemplateImpl) self).includeTemplate(writer, (EvaluationContextImpl) context, templateName, addVars);
       } catch (IOException e) {
         throw new RuntimeException("Error processing template", e);

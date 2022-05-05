@@ -39,6 +39,15 @@ import com.mitchellbosecke.pebble.template.PebbleTemplateImpl;
  */
 public class ReadFileFunction implements Function {
 
+  private final File rootDir;
+
+  /**
+   * @param rootDir the project root directory for resolving absolute references
+   */
+  public ReadFileFunction(File rootDir) {
+    this.rootDir = rootDir;
+  }
+
   @Override
   public List<String> getArgumentNames() {
     return Collections.singletonList("value");
@@ -63,7 +72,7 @@ public class ReadFileFunction implements Function {
     }
     else {
       String path = value.toString();
-      path = ((PebbleTemplateImpl) self).resolveRelativePath(path);
+      path = resolvePath((PebbleTemplateImpl) self, rootDir, path);
       file = Paths.get(path);
     }
 
@@ -71,6 +80,32 @@ public class ReadFileFunction implements Function {
       return Files.readAllLines(file, StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
     } catch (IOException e) {
       throw new RuntimeException("Could not read file " + file.toString(), e);
+    }
+  }
+
+  /**
+   * Resolve a path in relation to a template and the project.
+   *
+   * @param template the template to resolve relative paths to
+   * @param rootDir the project root directory to resolve absolute paths with
+   * @param path the path to resolve
+   * @return the resolved path
+   */
+  public static String resolvePath(PebbleTemplateImpl template, File rootDir, String path) {
+    if (path.startsWith("/")) {
+      // absolute
+      if (rootDir == null) {
+        throw new IllegalStateException("Project root directory must be provided to resolve absolute paths");
+      }
+      else if (path.length() == 1) {
+        return rootDir.getAbsolutePath() + path;
+      }
+      else {
+        return new File(rootDir, path.substring(1)).getAbsolutePath();
+      }
+    }
+    else {
+      return ((PebbleTemplateImpl) template).resolveRelativePath(path);
     }
   }
 

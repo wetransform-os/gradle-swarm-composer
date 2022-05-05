@@ -52,7 +52,7 @@ class SetupConfiguration {
     if (!configInitialized) {
       assert stackName
       assert setupName
-      config = ConfigHelper.loadConfig(configFiles, stackName, setupName, config)
+      config = ConfigHelper.loadConfig(setupDir?.parentFile?.parentFile, configFiles, stackName, setupName, config)
       configInitialized = true
     }
     config.asImmutable()
@@ -79,7 +79,7 @@ class SetupConfiguration {
     if (!unevaluatedInitialized) {
       assert stackName
       assert setupName
-      unevaluated = ConfigHelper.loadConfig(configFiles, stackName, setupName, unevaluated, false)
+      unevaluated = ConfigHelper.loadConfig(setupDir?.parentFile?.parentFile, configFiles, stackName, setupName, unevaluated, false)
       unevaluatedInitialized = true
     }
     unevaluated.asImmutable()
