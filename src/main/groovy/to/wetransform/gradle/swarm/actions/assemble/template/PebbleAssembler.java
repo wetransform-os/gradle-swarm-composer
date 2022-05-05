@@ -36,15 +36,23 @@ import com.mitchellbosecke.pebble.template.PebbleTemplate;
  */
 public class PebbleAssembler implements TemplateAssembler {
 
-  private final PebbleEngine engine = new PebbleEngine.Builder()
-      .newLineTrimming(false)
-      .autoEscaping(false)
-      .strictVariables(true)
-      .addEscapingStrategy("doublequotes", new DoubleQuotesEscaper())
-      .addEscapingStrategy("compose", new ComposeFileEscaper())
-      .addEscapingStrategy("hcl", new HclEscaper())
-      .extension(new SwarmComposerExtension(false))
-      .build();
+  private final PebbleEngine engine;
+
+  public PebbleAssembler() {
+    this(null);
+  }
+
+  public PebbleAssembler(File rootDir) {
+    engine = new PebbleEngine.Builder()
+        .newLineTrimming(false)
+        .autoEscaping(false)
+        .strictVariables(true)
+        .addEscapingStrategy("doublequotes", new DoubleQuotesEscaper())
+        .addEscapingStrategy("compose", new ComposeFileEscaper())
+        .addEscapingStrategy("hcl", new HclEscaper())
+        .extension(new SwarmComposerExtension(false, rootDir))
+        .build();
+  }
 
   @Override
   public void compile(File template, Map<String, Object> context, Supplier<OutputStream> target) throws PebbleException, IOException {

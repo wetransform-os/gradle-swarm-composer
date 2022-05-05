@@ -54,12 +54,12 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
 
   protected final boolean lenient
 
-  AbstractPebbleEvaluator() {
-    this(false)
+  AbstractPebbleEvaluator(File rootDir) {
+    this(false, rootDir)
   }
 
-  AbstractPebbleEvaluator(boolean lenient) {
-    this(lenient, new SwarmComposerExtension(lenient))
+  AbstractPebbleEvaluator(boolean lenient, File rootDir) {
+    this(lenient, new SwarmComposerExtension(lenient, rootDir))
   }
 
   AbstractPebbleEvaluator(boolean lenient, SwarmComposerExtension extension) {

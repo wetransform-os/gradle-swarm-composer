@@ -213,11 +213,15 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
   }
 
   public PebbleCachingEvaluator() {
-    super()
+    this(null)
   }
 
-  public PebbleCachingEvaluator(boolean lenient) {
-    super(lenient)
+  public PebbleCachingEvaluator(File rootDir) {
+    super(rootDir)
+  }
+
+  public PebbleCachingEvaluator(boolean lenient, File rootDir) {
+    super(lenient, rootDir)
   }
 
   public PebbleCachingEvaluator(boolean lenient, SwarmComposerExtension sce) {

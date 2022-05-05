@@ -32,7 +32,6 @@ import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
 import to.wetransform.gradle.swarm.config.ConfigHelper
 import to.wetransform.gradle.swarm.config.SetupConfiguration
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
-import to.wetransform.gradle.swarm.config.pebble.PebbleEvaluator
 import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap
 import to.wetransform.gradle.swarm.crypt.ConfigCryptor
 import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor;
@@ -323,7 +322,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
         // export evaluated configuration
         def evaluatedFile = new File(sc.stackFile.parentFile, "${sc.setupName}-evaluated-config.yml")
         // lenient evaluation so a failure does not prevent the export
-        def config = new PebbleCachingEvaluator(true).evaluate(sc.unevaluated)
+        def config = new PebbleCachingEvaluator(true, project.projectDir).evaluate(sc.unevaluated)
         ConfigHelper.saveYaml(config, evaluatedFile)
       }
 
@@ -731,7 +730,7 @@ $run"""
     config = new JsonSlurper().parseText(JsonOutput.toJson(config))
     // try to evaluate config as good as possible
     try {
-      config = new PebbleCachingEvaluator(true).evaluate(config)
+      config = new PebbleCachingEvaluator(true, project.projectDir).evaluate(config)
     } catch (e) {
       project.logger.error("Error evaluating configuration for builds of stack ${sc.stackName} with setup ${sc.setupName}", e)
     }
