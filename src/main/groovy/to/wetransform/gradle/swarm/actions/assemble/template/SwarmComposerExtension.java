@@ -76,6 +76,7 @@ public class SwarmComposerExtension extends AbstractExtension {
 
     resolvers.add(new ContextWrapperResolver());
 
+    tests.put("Number", new IsNumberTest());
     tests.put("String", new IsStringTest());
     tests.put("Map", new IsMapTest());
     tests.put("List", new IsListTest());
