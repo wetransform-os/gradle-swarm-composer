@@ -19,10 +19,11 @@ package to.wetransform.gradle.swarm.actions.assemble.template;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.template.EvaluationContext;
@@ -37,6 +38,16 @@ import com.mitchellbosecke.pebble.template.PebbleTemplateImpl;
  */
 public class ReadTemplateFunction implements Function {
 
+  /**
+   * Name of the argument specifying the script file path.
+   */
+  public static final String ARGUMENT_PATH = "path";
+
+  /**
+   * Name of the variables/binding argument.
+   */
+  public static final String ARGUMENT_BINDING = "with";
+
   private final File rootDir;
 
   /**
@@ -48,7 +59,7 @@ public class ReadTemplateFunction implements Function {
 
   @Override
   public List<String> getArgumentNames() {
-    return Collections.singletonList("value");
+    return Arrays.asList(ARGUMENT_PATH, ARGUMENT_BINDING);
   }
 
   /* (non-Javadoc)
@@ -56,7 +67,7 @@ public class ReadTemplateFunction implements Function {
    */
   @Override
   public String execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
-    Object value = args.get("value");
+    Object value = args.get(ARGUMENT_PATH);
 
     if (value == null) {
       throw new NullPointerException("Template name/path must be specified");
@@ -64,6 +75,14 @@ public class ReadTemplateFunction implements Function {
     else {
       String templateName = value.toString();
       Map<String, Object> addVars = new LinkedHashMap<>();
+
+      // add local binding
+      Object bindingValue = args.get(ARGUMENT_BINDING);
+      if (bindingValue instanceof Map) {
+        for (Entry<?, ?> entry : ((Map<?, ?>) bindingValue).entrySet()) {
+          addVars.put(entry.getKey().toString(), entry.getValue());
+        }
+      }
 
       StringWriter writer = new StringWriter();
       try {

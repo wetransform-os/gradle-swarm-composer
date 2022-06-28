@@ -482,4 +482,43 @@ class PebbleAssemblerTest {
     }
   }
 
+  @Test
+  void testReadTemplateBinding() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFolder = Files.createTempDirectory('templates').toFile()
+    def tmpMain = new File(tmpFolder, 'main.tmp')
+    def tmpInclude = new File(tmpFolder, 'include.tmp')
+    try {
+      tmpMain.text = '''
+      |Includes:
+      |{{ template(path='./include.tmp',with={'foo': 7, 'bar': 6, 'what': what}) }}
+      '''.stripMargin().trim()
+
+      def context = [
+        foo: 12,
+        what: 'the answer to everything'
+      ]
+
+      tmpInclude.text = '''
+      |{{ foo * bar }} is {{ what }}!
+      '''.stripMargin().trim()
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpMain, context) { out }
+
+      def result = out.toString()
+
+      def list = result.split(/\n/).collect{ it.trim() }.findAll()
+
+      assert list == ['Includes:', '42 is the answer to everything!']
+    } finally {
+      tmpFolder.deleteDir()
+    }
+  }
+
 }
