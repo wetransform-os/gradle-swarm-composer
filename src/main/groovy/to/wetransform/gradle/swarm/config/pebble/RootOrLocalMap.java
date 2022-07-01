@@ -18,7 +18,7 @@ package to.wetransform.gradle.swarm.config.pebble;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,7 +114,7 @@ public class RootOrLocalMap implements Map<String, Object> {
 
   @Override
   public Set<String> keySet() {
-    Set<String> keys = new HashSet<>(root.keySet());
+    Set<String> keys = new LinkedHashSet<>(root.keySet());
     keys.addAll(local.keySet());
     return Collections.unmodifiableSet(keys);
   }

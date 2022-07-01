@@ -200,7 +200,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
     public Set<java.util.Map.Entry<String, Object>> entrySet() {
       // Note: This method results in evaluation of all entries
 
-      Set<java.util.Map.Entry<String, Object>> result = new HashSet()
+      Set<java.util.Map.Entry<String, Object>> result = new LinkedHashSet()
 
       for (String key : keySet()) {
         Object value = this.get(key)
