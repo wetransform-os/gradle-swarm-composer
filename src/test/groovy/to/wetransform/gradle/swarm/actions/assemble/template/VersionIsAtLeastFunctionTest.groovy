@@ -77,6 +77,16 @@ class VersionIsAtLeastFunctionTest {
   }
 
   @Test
+  void testStringPrefix() {
+    boolean result = function.execute([
+      version: 'v0.24.0',
+      required: '0.22.0'
+    ])
+
+    assert result == true
+  }
+
+  @Test
   void testSingle1() {
     boolean result = function.execute([
       version: '3',

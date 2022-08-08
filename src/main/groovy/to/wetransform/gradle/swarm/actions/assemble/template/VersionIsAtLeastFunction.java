@@ -57,7 +57,14 @@ public class VersionIsAtLeastFunction implements Function {
   }
 
   private Semver toVersion(Object version) {
-    return new Semver(version.toString(), SemverType.LOOSE);
+    String versionString = version.toString();
+
+    // allow non-numeric prefix - remove it
+    int firstDigit;
+    for (firstDigit = 0; firstDigit < versionString.length() && !Character.isDigit(versionString.charAt(firstDigit)); firstDigit++) {}
+    versionString = versionString.substring(firstDigit);
+
+    return new Semver(versionString, SemverType.LOOSE);
   }
 
 }
