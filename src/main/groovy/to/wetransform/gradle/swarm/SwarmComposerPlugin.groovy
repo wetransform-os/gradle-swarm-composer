@@ -23,6 +23,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.bundling.Jar
 
+import com.bmuschko.gradle.docker.DockerRegistryCredentials
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage;
 
@@ -812,6 +813,20 @@ $run"""
           }
         }
 
+        // custom registry credentials for a build
+        def customCredentials = settings.registry_credentials
+        if (customCredentials) {
+          if (customCredentials.url) { // evaluate url
+            customCredentials.url = evaluateSetting(customCredentials.url, settingBinding)
+          }
+          if (customCredentials.username) { // evaluate username
+            customCredentials.username = evaluateSetting(customCredentials.username, settingBinding)
+          }
+          if (customCredentials.password) { // evaluate password
+            customCredentials.password = evaluateSetting(customCredentials.password, settingBinding)
+          }
+        }
+
         String imageTag
         if (buildSpecificName) {
           // relation to build already contained in name
@@ -884,6 +899,13 @@ $run"""
           //quiet = quietMode
 
           pull = pullImage
+
+          if (customCredentials) {
+            registryCredentials = new DockerRegistryCredentials()
+            registryCredentials.url = customCredentials.url
+            registryCredentials.username = customCredentials.username
+            registryCredentials.password = customCredentials.password
+          }
 
           group 'Build individual image'
           description "Build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
