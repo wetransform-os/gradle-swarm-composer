@@ -920,8 +920,10 @@ $run"""
         // add push tasks
 
         def pushTask = project.task("push-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerPushImage) {
-          imageName = imageTag.split(':')[0]
-          tag = imageTag.split(':')[1]
+          def sepIndex = imageTag.lastIndexOf(':')
+
+          imageName = (sepIndex >= 0) ? imageTag.substring(0, sepIndex) : imageTag
+          tag = (sepIndex >= 0 && sepIndex + 1 < imageTag.length()) ? imageTag.substring(sepIndex + 1) : ''
 
           group 'Push individual image'
           description "Push image for build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
