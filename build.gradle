@@ -20,19 +20,19 @@ repositories {
 dependencies{
   compile gradleApi()
   compile localGroovy()
-  
+
   // template engine
   // https://github.com/PebbleTemplates/pebble
   compile 'io.pebbletemplates:pebble:3.1.5'
-  
+
   compile 'com.vdurmont:semver4j:3.1.0'
-  
+
   // YAML processing
-  compile 'org.yaml:snakeyaml:1.18'
-  
+  compile 'org.yaml:snakeyaml:1.33'
+
   // Docker plugin
   compile 'com.bmuschko:gradle-docker-plugin:3.1.0'
-  
+
   // Encryption library
   compile 'com.github.rockaport:alice:0.8.0', {
     exclude group: 'org.codehaus.groovy', module: 'groovy-all'
