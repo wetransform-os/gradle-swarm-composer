@@ -72,6 +72,7 @@ public class SwarmComposerExtension extends AbstractExtension {
     functions.put("toBoolean", new ToBooleanFunction());
     functions.put("checkVersion", new VersionIsAtLeastFunction());
     functions.put("file", new ReadFileFunction(rootDir));
+    functions.put("file64", new ReadFileBase64Function(rootDir));
     functions.put("template", new ReadTemplateFunction(rootDir));
 
     resolvers.add(new ContextWrapperResolver());
