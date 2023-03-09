@@ -19,11 +19,16 @@ package to.wetransform.gradle.swarm.actions.assemble.template;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.template.EvaluationContext;
@@ -85,17 +90,37 @@ public class ReadTemplateFunction implements Function {
       }
 
       StringWriter writer = new StringWriter();
+      boolean absolutePath = false;
       try {
         if (templateName.startsWith("/")) {
           // absolute path
+          absolutePath = true;
           templateName = ReadFileFunction.resolvePath((PebbleTemplateImpl) self, rootDir, templateName);
-          //FIXME test if this actually works with includeTemplate below
         }
         ((PebbleTemplateImpl) self).includeTemplate(writer, (EvaluationContextImpl) context, templateName, addVars);
       } catch (IOException e) {
         throw new RuntimeException("Error processing template", e);
       }
-      return writer.toString();
+      String result = writer.toString();
+      if (absolutePath && templateName.equals(result)) {
+        /*
+         * If the result is equal to the resolved absolute path, we very likely have the case
+         * that a string loader is used for the original template, so it can actually not include
+         * file templates.
+         * Instead, we load the file content and use that as template name.
+         */
+        try {
+          writer = new StringWriter();
+          Path templateFile = Paths.get(templateName);
+          String templateContent = Files.readAllLines(templateFile, StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
+          ((PebbleTemplateImpl) self).includeTemplate(writer, (EvaluationContextImpl) context, templateContent, addVars);
+          result = writer.toString();
+        } catch (IOException e) {
+          throw new RuntimeException("Error processing template using string loader", e);
+        }
+      }
+
+      return result;
     }
   }
 
