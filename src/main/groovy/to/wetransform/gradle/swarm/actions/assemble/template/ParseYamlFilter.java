@@ -48,7 +48,13 @@ public class ParseYamlFilter implements Filter {
     }
 
     Yaml yaml = new Yaml();
-    return yaml.load(input.toString()); //TODO also support loading multiple yaml documents with loadAll?
+    String toParse = input.toString();
+    try {
+      return yaml.load(toParse); //TODO also support loading multiple yaml documents with loadAll?
+    } catch (Exception e) {
+      // include string to parse in exception for easier debugging
+      throw new PebbleException(e, "Error parsing Yaml:\n" + toParse);
+    }
   }
 
 }
