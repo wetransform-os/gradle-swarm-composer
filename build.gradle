@@ -53,6 +53,16 @@ configurations.all {
   resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
+configurations {
+  // activate dependency locks for lockfile generation (used by trivy security scan)
+  compileClasspath {
+    resolutionStrategy.activateDependencyLocking()
+  }
+  runtimeClasspath {
+    resolutionStrategy.activateDependencyLocking()
+  }
+}
+
 tasks.wrapper {
   distributionType = Wrapper.DistributionType.ALL
   gradleVersion = '8.4'
