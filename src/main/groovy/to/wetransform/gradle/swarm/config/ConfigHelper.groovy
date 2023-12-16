@@ -181,7 +181,7 @@ class ConfigHelper {
    * @return the loaded configuration map
    */
   static Map loadYaml(File yamlFile) {
-    Yaml yaml = new Yaml(new SafeConstructor());
+    Yaml yaml = new Yaml();
     Map result
     yamlFile.withInputStream {
       result = yaml.load(it)

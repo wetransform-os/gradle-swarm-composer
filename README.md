@@ -19,12 +19,9 @@ Usage
 ```groovy
 buildscript {
   repositories {
-    jcenter()
+    mavenCentral()
     maven {
-      url 'https://artifactory.wetransform.to/artifactory/libs-release-local'
-    }
-    maven {
-      url 'https://artifactory.wetransform.to/artifactory/libs-snapshot-local'
+      url 'https://artifactory.wetransform.to/artifactory/local'
     }
     maven {
       url 'https://jitpack.io'
@@ -99,7 +96,7 @@ YAML configurations are accessible via their property path (segments separated s
 
 **TODO:** Configuration that controls swarm-composer behavior (e.g. which modes are enabled, if another setup should be extended, if a custom file name should be used, etc.)
 
-Restrictions for variable evaluation in configuration files: Simple value insertions/replacements work, for conditions only boolean variables are supported right now. 
+Restrictions for variable evaluation in configuration files: Simple value insertions/replacements work, for conditions only boolean variables are supported right now.
 
 #### Secret variables
 

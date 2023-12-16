@@ -47,7 +47,7 @@ public class ParseYamlFilter implements Filter {
       return null;
     }
 
-    Yaml yaml = new Yaml(new SafeConstructor());
+    Yaml yaml = new Yaml();
     return yaml.load(input.toString()); //TODO also support loading multiple yaml documents with loadAll?
   }
 
