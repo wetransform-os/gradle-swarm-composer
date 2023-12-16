@@ -71,7 +71,7 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
   protected void init() {
     if (engine == null) {
       engine = new PebbleEngine.Builder()
-      .newLineTrimming(true)
+      .newLineTrimming(false)
       .strictVariables(!lenient)
       .autoEscaping(false)
       .extension(this.extension)
