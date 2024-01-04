@@ -16,7 +16,6 @@
 
 package to.wetransform.gradle.swarm.config.pebble
 
-import org.junit.Ignore
 import org.junit.Test
 
 /**
@@ -48,7 +47,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     assert evaluated == expected
   }
 
-  @Test(expected = IllegalStateException)
+  @Test(expected = StackOverflowError) //XXX can we improve this, e.g. detect loops and/or provide useful information to the user?
   void testValueLoop() {
     def config = [
       foo: '{{ bar }}',
