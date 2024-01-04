@@ -25,6 +25,7 @@ import java.util.AbstractMap.SimpleEntry
 import java.util.Collection
 import java.util.Map
 import java.util.Set
+import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Function
 import java.util.stream.Collectors
 
@@ -64,20 +65,40 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
     private final Map<String, Object> evaluated
 
+    private final ThreadLocal<Set<Object>> evaluating = new ThreadLocal<Set<Object>>() {
+      @Override
+      protected Set<Object> initialValue() {
+        return new HashSet<Object>();
+      }
+    }
+
     private final PebbleCachingConfig root
 
     PebbleCachingConfig(Map<String, Object> original, PebbleCachingConfig root) {
       if (original instanceof PebbleCachingConfig) throw new IllegalStateException('Cannot wrap a PebbleCachingConfig (would result in multiple evaluations)')
 
       this.original = original
-      this.evaluated = new HashMap<>()
+      /*
+       * Use concurrent hash map to avoid ConcurrentModificationException that can happen if
+       * computeIfAbsent is called from different threads (since Java 9).
+       */
+      this.evaluated = new ConcurrentHashMap<>()
       this.root = root
     }
 
     private Object evaluate(Object key) {
-      def value = original.get(key)
+      // add to set of keys being evaluated so we can detect attempts to get the same key in the same thread (loop)
+      boolean wasNew = evaluating.get().add(key)
+      if (!wasNew) {
+        throw new IllegalStateException("Evaluation of key $key results in an evaluation loop")
+      }
+      try {
+        def value = original.get(key)
 
-      return evaluateObject(value)
+        return evaluateObject(value)
+      } finally {
+        evaluating.get().remove(key)
+      }
     }
 
     private def evaluateObject(Object value) {
@@ -161,6 +182,12 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
     @CompileStatic(TypeCheckingMode.SKIP)
     @Override
     public Object get(Object key) {
+      boolean isBeingEvaluated = evaluating.get().contains(key)
+      if (isBeingEvaluated) {
+        // Note: we need to do this check before computeIfAbsent is called because computeIfAbsent
+        // may otherwise stall forever waiting for the other evaluations to be complete
+        throw new IllegalStateException("Evaluation of key $key results in an evaluation loop")
+      }
       return evaluated.computeIfAbsent(key, this.&evaluate)
     }
 
