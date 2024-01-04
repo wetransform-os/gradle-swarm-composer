@@ -51,6 +51,8 @@ import to.wetransform.gradle.swarm.actions.assemble.template.SwarmComposerExtens
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.ConfigHelper
 
+import java.util.stream.Stream
+
 /**
  * Evaluates configuration based on Pebble templates.
  * Map entries are evaluated lazily if possible and the result is cached.
@@ -66,6 +68,8 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
     private final Map<String, Object> evaluated
 
+    private final List<String> path
+
     private final ThreadLocal<Set<Object>> evaluating = new ThreadLocal<Set<Object>>() {
       @Override
       protected Set<Object> initialValue() {
@@ -75,7 +79,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
     private final PebbleCachingConfig root
 
-    PebbleCachingConfig(Map<String, Object> original, PebbleCachingConfig root) {
+    PebbleCachingConfig(Map<String, Object> original, PebbleCachingConfig root, List<String> path) {
       if (original instanceof PebbleCachingConfig) throw new IllegalStateException('Cannot wrap a PebbleCachingConfig (would result in multiple evaluations)')
 
       this.original = original
@@ -86,24 +90,25 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
        */
       this.evaluated = new ConcurrentSkipListMap<>()
       this.root = root
+      this.path = path
     }
 
     private Object evaluate(Object key) {
       // add to set of keys being evaluated so we can detect attempts to get the same key in the same thread (loop)
       boolean wasNew = evaluating.get().add(key)
       if (!wasNew) {
-        throw new IllegalStateException("Evaluation of key $key results in an evaluation loop")
+        throw new IllegalStateException("[${pathString()}] Evaluation of key $key results in an evaluation loop")
       }
       try {
         def value = original.get(key)
 
-        return evaluateObject(value)
+        return evaluateObject(value, key)
       } finally {
         evaluating.get().remove(key)
       }
     }
 
-    private def evaluateObject(Object value) {
+    private def evaluateObject(Object value, Object key) {
       if (value == null) {
         return null
       }
@@ -112,11 +117,12 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
         return value
       }
       else if (value instanceof Map) {
-        return new PebbleCachingConfig(value, root ?: this)
+        return new PebbleCachingConfig(value, root ?: this, buildChildPath(key, null))
       }
       else if (value instanceof List) {
+        int index = 0
         return value.collect { Object obj ->
-          this.evaluateObject(obj)
+          this.evaluateObject(obj, buildChildPath(key, index++))
         }.toList()
       }
       else if (value instanceof String || value instanceof GString) {
@@ -188,7 +194,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
       if (isBeingEvaluated) {
         // Note: we need to do this check before computeIfAbsent is called because computeIfAbsent
         // may otherwise stall forever waiting for the other evaluations to be complete
-        throw new IllegalStateException("Evaluation of key $key results in an evaluation loop")
+        throw new IllegalStateException("[${pathString()}] Evaluation of key $key results in an evaluation loop")
       }
       return evaluated.computeIfAbsent(key, this.&evaluate)
     }
@@ -244,6 +250,31 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
       return new LinkedHashMap(this);
     }
 
+    private List<String> buildChildPath(Object key, Integer index) {
+      List<String> childPath = null
+      if (key != null) {
+        def keyStr = key.toString()
+        if (index != null) {
+          keyStr = keyStr + '[' + index + ']'
+        }
+        if (path != null) {
+          childPath = Stream.concat(path.stream(), Stream.of(keyStr))
+            .collect(Collectors.toList())
+        } else {
+          childPath = Arrays.asList(keyStr)
+        }
+      }
+      return childPath
+    }
+
+    private String pathString() {
+      if (path == null || path.isEmpty()) {
+        return '<root>'
+      }
+      else {
+        return path.join('.')
+      }
+    }
   }
 
   public PebbleCachingEvaluator() {
@@ -266,7 +297,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
   public Map<String, Object> evaluate(Map<String, Object> config) {
     init()
 
-    return new PebbleCachingConfig(config, null)
+    return new PebbleCachingConfig(config, null, null)
   }
 
 }
