@@ -16,6 +16,7 @@
 
 package to.wetransform.gradle.swarm.config.pebble
 
+import org.junit.Ignore
 import org.junit.Test
 
 /**
@@ -47,7 +48,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     assert evaluated == expected
   }
 
-  @Test(expected = StackOverflowError) //XXX can we improve this, e.g. detect loops and/or provide useful information to the user?
+  @Test(expected = IllegalStateException)
   void testValueLoop() {
     def config = [
       foo: '{{ bar }}',
@@ -57,6 +58,79 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     def evaluated = eval.evaluate(config)
 
     evaluated.bar
+  }
+
+  @Test
+  void testValueSameMap() {
+    def config = [
+      foo: 'Test',
+      blub: '{{ foo }}',
+      bar: '{{ blub }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      foo: 'Test',
+      blub: 'Test',
+      bar: 'Test'
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testValueNestedCrossRef() {
+    def config = [
+      foo: 'Test',
+      blub: [
+        no1: '{{ foo }}',
+        no2: '{{ blub.no1 }}',
+        no3: [
+          np1: '{{ blub.no1 }}',
+          np2: '{{ blub.no3.np1 }}'
+        ]
+      ],
+      bar: '{{ blub.no1 }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      foo: 'Test',
+      blub: [
+        no1: 'Test',
+        no2: 'Test',
+        no3: [
+          np1: 'Test',
+          np2: 'Test'
+        ]
+      ],
+      bar: 'Test'
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testEvaluationOrder() {
+    def config = [
+      proxy: [
+        use_paths: "{{ not proxy.no_proxy }}",
+        no_proxy: true
+      ]
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    assert evaluated.proxy.no_proxy == true
+    assert evaluated.proxy.use_paths == false
+
+    // other evaluation order
+    evaluated = eval.evaluate(config)
+
+    assert evaluated.proxy.use_paths == false
+    assert evaluated.proxy.no_proxy == true
   }
 
   @Test
