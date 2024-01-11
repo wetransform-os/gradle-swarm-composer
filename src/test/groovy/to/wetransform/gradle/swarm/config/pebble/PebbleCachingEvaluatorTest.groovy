@@ -16,6 +16,7 @@
 
 package to.wetransform.gradle.swarm.config.pebble
 
+import com.mitchellbosecke.pebble.error.PebbleException
 import org.junit.Ignore
 import org.junit.Test
 
@@ -531,6 +532,24 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     ]
 
     assert evaluated == expected
+  }
+
+  @Test
+  void testFail() {
+    def config = [
+      fail: true,
+      check: '{% if fail %}{{ fail("fail should not be set to true") }}{% endif %}'
+    ]
+
+    try {
+      def evaluated = eval.evaluate(config)
+
+      evaluated.check
+
+      throw new IllegalStateException("should not reach here")
+    } catch (PebbleException e) {
+      assert e.message.startsWith('fail should not be set to true')
+    }
   }
 
 }
