@@ -60,6 +60,7 @@ public class SwarmComposerExtension extends AbstractExtension {
     filters.put("prettyJson", new PrettyJsonFilter());
     filters.put("ifNull", new IfNullFilter());
     filters.put("orError", new OrErrorFilter());
+    filters.put("merge", new MergeFilter());
 
     filters.put("apply", new GroovyScriptFilter(rootDir));
     filters.put("map", new GroovyScriptMapFilter(rootDir));
