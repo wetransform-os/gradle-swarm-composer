@@ -422,4 +422,115 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     assert evaluated == expected
   }
 
+  @Test
+  void testMergeLiterals() {
+    def config = [
+      merged: '{{ {"foo": "bar"} | merge({"bar": "foo"}) | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      merged: [
+        foo: 'bar',
+        bar: 'foo'
+      ]
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testMergeInput() {
+    def config = [
+      defaults: [
+        foo: 'bar',
+        test: 'example'
+      ],
+      merged: '{{ defaults | merge({"bar": "foo", "test": "concrete"}) | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      defaults: [
+        foo: 'bar',
+        test: 'example'
+      ],
+      merged: [
+        foo: 'bar',
+        bar: 'foo',
+        test: 'concrete'
+      ]
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testMergeNestedInput() {
+    def config = [
+      platform: [
+        defaults: [
+          foo: 'bar',
+          test: 'example'
+        ]
+      ],
+      merged: '{{ platform.defaults | merge({"bar": "foo", "test": "concrete"}) | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      platform: [
+        defaults: [
+          foo: 'bar',
+          test: 'example'
+        ]
+      ],
+      merged: [
+        foo: 'bar',
+        bar: 'foo',
+        test: 'concrete'
+      ]
+    ]
+
+    assert evaluated == expected
+  }
+
+  @Test
+  void testMergeVars() {
+    def config = [
+      defaults: [
+        foo: 'bar',
+        test: 'example'
+      ],
+      override: [
+        bar: 'foo',
+        test: 'concrete'
+      ],
+      merged: '{{ defaults | merge(override) | expand }}'
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      defaults: [
+        foo: 'bar',
+        test: 'example'
+      ],
+      override: [
+        bar: 'foo',
+        test: 'concrete'
+      ],
+      merged: [
+        foo: 'bar',
+        bar: 'foo',
+        test: 'concrete'
+      ]
+    ]
+
+    assert evaluated == expected
+  }
+
 }
