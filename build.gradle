@@ -34,7 +34,7 @@ dependencies{
   implementation 'org.yaml:snakeyaml:2.2'
 
   // Docker plugin
-  implementation 'com.bmuschko:gradle-docker-plugin:3.1.0'
+  implementation 'com.bmuschko:gradle-docker-plugin:6.7.0'
 
   // Encryption library
   implementation 'com.github.rockaport:alice:0.8.0', {
