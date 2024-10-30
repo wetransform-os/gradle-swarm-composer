@@ -1,0 +1,12 @@
+---
+# Repository configuration for wetransform managed repositories
+
+# Reference presets that should apply to this repository
+presets:
+  - gradle-library
+  - renovate
+  - workflows-default
+
+workflows:
+  presets:
+    - java-11 # for Gradle plugin, library uses Java 8
