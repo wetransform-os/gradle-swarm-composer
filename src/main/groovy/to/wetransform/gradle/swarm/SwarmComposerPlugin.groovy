@@ -895,7 +895,7 @@ $run"""
           dockerFile = new File(tempDir, dFile.name)
           inputDir = tempDir
           labels = ['sc-stack': sc.stackName, 'sc-setup': sc.setupName, 'sc-build': buildName]
-          tag = imageTag
+          images = [imageTag]
 
           //XXX quiet seems to break build
           //quiet = quietMode
@@ -903,10 +903,12 @@ $run"""
           pull = pullImage
 
           if (customCredentials) {
-            registryCredentials = new DockerRegistryCredentials()
-            registryCredentials.url = customCredentials.url
-            registryCredentials.username = customCredentials.username
-            registryCredentials.password = customCredentials.password
+            registryCredentials {
+              url = customCredentials.url
+              username = customCredentials.username
+              password = customCredentials.password
+            }
+            
           }
 
           group 'Build individual image'
@@ -922,10 +924,8 @@ $run"""
         // add push tasks
 
         def pushTask = project.task("push-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerPushImage) {
-          def sepIndex = imageTag.lastIndexOf(':')
-
-          imageName = (sepIndex >= 0) ? imageTag.substring(0, sepIndex) : imageTag
-          tag = (sepIndex >= 0 && sepIndex + 1 < imageTag.length()) ? imageTag.substring(sepIndex + 1) : ''
+          
+          images = [imageTag]
 
           group 'Push individual image'
           description "Push image for build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
