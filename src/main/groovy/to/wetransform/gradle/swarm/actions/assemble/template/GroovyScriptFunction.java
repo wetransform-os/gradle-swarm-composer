@@ -20,9 +20,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import com.mitchellbosecke.pebble.extension.Function;
-import com.mitchellbosecke.pebble.template.EvaluationContext;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import io.pebbletemplates.pebble.extension.Function;
+import io.pebbletemplates.pebble.template.EvaluationContext;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 /**
  * Functions that runs a Groovy script.
@@ -46,7 +46,7 @@ public class GroovyScriptFunction implements Function {
   }
 
   /* (non-Javadoc)
-   * @see com.mitchellbosecke.pebble.extension.Function#execute(java.util.Map, com.mitchellbosecke.pebble.template.PebbleTemplate, com.mitchellbosecke.pebble.template.EvaluationContext, int)
+   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map, io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
    */
   @Override
   public Object execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {

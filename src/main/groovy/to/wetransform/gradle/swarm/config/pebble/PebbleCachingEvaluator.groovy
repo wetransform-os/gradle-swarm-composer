@@ -33,14 +33,14 @@ import java.util.stream.Collectors
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory;
 
-import com.mitchellbosecke.pebble.PebbleEngine
-import com.mitchellbosecke.pebble.lexer.LexerImpl;
-import com.mitchellbosecke.pebble.lexer.TokenStream;
-import com.mitchellbosecke.pebble.loader.StringLoader
-import com.mitchellbosecke.pebble.node.RootNode;
-import com.mitchellbosecke.pebble.parser.Parser;
-import com.mitchellbosecke.pebble.parser.ParserImpl
-import com.mitchellbosecke.pebble.template.PebbleTemplate
+import io.pebbletemplates.pebble.PebbleEngine
+import io.pebbletemplates.pebble.lexer.LexerImpl;
+import io.pebbletemplates.pebble.lexer.TokenStream;
+import io.pebbletemplates.pebble.loader.StringLoader
+import io.pebbletemplates.pebble.node.RootNode;
+import io.pebbletemplates.pebble.parser.Parser;
+import io.pebbletemplates.pebble.parser.ParserImpl
+import io.pebbletemplates.pebble.template.PebbleTemplate
 
 import groovy.transform.CompileStatic
 import groovy.transform.TypeCheckingMode

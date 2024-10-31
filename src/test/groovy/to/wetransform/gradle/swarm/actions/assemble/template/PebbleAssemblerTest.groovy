@@ -18,8 +18,8 @@ package to.wetransform.gradle.swarm.actions.assemble.template
 
 import org.junit.Test
 
-import com.mitchellbosecke.pebble.error.AttributeNotFoundException
-import com.mitchellbosecke.pebble.error.PebbleException
+import io.pebbletemplates.pebble.error.AttributeNotFoundException
+import io.pebbletemplates.pebble.error.PebbleException
 
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator

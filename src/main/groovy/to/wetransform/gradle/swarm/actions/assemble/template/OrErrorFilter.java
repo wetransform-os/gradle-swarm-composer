@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mitchellbosecke.pebble.error.AttributeNotFoundException;
-import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.extension.Test;
-import com.mitchellbosecke.pebble.extension.core.DefaultFilter;
-import com.mitchellbosecke.pebble.extension.core.EmptyTest;
-import com.mitchellbosecke.pebble.template.EvaluationContext;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import io.pebbletemplates.pebble.error.AttributeNotFoundException;
+import io.pebbletemplates.pebble.error.PebbleException;
+import io.pebbletemplates.pebble.extension.Test;
+import io.pebbletemplates.pebble.extension.core.DefaultFilter;
+import io.pebbletemplates.pebble.extension.core.EmptyTest;
+import io.pebbletemplates.pebble.template.EvaluationContext;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 
 /**
  * Filter that throws an error with a custom message if a property is not present.

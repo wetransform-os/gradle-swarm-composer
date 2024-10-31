@@ -23,11 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mitchellbosecke.pebble.attributes.AttributeResolver;
-import com.mitchellbosecke.pebble.extension.AbstractExtension;
-import com.mitchellbosecke.pebble.extension.Filter;
-import com.mitchellbosecke.pebble.extension.Function;
-import com.mitchellbosecke.pebble.extension.Test;
+import io.pebbletemplates.pebble.attributes.AttributeResolver;
+import io.pebbletemplates.pebble.extension.AbstractExtension;
+import io.pebbletemplates.pebble.extension.Filter;
+import io.pebbletemplates.pebble.extension.Function;
+import io.pebbletemplates.pebble.extension.Test;
 
 import to.wetransform.gradle.swarm.actions.assemble.template.PredicateFilter.PredicateFilterType;
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator;

@@ -16,7 +16,7 @@
 
 package to.wetransform.gradle.swarm.config.pebble
 
-import com.mitchellbosecke.pebble.error.PebbleException
+import io.pebbletemplates.pebble.error.PebbleException
 import org.junit.Ignore
 import org.junit.Test
 

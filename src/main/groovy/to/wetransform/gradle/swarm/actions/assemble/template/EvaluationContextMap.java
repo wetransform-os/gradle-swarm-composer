@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import com.mitchellbosecke.pebble.template.EvaluationContext;
+import io.pebbletemplates.pebble.template.EvaluationContext;
 
 /**
  * Map backed by an evaluation context.
