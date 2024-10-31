@@ -22,7 +22,7 @@ import org.junit.BeforeClass
 import org.junit.Ignore;
 import org.junit.Test
 
-import com.mitchellbosecke.pebble.error.AttributeNotFoundException
+import io.pebbletemplates.pebble.error.AttributeNotFoundException
 
 import to.wetransform.gradle.swarm.config.ConfigEvaluator;
 

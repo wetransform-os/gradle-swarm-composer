@@ -16,10 +16,10 @@
 
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
-import com.mitchellbosecke.pebble.attributes.AttributeResolver;
-import com.mitchellbosecke.pebble.attributes.ResolvedAttribute;
-import com.mitchellbosecke.pebble.node.ArgumentsNode;
-import com.mitchellbosecke.pebble.template.EvaluationContextImpl;
+import io.pebbletemplates.pebble.attributes.AttributeResolver;
+import io.pebbletemplates.pebble.attributes.ResolvedAttribute;
+import io.pebbletemplates.pebble.node.ArgumentsNode;
+import io.pebbletemplates.pebble.template.EvaluationContextImpl;
 
 /**
  * @author simon

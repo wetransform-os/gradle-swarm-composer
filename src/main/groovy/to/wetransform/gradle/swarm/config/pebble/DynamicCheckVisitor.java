@@ -16,26 +16,26 @@
 
 package to.wetransform.gradle.swarm.config.pebble;
 
-import com.mitchellbosecke.pebble.extension.NodeVisitor;
-import com.mitchellbosecke.pebble.node.ArgumentsNode;
-import com.mitchellbosecke.pebble.node.AutoEscapeNode;
-import com.mitchellbosecke.pebble.node.BlockNode;
-import com.mitchellbosecke.pebble.node.BodyNode;
-import com.mitchellbosecke.pebble.node.ExtendsNode;
-import com.mitchellbosecke.pebble.node.FlushNode;
-import com.mitchellbosecke.pebble.node.ForNode;
-import com.mitchellbosecke.pebble.node.IfNode;
-import com.mitchellbosecke.pebble.node.ImportNode;
-import com.mitchellbosecke.pebble.node.IncludeNode;
-import com.mitchellbosecke.pebble.node.MacroNode;
-import com.mitchellbosecke.pebble.node.NamedArgumentNode;
-import com.mitchellbosecke.pebble.node.Node;
-import com.mitchellbosecke.pebble.node.ParallelNode;
-import com.mitchellbosecke.pebble.node.PositionalArgumentNode;
-import com.mitchellbosecke.pebble.node.PrintNode;
-import com.mitchellbosecke.pebble.node.RootNode;
-import com.mitchellbosecke.pebble.node.SetNode;
-import com.mitchellbosecke.pebble.node.TextNode;
+import io.pebbletemplates.pebble.extension.NodeVisitor;
+import io.pebbletemplates.pebble.node.ArgumentsNode;
+import io.pebbletemplates.pebble.node.AutoEscapeNode;
+import io.pebbletemplates.pebble.node.BlockNode;
+import io.pebbletemplates.pebble.node.BodyNode;
+import io.pebbletemplates.pebble.node.ExtendsNode;
+import io.pebbletemplates.pebble.node.FlushNode;
+import io.pebbletemplates.pebble.node.ForNode;
+import io.pebbletemplates.pebble.node.IfNode;
+import io.pebbletemplates.pebble.node.ImportNode;
+import io.pebbletemplates.pebble.node.IncludeNode;
+import io.pebbletemplates.pebble.node.MacroNode;
+import io.pebbletemplates.pebble.node.NamedArgumentNode;
+import io.pebbletemplates.pebble.node.Node;
+import io.pebbletemplates.pebble.node.ParallelNode;
+import io.pebbletemplates.pebble.node.PositionalArgumentNode;
+import io.pebbletemplates.pebble.node.PrintNode;
+import io.pebbletemplates.pebble.node.RootNode;
+import io.pebbletemplates.pebble.node.SetNode;
+import io.pebbletemplates.pebble.node.TextNode;
 
 /**
  * Visitor that checks if there is any dynamic content in the visited nodes.

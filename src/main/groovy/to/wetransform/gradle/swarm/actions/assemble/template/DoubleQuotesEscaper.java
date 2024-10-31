@@ -19,7 +19,7 @@ package to.wetransform.gradle.swarm.actions.assemble.template;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.mitchellbosecke.pebble.extension.escaper.EscapingStrategy;
+import io.pebbletemplates.pebble.extension.escaper.EscapingStrategy;
 
 /**
  * Escapes double quotes.
@@ -31,13 +31,13 @@ public class DoubleQuotesEscaper implements EscapingStrategy {
   @Override
   public String escape(String input) {
     String res = input;
-    
+
     res = res.replaceAll(Pattern.quote("\\"), Matcher.quoteReplacement("\\\\\\\\"));
-    
+
     res = res.replaceAll(Pattern.quote("\""), Matcher.quoteReplacement("\\\""));
     res = res.replaceAll(Pattern.quote("$"), Matcher.quoteReplacement("\\$"));
     res = res.replaceAll(Pattern.quote("&"), Matcher.quoteReplacement("\\&"));
-      
+
     return res;
   }
 

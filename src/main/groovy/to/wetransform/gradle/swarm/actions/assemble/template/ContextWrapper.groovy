@@ -21,8 +21,8 @@ import java.util.Iterator;
 import java.util.Map
 import java.util.stream.Collectors;
 
-import com.mitchellbosecke.pebble.error.AttributeNotFoundException;
-import com.mitchellbosecke.pebble.utils.Pair;
+import io.pebbletemplates.pebble.error.AttributeNotFoundException;
+import io.pebbletemplates.pebble.utils.Pair;
 
 /**
  * Context wrapper for a map that throws an exception if the map key does not exist.

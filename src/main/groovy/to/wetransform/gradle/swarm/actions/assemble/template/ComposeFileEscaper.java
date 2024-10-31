@@ -19,7 +19,7 @@ package to.wetransform.gradle.swarm.actions.assemble.template;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.mitchellbosecke.pebble.extension.escaper.EscapingStrategy;
+import io.pebbletemplates.pebble.extension.escaper.EscapingStrategy;
 
 /**
  * Escaping for compose files.
