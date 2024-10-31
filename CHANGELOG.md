@@ -1,3 +1,17 @@
+## [2.0.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v1.1.0...v2.0.0) (2024-10-31)
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Previously docker tasks required Java 8 to run and
+failed with later versions. Now at least Java 11 is required.
+
+### Bug Fixes
+
+* **deps:** update dependency io.pebbletemplates:pebble to v3.2.2 ([af5cd40](https://github.com/wetransform-os/gradle-swarm-composer/commit/af5cd40ab2bcc73c0822c13b4882b5325ee84369))
+* **deps:** update dependency junit:junit to v4.13.2 ([b07368f](https://github.com/wetransform-os/gradle-swarm-composer/commit/b07368f05d75f599e013c814f51585ef13034891))
+* **deps:** update dependency org.yaml:snakeyaml to v2.3 ([a6a6307](https://github.com/wetransform-os/gradle-swarm-composer/commit/a6a63073f0bec42bb5c8432c8ea8c0536b769f51))
+* **deps:** upgrade gradle-docker-plugin version to 9.4.0 ([21a5eb7](https://github.com/wetransform-os/gradle-swarm-composer/commit/21a5eb761354aab1c723d7c4f1b0059279af1708))
+
 ## [1.1.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v1.0.0...v1.1.0) (2024-10-31)
 
 ### Features
