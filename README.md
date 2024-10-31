@@ -24,11 +24,11 @@ buildscript {
       url 'https://artifactory.wetransform.to/artifactory/local'
     }
     maven {
-      url 'https://jitpack.io'
+      url "https://plugins.gradle.org/m2/"
     }
   }
   dependencies {
-    classpath 'to.wetransform:gradle-swarm-composer:1.0.0'
+    classpath 'to.wetransform:gradle-swarm-composer:2.0.0'
   }
 }
 
