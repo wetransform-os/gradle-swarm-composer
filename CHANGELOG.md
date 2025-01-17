@@ -1,3 +1,13 @@
+## [2.1.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.0.0...v2.1.0) (2025-01-17)
+
+### Features
+
+* support disabling setup specific Swarm scripts ([ee18793](https://github.com/wetransform-os/gradle-swarm-composer/commit/ee1879384828495a1a8cd9b22fed0215d24ee99b))
+
+### Bug Fixes
+
+* change Docker Compose command in scripts ([057ba00](https://github.com/wetransform-os/gradle-swarm-composer/commit/057ba007ffdca38cb430f4792a10fb60c700ff0c))
+
 ## [2.0.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v1.1.0...v2.0.0) (2024-10-31)
 
 ### ⚠ BREAKING CHANGES
