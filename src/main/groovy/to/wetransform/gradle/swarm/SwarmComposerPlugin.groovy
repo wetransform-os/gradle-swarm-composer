@@ -642,7 +642,7 @@ class SwarmComposerPlugin implements Plugin<Project> {
         boolean includeCheck = project.composer.swarmSetupChecks
 
         if (composeSupported) {
-          run = "docker-compose -f \"$relPath\" \"\$@\""
+          run = "docker compose -f \"$relPath\" \"\$@\""
           if (includeCheck) {
             check = """echo "Checking if connected to a Swarm..."
               |docker node ls
@@ -908,7 +908,7 @@ $run"""
               username = customCredentials.username
               password = customCredentials.password
             }
-            
+
           }
 
           group 'Build individual image'
@@ -924,7 +924,7 @@ $run"""
         // add push tasks
 
         def pushTask = project.task("push-${sc.stackName}-${sc.setupName}-${buildName}", type: DockerPushImage) {
-          
+
           images = [imageTag]
 
           group 'Push individual image'
