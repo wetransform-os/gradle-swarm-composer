@@ -61,6 +61,12 @@ class SwarmComposerExtension {
   boolean swarmSetupChecks = true
 
   /**
+   * If swarm scripts should be generated per setup.
+   * If false, a single script is generated for all setups per stack.
+   */
+  boolean swarmScriptsPerSetup = true
+
+  /**
    * Docker configuration applied to the Gradle Docker plugin.
    */
   void docker(Closure cl) {

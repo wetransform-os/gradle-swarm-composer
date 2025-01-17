@@ -632,8 +632,10 @@ class SwarmComposerPlugin implements Plugin<Project> {
       }
 
       if (createScript) {
+        boolean scriptPerSetup = project.composer.swarmScriptsPerSetup || composeSupported
+
         // add a script file for convenient Docker Compose calls
-        File scriptFile = project.file(composeSupported ? "${sc.stackName}-${sc.setupName}.sh" : "deploy-${sc.stackName}-${sc.setupName}.sh")
+        File scriptFile = project.file(composeSupported ? "${sc.stackName}-${sc.setupName}.sh" : (scriptPerSetup ? "deploy-${sc.stackName}-${sc.setupName}.sh" : "deploy-${sc.stackName}.sh"))
         def relPath = project.projectDir.toPath().relativize( composeFile.toPath() ).toFile().toString()
 
         def run
@@ -660,30 +662,47 @@ class SwarmComposerPlugin implements Plugin<Project> {
           run = "docker stack deploy --compose-file \"$relPath\" --with-registry-auth ${sc.stackName}"
           if (includeCheck) {
             check = """echo "Checking \\"sc-setup\\" label to check if Docker is connected to the correct Swarm..."
-              |SETUP=\$(docker node inspect self --format "{{ index .Spec.Labels \\"sc-setup\\"}}")
-              |if [ -z "\$SETUP" ]; then
-              |  SETUP=\$(docker node inspect self --format "{{ index .Description.Engine.Labels \\"sc-setup\\"}}")
+              |SETUP_LABEL=\$(docker node inspect self --format "{{ index .Spec.Labels \\"sc-setup\\"}}")
+              |if [ -z "\$SETUP_LABEL" ]; then
+              |  SETUP_LABEL=\$(docker node inspect self --format "{{ index .Description.Engine.Labels \\"sc-setup\\"}}")
               |fi
-              |if [ "\$SETUP" != "${sc.setupName}" ]; then
-              |  echo "Found label for setup \\"\$SETUP\\" instead of \\"${sc.setupName}\\""
+              |if [ "\$SETUP_LABEL" != "\$SETUP" ]; then
+              |  echo "Found label for setup \\"\$SETUP_LABEL\\" instead of \\"\$SETUP\\""
               |  echo "Please make sure you are connected to the right swarm"
               |  exit 1
               |fi
-              |echo "Found setup label \\"\$SETUP\\""
+              |echo "Found setup label \\"\$SETUP_LABEL\\""
               |""".stripMargin()
+          }
+
+          if (!scriptPerSetup) {
+            // prepend check that SETUP variable is set and that setup folder exists in `setups/` directory
+            check = """if [ -z "\$SETUP" ]; then
+              |  echo "Please set the SETUP environment variable to the setup name"
+              |  exit 1
+              |fi
+              |if [ ! -d "setups/\$SETUP" ]; then
+              |  echo "Setup \$SETUP does not exist"
+              |  exit 1
+              |fi
+              |""".stripMargin() + '\n' + check
+          }
+          else {
+            // prepend setting SETUP variable to setup name
+            check = "SETUP=${sc.setupName}\n" + check
           }
         }
 
         def gradleArgs = []
 
         gradleArgs.add(0, '-Pquiet=true')
-        gradleArgs << "build-${sc.stackName}-${sc.setupName}"
+        gradleArgs << buildScriptTaskName('build', sc, scriptPerSetup)
         if (!composeSupported) {
           // also add push
-          gradleArgs << "push-${sc.stackName}-${sc.setupName}"
+          gradleArgs << buildScriptTaskName('push', sc, scriptPerSetup)
         }
 
-        gradleArgs << taskName
+        gradleArgs << buildScriptTaskName('assemble', sc, scriptPerSetup)
 
         scriptFile.text = """#!/bin/bash
 $check
@@ -708,6 +727,15 @@ $run"""
     // configure Docker image build tasks
     configureBuilds(project, sc, task)
 
+  }
+
+  String buildScriptTaskName(String taskName, SetupConfiguration sc, boolean scriptPerSetup) {
+    if (scriptPerSetup) {
+      return "${taskName}-${sc.stackName}-${sc.setupName}"
+    }
+    else {
+      return "${taskName}-${sc.stackName}-\$SETUP"
+    }
   }
 
   void configureBuilds(Project project, final SetupConfiguration sc, def assembleTask) {
