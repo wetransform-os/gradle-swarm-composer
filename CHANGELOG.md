@@ -1,3 +1,9 @@
+## [2.1.1](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.1.0...v2.1.1) (2025-01-23)
+
+### Bug Fixes
+
+* fix reference to stack file in common stack deploy scripts ([8046264](https://github.com/wetransform-os/gradle-swarm-composer/commit/80462648c2a69d9e5ad074d5cc787b8b6d96ec31))
+
 ## [2.1.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.0.0...v2.1.0) (2025-01-17)
 
 ### Features
