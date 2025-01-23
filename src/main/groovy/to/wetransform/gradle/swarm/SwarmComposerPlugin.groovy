@@ -37,7 +37,9 @@ import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap
 import to.wetransform.gradle.swarm.crypt.ConfigCryptor
 import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor;
 import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor;
-import to.wetransform.gradle.swarm.tasks.Assemble;
+import to.wetransform.gradle.swarm.tasks.Assemble
+
+import java.util.regex.Pattern;
 
 class SwarmComposerPlugin implements Plugin<Project> {
 
@@ -637,6 +639,10 @@ class SwarmComposerPlugin implements Plugin<Project> {
         // add a script file for convenient Docker Compose calls
         File scriptFile = project.file(composeSupported ? "${sc.stackName}-${sc.setupName}.sh" : (scriptPerSetup ? "deploy-${sc.stackName}-${sc.setupName}.sh" : "deploy-${sc.stackName}.sh"))
         def relPath = project.projectDir.toPath().relativize( composeFile.toPath() ).toFile().toString()
+        if (!scriptPerSetup) {
+          // path to compose file must be generalized - can only work if setup name is generally part of the path, as it is the case for the default path
+          relPath = relPath.replaceAll(Pattern.quote(sc.setupName), '\\$SETUP')
+        }
 
         def run
         def check = ''
