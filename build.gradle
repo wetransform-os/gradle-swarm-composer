@@ -33,7 +33,7 @@ dependencies{
   implementation 'com.vdurmont:semver4j:3.1.0'
 
   // YAML processing
-  implementation 'org.yaml:snakeyaml:2.3'
+  implementation 'org.yaml:snakeyaml:2.4'
 
   // Docker plugin
   implementation 'com.bmuschko:gradle-docker-plugin:9.4.0'
