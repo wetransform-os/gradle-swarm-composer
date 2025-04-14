@@ -552,4 +552,58 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     }
   }
 
+  @Test
+  void testFilterExpand() {
+    def config = [
+      root: [
+        namespaces: [
+          'namespace1': [
+            enabled: true,
+            test: 'test1'
+          ],
+          'namespace2': [
+            enabled: false,
+            test: 'test2'
+          ]
+        ],
+        computed_config: [
+          namespaces: '{{ root.namespaces | default({}) | filter(\'it.value.enabled | default(true)\') | expand }}'
+        ],
+        json: [
+          namespaces: '{{ root.computed_config.namespaces | json }}'
+        ]
+      ]
+    ]
+
+    def evaluated = eval.evaluate(config)
+
+    def expected = [
+      root: [
+        namespaces: [
+          'namespace1': [
+            enabled: true,
+            test: 'test1'
+          ],
+          'namespace2': [
+            enabled: false,
+            test: 'test2'
+          ]
+        ],
+        computed_config: [
+          namespaces: [
+            'namespace1': [
+              enabled: true,
+              test: 'test1'
+            ]
+          ]
+        ],
+        json: [
+          namespaces: '{"namespace1":{"enabled":true,"test":"test1"}}'
+        ]
+      ]
+    ]
+
+    assert evaluated == expected
+  }
+
 }

@@ -46,6 +46,10 @@ class GroovyScriptMapFilter implements Filter {
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber)
       throws PebbleException {
+    if (input instanceof ContextWrapper) {
+      input = ((ContextWrapper) input).getInternalMap();
+    }
+
     if (input instanceof Map) {
       input.collectEntries {
         filter.apply(it, args, self, context, lineNumber)

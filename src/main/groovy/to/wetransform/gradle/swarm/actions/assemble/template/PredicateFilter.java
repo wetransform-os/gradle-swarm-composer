@@ -102,6 +102,10 @@ public class PredicateFilter implements Filter {
       throw new IllegalStateException("result must be boolean");
     };
 
+    if (input instanceof ContextWrapper) {
+      input = ((ContextWrapper) input).getInternalMap();
+    }
+
     if (input instanceof Map<?, ?>) {
       @SuppressWarnings({ "unchecked", "rawtypes" })
       Stream<Entry<?, ?>> stream = StreamSupport.stream(((Map) input).entrySet().spliterator(), false);
