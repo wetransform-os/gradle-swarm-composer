@@ -1,3 +1,12 @@
+## [2.1.2](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.1.1...v2.1.2) (2025-04-14)
+
+### Bug Fixes
+
+* **deps:** update dependency io.pebbletemplates:pebble to v3.2.3 ([a1680b8](https://github.com/wetransform-os/gradle-swarm-composer/commit/a1680b89f13eb1dfa4a0cb32a0b55d4e57f50d3d))
+* **deps:** update dependency io.pebbletemplates:pebble to v3.2.4 ([b140ae7](https://github.com/wetransform-os/gradle-swarm-composer/commit/b140ae7e0a83a86f1031a599987c3a584748b1b1))
+* **deps:** update dependency org.yaml:snakeyaml to v2.4 ([1f6d1d0](https://github.com/wetransform-os/gradle-swarm-composer/commit/1f6d1d0015dfbc52f6cd8f35ed1d8c134c308bd5))
+* retain map structure when filtering/mapping ContextWrapper ([cc8a959](https://github.com/wetransform-os/gradle-swarm-composer/commit/cc8a9598e861165dc3df1a39f646b05377b0d662)), closes [ING-4587](https://wetransform.atlassian.net/browse/ING-4587)
+
 ## [2.1.1](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.1.0...v2.1.1) (2025-01-23)
 
 ### Bug Fixes
