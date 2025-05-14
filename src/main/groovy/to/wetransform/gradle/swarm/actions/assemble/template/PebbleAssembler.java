@@ -47,6 +47,7 @@ public class PebbleAssembler implements TemplateAssembler {
       .autoEscaping(false)
       .strictVariables(true)
       .addEscapingStrategy("doublequotes", new DoubleQuotesEscaper())
+      .addEscapingStrategy("hereDoc", new HereDocEscaper())
       .addEscapingStrategy("compose", new ComposeFileEscaper())
       .addEscapingStrategy("hcl", new HclEscaper())
       .extension(new SwarmComposerExtension(false, rootDir))
