@@ -1029,7 +1029,7 @@ $run"""
    * @return the evaluated setting
    */
   private String evaluateSetting(String setting, Map binding) {
-    def template = cachedTemplates.computeIfAbsent(setting, s -> { groovyEngine.createTemplate(s) }).make(binding)
+    def template = cachedTemplates.computeIfAbsent(setting, { s ->  groovyEngine.createTemplate(s) }).make(binding)
     try {
       template.toString()
     } catch (Exception e) {

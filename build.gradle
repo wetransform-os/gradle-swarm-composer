@@ -1,24 +1,46 @@
 plugins {
   id 'groovy'
   id 'maven-publish'
-  id 'to.wetransform.semantic-release-version' version '2.1.2'
+  id 'to.wetransform.conventions' version '1.6.0'
 }
-
-java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(8)
-  }
-}
-
-group = 'to.wetransform'
 
 repositories {
   mavenCentral()
-  maven {
-    url "https://plugins.gradle.org/m2/"
+  gradlePluginPortal()
+}
+
+wetransform {
+  repos {
+    wetfPublic()
   }
-  maven {
-    url 'https://artifactory.wetransform.to/artifactory/local'
+
+  setup {
+    javaVersion(8)
+
+    spotless {
+      licenseHeader = '''\
+      /*
+       * Copyright $YEAR wetransform GmbH
+       *
+       * Licensed under the Apache License, Version 2.0 (the "License");
+       * you may not use this file except in compliance with the License.
+       * You may obtain a copy of the License at
+       *
+       *     http://www.apache.org/licenses/LICENSE-2.0
+       *
+       * Unless required by applicable law or agreed to in writing, software
+       * distributed under the License is distributed on an "AS IS" BASIS,
+       * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       * See the License for the specific language governing permissions and
+       * limitations under the License.
+       */
+      '''.stripIndent()
+    }
+
+    publish {
+      // publish to public repo
+      privateRepo = false
+    }
   }
 }
 
@@ -28,68 +50,26 @@ dependencies{
 
   // template engine
   // https://github.com/PebbleTemplates/pebble
-  implementation 'io.pebbletemplates:pebble:3.2.4'
+  implementation libs.pebble
 
-  implementation 'com.vdurmont:semver4j:3.1.0'
+  implementation libs.semver4j
 
   // YAML processing
-  implementation 'org.yaml:snakeyaml:2.4'
+  implementation libs.snakeyaml
 
   // Docker plugin
-  implementation 'com.bmuschko:gradle-docker-plugin:9.4.0'
+  implementation libs.gradle.docker.plugin
 
   // Encryption library
-  implementation 'to.wetransform:alice:1.0.0', {
+  implementation libs.alice, {
     exclude group: 'org.codehaus.groovy', module: 'groovy'
   }
 
   // testing
-  testImplementation 'junit:junit:4.13.2'
-}
-
-/*
- * Some general project configuration
- */
-configurations.all {
-  // ensure SNAPSHOTs are updated every time if needed
-  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
-configurations {
-  // activate dependency locks for lockfile generation (used by trivy security scan)
-  compileClasspath {
-    resolutionStrategy.activateDependencyLocking()
-  }
-  runtimeClasspath {
-    resolutionStrategy.activateDependencyLocking()
-  }
+  testImplementation testLibs.junit
 }
 
 tasks.wrapper {
   distributionType = Wrapper.DistributionType.ALL
   gradleVersion = '8.14'
-}
-
-/*
- * Publishing to Maven
- *
- * https://docs.gradle.org/current/userguide/publishing_maven.html
- */
-publishing {
-  publications {
-    plugin(MavenPublication) {
-      from components.java
-    }
-  }
-
-  repositories {
-    maven {
-      url 'https://artifactory.wetransform.to/artifactory/' +
-        (version.endsWith('-SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local')
-      credentials {
-        username project.hasProperty('wetfArtifactoryUser') ? wetfArtifactoryUser : ''
-        password project.hasProperty('wetfArtifactoryPassword') ? wetfArtifactoryPassword : ''
-      }
-    }
-  }
 }

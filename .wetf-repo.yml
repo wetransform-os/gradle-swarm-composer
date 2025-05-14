@@ -9,4 +9,4 @@ presets:
 
 workflows:
   presets:
-    - java-11 # for Gradle plugin, library uses Java 8
+    - java-17 # for Gradle plugin, library uses Java 8
