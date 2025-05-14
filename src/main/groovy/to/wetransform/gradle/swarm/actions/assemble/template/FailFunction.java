@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import io.pebbletemplates.pebble.error.PebbleException;
 import io.pebbletemplates.pebble.extension.Function;
 import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Simple function that fails with a given message.
@@ -45,8 +44,7 @@ public class FailFunction implements Function {
     String message;
     if (messageRaw != null) {
       message = messageRaw.toString();
-    }
-    else {
+    } else {
       message = "fail: (no message)";
     }
 

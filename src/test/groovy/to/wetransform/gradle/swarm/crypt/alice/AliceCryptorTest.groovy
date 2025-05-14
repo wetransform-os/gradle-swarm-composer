@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.crypt.alice
 
-import org.junit.Test;
+import org.junit.Test
 
 /**
  * Simple AliceCryptor test.
@@ -40,5 +39,4 @@ class AliceCryptorTest {
 
     assert encrypted != decrypted
   }
-
 }

@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template
+
+import java.io.ByteArrayOutputStream
+import java.nio.file.Files
 
 import org.junit.Test
 
 import io.pebbletemplates.pebble.error.AttributeNotFoundException
 import io.pebbletemplates.pebble.error.PebbleException
-
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
-import java.nio.file.Files
-import java.io.ByteArrayOutputStream
 
 /**
  * Tests evaluating templates with PebbleAssembler.
@@ -46,13 +45,13 @@ class PebbleAssemblerTest {
       '''.stripMargin().trim()
 
       def context = [beninfos: [
-        results: [
-          properties: [
-            BQI: 'test',
-            MAMBI: null
+          results: [
+            properties: [
+              BQI: 'test',
+              MAMBI: null
+            ]
           ]
-        ]
-      ]]
+        ]]
 
       ConfigEvaluator evaluator = new PebbleCachingEvaluator()
       context = evaluator.evaluate(context)
@@ -370,7 +369,9 @@ class PebbleAssemblerTest {
 
       def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
 
-      assert list == ['42 is the answer to everything']
+      assert list == [
+        '42 is the answer to everything'
+      ]
     } finally {
       tmpFile.delete()
     }
@@ -402,7 +403,9 @@ class PebbleAssemblerTest {
 
       def list = result.split(/\n/).collect{ it.trim() }.findAll().toSorted()
 
-      assert list == ['42 is the answer to everything']
+      assert list == [
+        '42 is the answer to everything'
+      ]
     } finally {
       tmpFile.delete()
     }
@@ -515,10 +518,12 @@ class PebbleAssemblerTest {
 
       def list = result.split(/\n/).collect{ it.trim() }.findAll()
 
-      assert list == ['Includes:', '42 is the answer to everything!']
+      assert list == [
+        'Includes:',
+        '42 is the answer to everything!'
+      ]
     } finally {
       tmpFolder.deleteDir()
     }
   }
-
 }

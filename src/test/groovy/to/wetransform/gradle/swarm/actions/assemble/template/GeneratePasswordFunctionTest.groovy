@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template
 
-import org.junit.Test
-
 import static org.junit.Assert.*
+
+import org.junit.Test
 
 /**
  * Tests for password generation function.
@@ -27,7 +26,7 @@ import static org.junit.Assert.*
  */
 class GeneratePasswordFunctionTest {
 
-  private final GeneratePasswordFunction function = new GeneratePasswordFunction();
+  private final GeneratePasswordFunction function = new GeneratePasswordFunction()
 
   @Test
   void testDefaults() {
@@ -90,5 +89,4 @@ class GeneratePasswordFunctionTest {
 
     println "Example password: $password"
   }
-
 }

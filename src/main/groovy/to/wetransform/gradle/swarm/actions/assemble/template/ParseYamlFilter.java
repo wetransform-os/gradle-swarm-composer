@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Collections;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import io.pebbletemplates.pebble.error.PebbleException;
 import io.pebbletemplates.pebble.extension.Filter;
@@ -42,7 +40,7 @@ public class ParseYamlFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     if (input == null) {
       return null;
     }
@@ -50,7 +48,7 @@ public class ParseYamlFilter implements Filter {
     Yaml yaml = new Yaml();
     String toParse = input.toString();
     try {
-      return yaml.load(toParse); //TODO also support loading multiple yaml documents with loadAll?
+      return yaml.load(toParse); // TODO also support loading multiple yaml documents with loadAll?
     } catch (Exception e) {
       // include string to parse in exception for easier debugging
       throw new PebbleException(e, "Error parsing Yaml:\n" + toParse);

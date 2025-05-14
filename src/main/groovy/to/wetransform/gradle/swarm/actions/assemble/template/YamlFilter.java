@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.io.StringWriter;
@@ -43,7 +42,7 @@ public class YamlFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     if (input instanceof ContextWrapper) {
       input = ((ContextWrapper) input).getInternalMap();
     }

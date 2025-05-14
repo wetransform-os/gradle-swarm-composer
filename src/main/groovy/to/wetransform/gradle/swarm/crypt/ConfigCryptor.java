@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.crypt;
 
 import java.util.Map;
@@ -32,20 +31,26 @@ public interface ConfigCryptor {
    * encrypted version of the configuration.
    * The encryptor may mutate the given configuration and return it or create a new configuration.
    *
-   * @param config the configuration
-   * @param password the password
-   * @param reference an already encrypted reference configuration (to reuse existing encryptions)
+   * @param config
+   *          the configuration
+   * @param password
+   *          the password
+   * @param reference
+   *          an already encrypted reference configuration (to reuse existing encryptions)
    * @return the encrypted configuration
    */
-  Map<String, Object> encrypt(Map<String, Object> config, String password, @Nullable Map<String, Object> reference) throws Exception;
+  Map<String, Object> encrypt(Map<String, Object> config, String password, @Nullable Map<String, Object> reference)
+    throws Exception;
 
   /**
    * Decrypt the (string) settings in the given configuration and return the
    * decrypted version of the configuration.
    * The decryptor may mutate the given configuration and return it or create a new configuration.
    *
-   * @param config the configuration
-   * @param password the password
+   * @param config
+   *          the configuration
+   * @param password
+   *          the password
    * @return the decrypted configuration
    */
   Map<String, Object> decrypt(Map<String, Object> config, String password) throws Exception;

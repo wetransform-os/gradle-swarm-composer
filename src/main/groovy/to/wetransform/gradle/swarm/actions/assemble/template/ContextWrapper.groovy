@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package to.wetransform.gradle.swarm.actions.assemble.template;
+package to.wetransform.gradle.swarm.actions.assemble.template
 
 import java.text.MessageFormat
-import java.util.Iterator;
+import java.util.Iterator
 import java.util.Map
-import java.util.stream.Collectors;
+import java.util.stream.Collectors
 
-import io.pebbletemplates.pebble.error.AttributeNotFoundException;
-import io.pebbletemplates.pebble.utils.Pair;
+import io.pebbletemplates.pebble.error.AttributeNotFoundException
+import io.pebbletemplates.pebble.utils.Pair
 
 /**
  * Context wrapper for a map that throws an exception if the map key does not exist.
@@ -32,44 +31,44 @@ import io.pebbletemplates.pebble.utils.Pair;
  */
 public class ContextWrapper implements Iterable<Object> {
 
-  private final String path;
+  private final String path
 
-  private final Map contextMap;
+  private final Map contextMap
 
   public static Map<String, Object> create(Map<String, Object> contextMap) {
     contextMap.entrySet().stream()
       .map { entry ->
-        String key = entry.key;
-        Object value = entry.value;
+        String key = entry.key
+        Object value = entry.value
         if (value instanceof Map) {
-          value = new ContextWrapper(key, (Map) value);
+          value = new ContextWrapper(key, (Map) value)
         }
-        return new Pair<>(key, value);
+        return new Pair<>(key, value)
       }
-      .collect(Collectors.toMap { p -> p.left} { p -> p.right });
+      .collect(Collectors.toMap { p -> p.left} { p -> p.right })
   }
 
   public ContextWrapper(String path, Map contextMap) {
-    super();
-    this.path = path;
-    this.contextMap = contextMap;
+    super()
+    this.path = path
+    this.contextMap = contextMap
   }
 
   public Object getDynamicAttribute(Object attributeName, Object[] argumentValues) throws AttributeNotFoundException {
-    Object value = contextMap.get(attributeName);
+    Object value = contextMap.get(attributeName)
     if (value == null) {
       String fullName = (path != null) ? (path + '.' + attributeName) : (attributeName)
       String knownKeys = contextMap.keySet().stream().collect(Collectors.joining(', '))
       throw new AttributeNotFoundException(null,
-        MessageFormat.format("Attribute {0} not found in context map. Known keys are {1}", fullName, knownKeys),
-        attributeName, 0, 'unknown');
+      MessageFormat.format("Attribute {0} not found in context map. Known keys are {1}", fullName, knownKeys),
+      attributeName, 0, 'unknown')
     }
     else if (value instanceof Map) {
       String fullName = (path != null) ? (path + '.' + attributeName) : (attributeName)
-      return new ContextWrapper(fullName, (Map) value);
+      return new ContextWrapper(fullName, (Map) value)
     }
     else {
-      return value;
+      return value
     }
   }
 
@@ -82,16 +81,15 @@ public class ContextWrapper implements Iterable<Object> {
    * @return the property value
    */
   public Object getProperty(String name) {
-    return getDynamicAttribute(name, null);
+    return getDynamicAttribute(name, null)
   }
 
   @Override
   Iterator<Object> iterator() {
-    contextMap.entrySet().iterator();
+    contextMap.entrySet().iterator()
   }
 
   Map getInternalMap() {
-    return contextMap;
+    return contextMap
   }
-
 }

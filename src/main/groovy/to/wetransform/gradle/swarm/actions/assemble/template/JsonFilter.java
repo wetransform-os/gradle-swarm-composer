@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import groovy.json.JsonOutput;
 import io.pebbletemplates.pebble.error.PebbleException;
 import io.pebbletemplates.pebble.extension.Filter;
 import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
-
-import groovy.json.JsonOutput;
 
 /**
  * Filter that produces JSON from input.
@@ -41,7 +39,7 @@ public class JsonFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     if (input instanceof ContextWrapper) {
       input = ((ContextWrapper) input).getInternalMap();
     }

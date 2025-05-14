@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.io.File;
@@ -42,7 +41,8 @@ public class ReadFileFunction implements Function {
   private final File rootDir;
 
   /**
-   * @param rootDir the project root directory for resolving absolute references
+   * @param rootDir
+   *          the project root directory for resolving absolute references
    */
   public ReadFileFunction(File rootDir) {
     this.rootDir = rootDir;
@@ -53,8 +53,11 @@ public class ReadFileFunction implements Function {
     return Collections.singletonList("value");
   }
 
-  /* (non-Javadoc)
-   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map, io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
+  /*
+   * (non-Javadoc)
+   *
+   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map,
+   * io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
    */
   @Override
   public String execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
@@ -63,14 +66,11 @@ public class ReadFileFunction implements Function {
 
     if (value == null) {
       throw new NullPointerException("File path must be specified");
-    }
-    else if (value instanceof Path) {
+    } else if (value instanceof Path) {
       file = (Path) value;
-    }
-    else if (value instanceof File) {
+    } else if (value instanceof File) {
       file = ((File) value).toPath();
-    }
-    else {
+    } else {
       String path = value.toString();
       path = resolvePath((PebbleTemplateImpl) self, rootDir, path);
       file = Paths.get(path);
@@ -86,9 +86,12 @@ public class ReadFileFunction implements Function {
   /**
    * Resolve a path in relation to a template and the project.
    *
-   * @param template the template to resolve relative paths to
-   * @param rootDir the project root directory to resolve absolute paths with
-   * @param path the path to resolve
+   * @param template
+   *          the template to resolve relative paths to
+   * @param rootDir
+   *          the project root directory to resolve absolute paths with
+   * @param path
+   *          the path to resolve
    * @return the resolved path
    */
   public static String resolvePath(PebbleTemplateImpl template, File rootDir, String path) {
@@ -96,15 +99,12 @@ public class ReadFileFunction implements Function {
       // absolute
       if (rootDir == null) {
         throw new IllegalStateException("Project root directory must be provided to resolve absolute paths");
-      }
-      else if (path.length() == 1) {
+      } else if (path.length() == 1) {
         return rootDir.getAbsolutePath() + path;
-      }
-      else {
+      } else {
         return new File(rootDir, path.substring(1)).getAbsolutePath();
       }
-    }
-    else {
+    } else {
       return ((PebbleTemplateImpl) template).resolveRelativePath(path);
     }
   }

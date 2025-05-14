@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config
 
 import static org.junit.Assert.*
 
 import org.junit.Before
-import org.junit.Test;;
+import org.junit.Test
 
 /**
  * Tests for SetupConfigurations class.
@@ -108,5 +107,4 @@ class SetupConfigurationsTest {
       }
     }
   }
-
 }

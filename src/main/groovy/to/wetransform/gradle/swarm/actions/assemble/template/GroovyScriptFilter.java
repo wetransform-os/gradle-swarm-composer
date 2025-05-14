@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.io.File;
@@ -27,15 +26,14 @@ import java.util.Map.Entry;
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.control.CompilerConfiguration;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import io.pebbletemplates.pebble.error.PebbleException;
 import io.pebbletemplates.pebble.extension.Filter;
 import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 import io.pebbletemplates.pebble.template.PebbleTemplateImpl;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
 import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap;
 
 /**
@@ -81,7 +79,7 @@ public class GroovyScriptFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     Object scriptValue = args.get(ARGUMENT_SCRIPT);
     Object pathValue = args.get(ARGUMENT_PATH);
     if (pathValue == null && scriptValue == null) {
@@ -103,11 +101,10 @@ public class GroovyScriptFilter implements Filter {
         if (otherFile.exists()) {
           scriptFile = otherFile;
           scriptContentOrPath = otherPath;
-        }
-        else throw new PebbleException(null, "Could not find script file " + scriptFile.getAbsolutePath());
+        } else
+          throw new PebbleException(null, "Could not find script file " + scriptFile.getAbsolutePath());
       }
-    }
-    else {
+    } else {
       // use provided script
       scriptContentOrPath = scriptValue.toString();
       scriptFile = null;
@@ -129,8 +126,8 @@ public class GroovyScriptFilter implements Filter {
 
     // add template context
     map = new RootOrLocalMap(map,
-        new EvaluationContextMap(context), //TODO instead a Map based on the ScopeChain in EvaluationContextImpl?
-        false, false);
+      new EvaluationContextMap(context), // TODO instead a Map based on the ScopeChain in EvaluationContextImpl?
+      false, false);
 
     Binding binding = new Binding(map);
 
@@ -140,8 +137,7 @@ public class GroovyScriptFilter implements Filter {
       try {
         if (fFile != null) {
           return shell.parse(fFile);
-        }
-        else {
+        } else {
           return shell.parse(id);
         }
       } catch (CompilationFailedException | IOException e) {

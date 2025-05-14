@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template
 
 import java.nio.file.Files
 
 import org.junit.Test
+
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
 
 class VersionIsAtLeastFunctionTest {
 
-  private final VersionIsAtLeastFunction function = new VersionIsAtLeastFunction();
+  private final VersionIsAtLeastFunction function = new VersionIsAtLeastFunction()
 
   @Test
   void testNumericFail() {
@@ -231,5 +231,4 @@ class VersionIsAtLeastFunctionTest {
       tmpFile.delete()
     }
   }
-
 }

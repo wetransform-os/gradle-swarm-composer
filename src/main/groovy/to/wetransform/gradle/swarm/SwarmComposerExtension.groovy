@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm
 
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
 
-import to.wetransform.gradle.swarm.actions.assemble.AssembleDefaultConfig;
+import to.wetransform.gradle.swarm.actions.assemble.AssembleDefaultConfig
 import to.wetransform.gradle.swarm.actions.assemble.AssembleRunner
-import to.wetransform.gradle.swarm.actions.assemble.template.PebbleAssembler;
+import to.wetransform.gradle.swarm.actions.assemble.template.PebbleAssembler
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler
-import to.wetransform.gradle.swarm.config.SetupConfigurations;
-import to.wetransform.gradle.swarm.tasks.Assemble;;
+import to.wetransform.gradle.swarm.config.SetupConfigurations
+import to.wetransform.gradle.swarm.tasks.Assemble
 
 class SwarmComposerExtension {
 
@@ -32,8 +31,8 @@ class SwarmComposerExtension {
    * @param project the project the extension is applied to
    */
   public SwarmComposerExtension(Project project) {
-    super();
-    this.project = project;
+    super()
+    this.project = project
   }
 
   // public API
@@ -123,5 +122,4 @@ class SwarmComposerExtension {
   Closure dockerConfig
 
   final List<Closure> configureClosures = []
-
 }

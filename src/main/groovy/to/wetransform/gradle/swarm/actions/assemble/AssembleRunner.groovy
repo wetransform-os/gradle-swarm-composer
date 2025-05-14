@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble
 
-import org.gradle.api.Project
-
-import static to.wetransform.gradle.swarm.util.Helpers.*
 import static to.wetransform.gradle.swarm.config.ConfigHelper.*
+import static to.wetransform.gradle.swarm.util.Helpers.*
+
+import groovy.json.JsonOutput
+import groovy.lang.Delegate
 
 import java.nio.charset.StandardCharsets
 
-import groovy.json.JsonOutput;
-import groovy.lang.Delegate
+import org.gradle.api.Project
+
 import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 
@@ -78,5 +78,4 @@ class AssembleRunner implements AssembleConfig {
       }
     }
   }
-
 }

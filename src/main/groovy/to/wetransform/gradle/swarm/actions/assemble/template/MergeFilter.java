@@ -13,18 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
+
+import java.util.*;
 
 import io.pebbletemplates.pebble.error.PebbleException;
 import io.pebbletemplates.pebble.extension.Filter;
-import io.pebbletemplates.pebble.extension.Test;
-import io.pebbletemplates.pebble.extension.core.EmptyTest;
 import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 import to.wetransform.gradle.swarm.config.ConfigHelper;
-
-import java.util.*;
 
 /**
  * Filter that merges the input with the argument.
@@ -49,9 +46,9 @@ public class MergeFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self,
-      EvaluationContext context, int lineNumber) throws PebbleException {
+    EvaluationContext context, int lineNumber) throws PebbleException {
 
-    //TODO also support merging lists?
+    // TODO also support merging lists?
 
     if (input instanceof ContextWrapper) {
       input = ((ContextWrapper) input).getInternalMap();
@@ -71,7 +68,7 @@ public class MergeFilter implements Filter {
       throw new PebbleException(null, "merge filter only accepts a map as argument", lineNumber, self.getName());
     }
 
-    return ConfigHelper.mergeConfigs(Arrays.asList((Map)input, (Map)value));
+    return ConfigHelper.mergeConfigs(Arrays.asList((Map) input, (Map) value));
   }
 
 }

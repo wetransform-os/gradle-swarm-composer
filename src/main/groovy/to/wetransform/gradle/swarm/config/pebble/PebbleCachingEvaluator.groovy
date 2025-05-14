@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config.pebble
 
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import groovy.transform.CompileStatic
+import groovy.transform.TypeCheckingMode
+
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.io.Reader
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer
+import java.nio.charset.StandardCharsets
 import java.util.AbstractMap.SimpleEntry
 import java.util.Collection
 import java.util.Map
@@ -29,29 +31,25 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentSkipListMap
 import java.util.function.Function
 import java.util.stream.Collectors
+import java.util.stream.Stream
 
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory
 
 import io.pebbletemplates.pebble.PebbleEngine
-import io.pebbletemplates.pebble.lexer.LexerImpl;
-import io.pebbletemplates.pebble.lexer.TokenStream;
+import io.pebbletemplates.pebble.lexer.LexerImpl
+import io.pebbletemplates.pebble.lexer.TokenStream
 import io.pebbletemplates.pebble.loader.StringLoader
-import io.pebbletemplates.pebble.node.RootNode;
-import io.pebbletemplates.pebble.parser.Parser;
+import io.pebbletemplates.pebble.node.RootNode
+import io.pebbletemplates.pebble.parser.Parser
 import io.pebbletemplates.pebble.parser.ParserImpl
 import io.pebbletemplates.pebble.template.PebbleTemplate
-
-import groovy.transform.CompileStatic
-import groovy.transform.TypeCheckingMode
-import to.wetransform.gradle.swarm.actions.assemble.template.ContextWrapper;
+import to.wetransform.gradle.swarm.actions.assemble.template.ContextWrapper
 import to.wetransform.gradle.swarm.actions.assemble.template.ExpandFilter
 import to.wetransform.gradle.swarm.actions.assemble.template.LazyContextWrapper
 import to.wetransform.gradle.swarm.actions.assemble.template.SwarmComposerExtension
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.ConfigHelper
-
-import java.util.stream.Stream
 
 /**
  * Evaluates configuration based on Pebble templates.
@@ -73,7 +71,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
     private final ThreadLocal<Set<Object>> evaluating = new ThreadLocal<Set<Object>>() {
       @Override
       protected Set<Object> initialValue() {
-        return new HashSet<Object>();
+        return new HashSet<Object>()
       }
     }
 
@@ -145,7 +143,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
         context = new RootOrLocalMap(root, this, false, true)
       }
 
-      PebbleTemplate compiledTemplate = PebbleCachingEvaluator.this.engine.getTemplate(value);
+      PebbleTemplate compiledTemplate = PebbleCachingEvaluator.this.engine.getTemplate(value)
       StringWriter writer = new StringWriter()
       if (PebbleCachingEvaluator.this.lenient) {
         compiledTemplate.evaluate(writer, context)
@@ -247,7 +245,7 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
     @Override
     protected Object clone() throws CloneNotSupportedException {
-      return new LinkedHashMap(this);
+      return new LinkedHashMap(this)
     }
 
     private List<String> buildChildPath(Object key, Integer index) {
@@ -299,5 +297,4 @@ public class PebbleCachingEvaluator extends AbstractPebbleEvaluator {
 
     return new PebbleCachingConfig(config, null, null)
   }
-
 }

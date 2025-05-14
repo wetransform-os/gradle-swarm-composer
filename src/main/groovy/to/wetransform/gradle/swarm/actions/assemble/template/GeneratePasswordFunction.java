@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.security.SecureRandom;
@@ -59,11 +58,9 @@ public class GeneratePasswordFunction implements Function {
     if (confLength != null) {
       if (confLength instanceof Number) {
         length = ((Number) confLength).intValue();
-      }
-      else if (confLength instanceof String) {
+      } else if (confLength instanceof String) {
         length = Integer.parseInt((String) confLength);
-      }
-      else {
+      } else {
         throw new IllegalArgumentException("Invalid type for argument 'length': " + confLength.getClass());
       }
     }
@@ -72,8 +69,7 @@ public class GeneratePasswordFunction implements Function {
     Object confCharacters = args.get("characters");
     if (confCharacters != null) {
       characters = confCharacters.toString();
-    }
-    else if (args.containsKey("alphabetic") || args.containsKey("numeric") || args.containsKey("special")) {
+    } else if (args.containsKey("alphabetic") || args.containsKey("numeric") || args.containsKey("special")) {
       // flags
       boolean alphabetic = getFlag(args, "alphabetic", false);
       boolean numeric = getFlag(args, "numeric", false);
@@ -114,8 +110,7 @@ public class GeneratePasswordFunction implements Function {
 
     if (obj instanceof Boolean) {
       return (Boolean) obj;
-    }
-    else if (obj instanceof String) {
+    } else if (obj instanceof String) {
       return Boolean.parseBoolean((String) obj);
     }
 

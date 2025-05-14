@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public class IndentLineFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     if (input == null) {
       return null;
     }
@@ -49,11 +48,9 @@ public class IndentLineFilter implements Filter {
     int number;
     if (numberVal == null) {
       number = 0;
-    }
-    else if (numberVal instanceof Number) {
+    } else if (numberVal instanceof Number) {
       number = ((Number) numberVal).intValue();
-    }
-    else {
+    } else {
       number = Integer.parseInt(numberVal.toString());
     }
 

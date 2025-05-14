@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.util
 
-import java.nio.file.Path;
+import java.nio.file.Path
 
 import org.gradle.api.Project
 
@@ -36,5 +35,4 @@ class Helpers {
       fileOrPath as File
     }
   }
-
 }

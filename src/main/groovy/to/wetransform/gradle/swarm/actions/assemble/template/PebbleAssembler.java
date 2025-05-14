@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.io.File;
@@ -44,22 +43,23 @@ public class PebbleAssembler implements TemplateAssembler {
 
   public PebbleAssembler(File rootDir) {
     engine = new PebbleEngine.Builder()
-        .newLineTrimming(false)
-        .autoEscaping(false)
-        .strictVariables(true)
-        .addEscapingStrategy("doublequotes", new DoubleQuotesEscaper())
-        .addEscapingStrategy("compose", new ComposeFileEscaper())
-        .addEscapingStrategy("hcl", new HclEscaper())
-        .extension(new SwarmComposerExtension(false, rootDir))
-        .build();
+      .newLineTrimming(false)
+      .autoEscaping(false)
+      .strictVariables(true)
+      .addEscapingStrategy("doublequotes", new DoubleQuotesEscaper())
+      .addEscapingStrategy("compose", new ComposeFileEscaper())
+      .addEscapingStrategy("hcl", new HclEscaper())
+      .extension(new SwarmComposerExtension(false, rootDir))
+      .build();
   }
 
   @Override
-  public void compile(File template, Map<String, Object> context, Supplier<OutputStream> target) throws PebbleException, IOException {
+  public void compile(File template, Map<String, Object> context, Supplier<OutputStream> target)
+    throws PebbleException, IOException {
     PebbleTemplate compiledTemplate = engine.getTemplate(template.getAbsolutePath());
 
     try (OutputStream out = target.get();
-        Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
+      Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
       compiledTemplate.evaluate(writer, ContextWrapper.create(context));
     }
   }

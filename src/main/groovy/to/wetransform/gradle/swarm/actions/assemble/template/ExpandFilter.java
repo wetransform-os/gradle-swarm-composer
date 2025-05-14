@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import groovy.json.JsonOutput;
+import groovy.json.JsonSlurper;
 import io.pebbletemplates.pebble.error.PebbleException;
 import io.pebbletemplates.pebble.extension.Filter;
 import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
 
-import groovy.json.JsonOutput;
-import groovy.json.JsonSlurper;
-
 /**
  * Filter that uses Json encoding to facilitate copying configuration into types that are not only string or boolean.
  * It uses a magix prefix and suffix for identification.
  *
- * Note that recreating objects from the filter result is only possible if the expanded object is the only content of the string.
+ * Note that recreating objects from the filter result is only possible if the expanded object is the only content of
+ * the string.
  *
  * @author Simon Templer
  */
@@ -61,7 +60,7 @@ public class ExpandFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     if (input instanceof ContextWrapper) {
       input = ((ContextWrapper) input).getInternalMap();
     }

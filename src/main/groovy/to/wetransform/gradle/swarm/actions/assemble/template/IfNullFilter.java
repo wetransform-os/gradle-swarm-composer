@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Map;
@@ -36,11 +35,11 @@ public class IfNullFilter extends DefaultFilter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     Object defaultObj = args.get("default");
 
     if (input == null) {
-        return defaultObj;
+      return defaultObj;
     }
     return input;
   }

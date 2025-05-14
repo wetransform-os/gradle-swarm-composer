@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config.pebble;
 
 import java.util.Collection;
@@ -42,8 +41,10 @@ public class RootOrLocalMap implements Map<String, Object> {
   public RootOrLocalMap(Map<String, Object> root, Map<String, Object> local, boolean allowPut, boolean localAccess) {
     super();
 
-    if (root == null) throw new IllegalArgumentException("root should not be null");
-    if (local == null) throw new IllegalArgumentException("local should not be null");
+    if (root == null)
+      throw new IllegalArgumentException("root should not be null");
+    if (local == null)
+      throw new IllegalArgumentException("local should not be null");
 
     this.root = root;
     this.local = local;
@@ -63,7 +64,7 @@ public class RootOrLocalMap implements Map<String, Object> {
 
   @Override
   public boolean containsKey(Object key) {
-    return root.containsKey(key) ||  local.containsKey(key);
+    return root.containsKey(key) || local.containsKey(key);
   }
 
   @Override
@@ -73,14 +74,15 @@ public class RootOrLocalMap implements Map<String, Object> {
 
   @Override
   public Object get(Object key) {
-    if (localAccess && LOCAL_ACCESS_KEY.equals(key) && !root.containsKey(LOCAL_ACCESS_KEY) && !local.containsKey(LOCAL_ACCESS_KEY)) {
+    if (localAccess && LOCAL_ACCESS_KEY.equals(key) && !root.containsKey(LOCAL_ACCESS_KEY)
+      && !local.containsKey(LOCAL_ACCESS_KEY)) {
       return local;
     }
 
     if (root.containsKey(key)) {
       return root.get(key);
     }
-    return local.get(key); //FIXME fail if key not contained?
+    return local.get(key); // FIXME fail if key not contained?
   }
 
   @Override
@@ -103,8 +105,8 @@ public class RootOrLocalMap implements Map<String, Object> {
       for (java.util.Map.Entry<? extends String, ? extends Object> entry : m.entrySet()) {
         root.put(entry.getKey(), entry.getValue());
       }
-    }
-    else throw new UnsupportedOperationException();
+    } else
+      throw new UnsupportedOperationException();
   }
 
   @Override

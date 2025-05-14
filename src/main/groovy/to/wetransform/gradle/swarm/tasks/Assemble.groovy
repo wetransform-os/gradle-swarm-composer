@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.tasks
 
 import groovy.lang.Delegate
@@ -39,5 +38,4 @@ class Assemble extends DefaultTask implements AssembleConfig {
   void runCommand() {
     new AssembleRunner(project, _config).runCommand()
   }
-
 }

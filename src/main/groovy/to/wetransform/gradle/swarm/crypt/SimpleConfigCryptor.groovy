@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.crypt
 
-import java.util.List;
+import java.util.List
 import java.util.Map
 import java.util.Set
-import java.util.function.Function;;;
+import java.util.function.Function
 
 /**
  * Applies encryption/decryption to configuration.
@@ -107,5 +106,4 @@ class SimpleConfigCryptor implements ConfigCryptor {
       }
     }
   }
-
 }

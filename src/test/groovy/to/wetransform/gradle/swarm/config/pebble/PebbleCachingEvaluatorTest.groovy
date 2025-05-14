@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config.pebble
 
-import io.pebbletemplates.pebble.error.PebbleException
 import org.junit.Ignore
 import org.junit.Test
+
+import io.pebbletemplates.pebble.error.PebbleException
 
 /**
  * Test for PebbleCachingEvaluator.
@@ -37,14 +37,14 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     def config = [
       object: [name: 'Object1'],
       value: 'Hallo {{ object.name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       object: [name: 'Object1'],
       value: 'Hallo Object1'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -54,7 +54,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     def config = [
       foo: '{{ bar }}',
       bar: '{{ foo }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -139,14 +139,14 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     def config = [
       object: [name: 'Object{{ object.num }}', num: 1],
       value: 'Hallo {{ object.name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       object: [name: 'Object1', num: 1],
       value: 'Hallo Object1'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -156,14 +156,14 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
     def config = [
       value: 'Hallo {{ object.name }}',
       object: [name: 'Object{{ object.num }}', num: 1]
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       object: [name: 'Object1', num: 1],
       value: 'Hallo Object1'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -178,7 +178,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
         ]
       ],
       value: 'Hallo {{ object.properties.name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -193,7 +193,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
         ]
       ],
       value: 'Hallo Object1'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -208,7 +208,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
         ]
       ],
       value: 'Hallo {{ object[\'properties\'].name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -220,7 +220,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
         ]
       ],
       value: 'Hallo Object1'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -232,9 +232,9 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
       object: [
         foo: [name: 'Foo'],
         bar: [name: 'Bar']
-        ],
+      ],
       value: 'Hallo {{ object[variable].name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -243,9 +243,9 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
       object: [
         foo: [name: 'Foo'],
         bar: [name: 'Bar']
-        ],
+      ],
       value: 'Hallo Bar'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -257,9 +257,9 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
       object: [
         foo: [name: 'Foo'],
         bar: [name: 'Bar']
-        ],
+      ],
       value: 'Hallo {{ object[variable.sub].name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -268,9 +268,9 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
       object: [
         foo: [name: 'Foo'],
         bar: [name: 'Bar']
-        ],
+      ],
       value: 'Hallo Bar'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -282,7 +282,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
       condition: true, // as string?
       config_breaking_version: '{{ latest_config_version }}',
       value: '{{ (toInt(config_breaking_version) < 4) and (not condition) }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -291,7 +291,7 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
       condition: true, // as string?
       config_breaking_version: '10',
       value: false
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -300,7 +300,10 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
   void testExpandList() {
     def config = [
       name: 'Jim',
-      list: ['Hello {{ name }}', 'Bye {{ name }}'],
+      list: [
+        'Hello {{ name }}',
+        'Bye {{ name }}'
+      ],
       copy: '{{ list | expand }}'
     ]
 
@@ -389,7 +392,10 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
       name: 'Jim',
       map: [
         hello: 'Hello {{ name }}',
-        list: ['{{ map.hello }}', 'Bye {{ name }}'],
+        list: [
+          '{{ map.hello }}',
+          'Bye {{ name }}'
+        ],
         more: [
           foo: 'bar',
           story: '{{ name }} went to a bar.'
@@ -605,5 +611,4 @@ class PebbleCachingEvaluatorTest extends ConfigEvaluatorTest<PebbleCachingEvalua
 
     assert evaluated == expected
   }
-
 }

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Collections;
@@ -30,7 +29,6 @@ import io.pebbletemplates.pebble.error.PebbleException;
 import io.pebbletemplates.pebble.extension.Filter;
 import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
-
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator;
 import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap;
 
@@ -42,11 +40,7 @@ import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap;
 public class PredicateFilter implements Filter {
 
   public static enum PredicateFilterType {
-    FILTER,
-    ANY_MATCH,
-    ALL_MATCH,
-    NONE_MATCH,
-    FIRST
+    FILTER, ANY_MATCH, ALL_MATCH, NONE_MATCH, FIRST
   }
 
   private static final String RESULT_KEY = "___result";
@@ -73,7 +67,7 @@ public class PredicateFilter implements Filter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self, EvaluationContext context,
-      int lineNumber) throws PebbleException {
+    int lineNumber) throws PebbleException {
     Object pred = args.get(ARGUMENT_PREDICATE);
     if (pred == null) {
       return input;
@@ -90,8 +84,8 @@ public class PredicateFilter implements Filter {
       map.put(RESULT_KEY, predString.toString());
 
       map = new RootOrLocalMap(map,
-          new EvaluationContextMap(context), //TODO instead a Map based on the ScopeChain in EvaluationContextImpl?
-          false, false);
+        new EvaluationContextMap(context), // TODO instead a Map based on the ScopeChain in EvaluationContextImpl?
+        false, false);
 
       Map<String, Object> eval = evaluator.evaluate(map);
 
@@ -107,54 +101,55 @@ public class PredicateFilter implements Filter {
     }
 
     if (input instanceof Map<?, ?>) {
-      @SuppressWarnings({ "unchecked", "rawtypes" })
+      @SuppressWarnings({"unchecked", "rawtypes"})
       Stream<Entry<?, ?>> stream = StreamSupport.stream(((Map) input).entrySet().spliterator(), false);
 
-      switch(type) {
-      case FILTER:
-        return stream.filter(predicate).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-      case FIRST:
-        return stream.filter(predicate).findFirst().orElse(null);
-      case ANY_MATCH:
-        return stream.anyMatch(predicate);
-      case ALL_MATCH:
-        return stream.allMatch(predicate);
-      case NONE_MATCH:
-        return stream.noneMatch(predicate);
-      default:
-        throw new IllegalStateException("Unrecognized filter type: " + type.name());
+      switch (type) {
+        case FILTER :
+          return stream.filter(predicate).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+        case FIRST :
+          return stream.filter(predicate).findFirst().orElse(null);
+        case ANY_MATCH :
+          return stream.anyMatch(predicate);
+        case ALL_MATCH :
+          return stream.allMatch(predicate);
+        case NONE_MATCH :
+          return stream.noneMatch(predicate);
+        default :
+          throw new IllegalStateException("Unrecognized filter type: " + type.name());
       }
-    }
-    else if (input instanceof Iterable<?>) {
+    } else if (input instanceof Iterable<?>) {
       Stream<?> stream = StreamSupport.stream(((Iterable<?>) input).spliterator(), false);
 
-      switch(type) {
-      case FILTER:
-        return stream.filter(predicate).collect(Collectors.toList());
-      case FIRST:
-        return stream.filter(predicate).findFirst().orElse(null);
-      case ANY_MATCH:
-        return stream.anyMatch(predicate);
-      case ALL_MATCH:
-        return stream.allMatch(predicate);
-      case NONE_MATCH:
-        return stream.noneMatch(predicate);
-      default:
-        throw new IllegalStateException("Unrecognized filter type: " + type.name());
+      switch (type) {
+        case FILTER :
+          return stream.filter(predicate).collect(Collectors.toList());
+        case FIRST :
+          return stream.filter(predicate).findFirst().orElse(null);
+        case ANY_MATCH :
+          return stream.anyMatch(predicate);
+        case ALL_MATCH :
+          return stream.allMatch(predicate);
+        case NONE_MATCH :
+          return stream.noneMatch(predicate);
+        default :
+          throw new IllegalStateException("Unrecognized filter type: " + type.name());
       }
-    }
-    else {
-      switch(type) {
-      case FILTER:
-      case FIRST:
-        if (predicate.test(input)) return input; else return null;
-      case ANY_MATCH:
-      case ALL_MATCH:
-        return predicate.test(input);
-      case NONE_MATCH:
-        return !predicate.test(input);
-      default:
-        throw new IllegalStateException("Unrecognized filter type: " + type.name());
+    } else {
+      switch (type) {
+        case FILTER :
+        case FIRST :
+          if (predicate.test(input))
+            return input;
+          else
+            return null;
+        case ANY_MATCH :
+        case ALL_MATCH :
+          return predicate.test(input);
+        case NONE_MATCH :
+          return !predicate.test(input);
+        default :
+          throw new IllegalStateException("Unrecognized filter type: " + type.name());
       }
     }
   }

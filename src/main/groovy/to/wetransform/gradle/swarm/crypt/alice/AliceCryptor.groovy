@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package to.wetransform.gradle.swarm.crypt.alice
 
-package to.wetransform.gradle.swarm.crypt.alice;
+import java.nio.charset.StandardCharsets
 
-import java.nio.charset.StandardCharsets;
-
-import com.rockaport.alice.Alice;
+import com.rockaport.alice.Alice
 import com.rockaport.alice.AliceContext
-import com.rockaport.alice.AliceContext.KeyLength;
-import com.rockaport.alice.AliceContextBuilder;
+import com.rockaport.alice.AliceContext.KeyLength
+import com.rockaport.alice.AliceContextBuilder
 
-import to.wetransform.gradle.swarm.crypt.Cryptor;
+import to.wetransform.gradle.swarm.crypt.Cryptor
 
 /**
  * Cryptor based on Alice encryption library.
@@ -40,14 +39,14 @@ public class AliceCryptor implements Cryptor {
     //TODO based on configuration?
 
     AliceContext aliceContext = new AliceContextBuilder()
-        .setAlgorithm(AliceContext.Algorithm.AES)
-        // on Oracle Java may require to install
-        // http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
-        .setKeyLength(KeyLength.BITS_256)
-        .setMode(AliceContext.Mode.GCM)
-        .setIvLength(12)
-        .setGcmTagLength(AliceContext.GcmTagLength.BITS_128)
-        .build()
+      .setAlgorithm(AliceContext.Algorithm.AES)
+      // on Oracle Java may require to install
+      // http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html
+      .setKeyLength(KeyLength.BITS_256)
+      .setMode(AliceContext.Mode.GCM)
+      .setIvLength(12)
+      .setGcmTagLength(AliceContext.GcmTagLength.BITS_128)
+      .build()
     alice = new Alice(aliceContext)
   }
 
@@ -63,5 +62,4 @@ public class AliceCryptor implements Cryptor {
     byte[] decrypted = alice.decrypt(decoded, password.toCharArray())
     new String(decrypted, StandardCharsets.UTF_8)
   }
-
 }
