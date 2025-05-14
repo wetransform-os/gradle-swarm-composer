@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.vdurmont.semver4j.Semver;
+import com.vdurmont.semver4j.Semver.SemverType;
+
 import io.pebbletemplates.pebble.extension.Function;
 import io.pebbletemplates.pebble.template.EvaluationContext;
 import io.pebbletemplates.pebble.template.PebbleTemplate;
-import com.vdurmont.semver4j.Semver;
-import com.vdurmont.semver4j.Semver.SemverType;
 
 /**
  * Function that checks if the given version meets the required version.
@@ -45,8 +45,11 @@ public class VersionIsAtLeastFunction implements Function {
     return execute(args, null, null, -1);
   }
 
-  /* (non-Javadoc)
-   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map, io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
+  /*
+   * (non-Javadoc)
+   *
+   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map,
+   * io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
    */
   @Override
   public Boolean execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
@@ -61,7 +64,9 @@ public class VersionIsAtLeastFunction implements Function {
 
     // allow non-numeric prefix - remove it
     int firstDigit;
-    for (firstDigit = 0; firstDigit < versionString.length() && !Character.isDigit(versionString.charAt(firstDigit)); firstDigit++) {}
+    for (firstDigit = 0; firstDigit < versionString.length()
+      && !Character.isDigit(versionString.charAt(firstDigit)); firstDigit++) {
+    }
     versionString = versionString.substring(firstDigit);
 
     return new Semver(versionString, SemverType.LOOSE);

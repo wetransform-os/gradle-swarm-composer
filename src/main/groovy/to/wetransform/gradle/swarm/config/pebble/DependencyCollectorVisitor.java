@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config.pebble;
 
 import java.util.ArrayList;
@@ -78,8 +77,7 @@ public class DependencyCollectorVisitor implements NodeVisitor {
     if (expression instanceof FunctionOrMacroInvocationExpression) {
       visit(((FunctionOrMacroInvocationExpression) expression).getArguments());
       return null;
-    }
-    else if (expression instanceof BinaryExpression<?>) {
+    } else if (expression instanceof BinaryExpression<?>) {
       BinaryExpression<?> expr = (BinaryExpression<?>) expression;
 
       // analyze each
@@ -87,21 +85,18 @@ public class DependencyCollectorVisitor implements NodeVisitor {
       analyzeExpression(expr.getRightExpression());
 
       return null;
-    }
-    else if (expression instanceof ContextVariableExpression) {
+    } else if (expression instanceof ContextVariableExpression) {
       ContextVariableExpression expr = (ContextVariableExpression) expression;
 
       if (root) {
         return Collections.singletonList(expr.getName());
-      }
-      else {
+      } else {
         // this is always the beginning of a reference
         analyzeExpression(expr);
 
         return null;
       }
-    }
-    else if (expression instanceof GetAttributeExpression) {
+    } else if (expression instanceof GetAttributeExpression) {
       GetAttributeExpression expr = (GetAttributeExpression) expression;
 
       List<String> head = doAnalyzeExpression(expr.getNode(), root);
@@ -113,8 +108,7 @@ public class DependencyCollectorVisitor implements NodeVisitor {
         }
         return head;
       }
-    }
-    else if (expression instanceof LiteralStringExpression && !root) {
+    } else if (expression instanceof LiteralStringExpression && !root) {
       LiteralStringExpression expr = (LiteralStringExpression) expression;
 
       return Collections.singletonList(expr.getValue());
@@ -126,7 +120,7 @@ public class DependencyCollectorVisitor implements NodeVisitor {
   @Override
   public void visit(Node node) {
     // ignore
-    //XXX for which nodes is this called?
+    // XXX for which nodes is this called?
   }
 
   @Override
@@ -205,7 +199,7 @@ public class DependencyCollectorVisitor implements NodeVisitor {
 
   @Override
   public void visit(IncludeNode node) {
- // ignore - not supported in config?
+    // ignore - not supported in config?
   }
 
   @Override

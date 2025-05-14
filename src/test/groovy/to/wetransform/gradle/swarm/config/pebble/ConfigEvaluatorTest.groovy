@@ -13,24 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config.pebble
-
-import org.junit.AfterClass
-import org.junit.Before;
-import org.junit.BeforeClass
-import org.junit.Ignore;
-import org.junit.Test
-
-import io.pebbletemplates.pebble.error.AttributeNotFoundException
-
-import to.wetransform.gradle.swarm.config.ConfigEvaluator;
 
 import static org.junit.Assert.*
 
 import java.lang.reflect.UndeclaredThrowableException
 
 import org.junit.After
+import org.junit.AfterClass
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Ignore
+import org.junit.Test
+
+import io.pebbletemplates.pebble.error.AttributeNotFoundException
+import to.wetransform.gradle.swarm.config.ConfigEvaluator
 
 /**
  * Tests for Pebble configuration evaluator.
@@ -57,13 +54,13 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
   void testEvalVerbatim() {
     def config = [
       autofillRule: '{% verbatim %}{{dataset.name}}{% endverbatim %}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       autofillRule: '{{dataset.name}}'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -73,14 +70,14 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     def config = [
       autofillRule: '{% verbatim %}{{dataset.name}}{% endverbatim %}',
       otherRule: '{{ autofillRule }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       autofillRule: '{{dataset.name}}',
       otherRule: '{{dataset.name}}'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -92,7 +89,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
         autofillRule: '{% verbatim %}{{dataset.name}}{% endverbatim %}',
       ],
       json: '{{ config | json }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -101,7 +98,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
         autofillRule: '{{dataset.name}}',
       ],
       json: '{"autofillRule":"{{dataset.name}}"}'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -114,7 +111,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       ],
       json: '{{ config | json }}',
       reuse: '{{ json }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -124,7 +121,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       ],
       json: '{"autofillRule":"{{dataset.name}}"}',
       reuse: '{"autofillRule":"{{dataset.name}}"}'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -135,7 +132,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       name: 'World',
       phrase: '{{ hello }}, nice to meet you!',
       hello: 'Hello {{ name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -143,7 +140,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       name: 'World',
       phrase: 'Hello World, nice to meet you!',
       hello: 'Hello World'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -156,8 +153,8 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
         'Hello {{ name }}',
         'Bye {{ name }}',
         '{{ name }}?'
-        ]
       ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -167,8 +164,8 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
         'Hello World',
         'Bye World',
         'World?'
-        ]
       ]
+    ]
 
     assert evaluated == expected
   }
@@ -180,8 +177,8 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
         [name: 'Peter', text: 'Hello {{ name }}'],
         [name: 'Tom', text: 'Hello {{ name }}!'],
         [name: 'Sven', text: '{{ name }}?']
-        ]
       ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -190,8 +187,8 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
         [name: 'Peter', text: 'Hello Peter'],
         [name: 'Tom', text: 'Hello Tom!'],
         [name: 'Sven', text: 'Sven?']
-        ]
       ]
+    ]
 
     assert evaluated == expected
   }
@@ -200,7 +197,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
   void testEvalConfigMissing() {
     def config = [
       hello: 'Hello {{ name }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -212,22 +209,22 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     def config = [
       name: 'World',
       down: [
-          phrase: '{{ down.hello }}, nice to meet you!',
-          hello: 'Hello {{ name }}'
-        ],
+        phrase: '{{ down.hello }}, nice to meet you!',
+        hello: 'Hello {{ name }}'
+      ],
       letter: 'To {{name}}: {{ down.phrase }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       name: 'World',
       down: [
-          phrase: 'Hello World, nice to meet you!',
-          hello: 'Hello World'
-        ],
+        phrase: 'Hello World, nice to meet you!',
+        hello: 'Hello World'
+      ],
       letter: 'To World: Hello World, nice to meet you!'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -237,7 +234,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     def config = [
       name: 'World',
       letter: 'To {{name}}: {{ down.phrase }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -250,7 +247,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       name: 'World',
       down: [:],
       letter: 'To {{name}}: {{ down.phrase }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -263,7 +260,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       name: 'World',
       down: 'NotAnObect',
       letter: 'To {{name}}: {{ down.phrase }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -275,22 +272,22 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     def config = [
       name: 'World',
       down: [
-          phrase: '{{ hello }}, nice to meet you!',
-          hello: 'Hello {{ name }}'
-        ],
+        phrase: '{{ hello }}, nice to meet you!',
+        hello: 'Hello {{ name }}'
+      ],
       letter: 'To {{name}}: {{ down.phrase }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       name: 'World',
       down: [
-          phrase: 'Hello World, nice to meet you!',
-          hello: 'Hello World'
-        ],
+        phrase: 'Hello World, nice to meet you!',
+        hello: 'Hello World'
+      ],
       letter: 'To World: Hello World, nice to meet you!'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -302,22 +299,22 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     def config = [
       name: 'World',
       down: [
-          name: 'Pete',
-          hello: 'Hello {{ name }}'
-        ],
+        name: 'Pete',
+        hello: 'Hello {{ name }}'
+      ],
       letter: 'To {{name}}: {{ down.hello }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       name: 'World',
       down: [
-          name: 'Pete',
-          hello: 'Hello World'
-        ],
+        name: 'Pete',
+        hello: 'Hello World'
+      ],
       letter: 'To World: Hello World'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -329,22 +326,22 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     def config = [
       name: 'World',
       down: [
-          name: 'Pete',
-          hello: 'Hello {{ _.name }}'
-        ],
+        name: 'Pete',
+        hello: 'Hello {{ _.name }}'
+      ],
       letter: 'To {{name}}: {{ down.hello }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       name: 'World',
       down: [
-          name: 'Pete',
-          hello: 'Hello Pete'
-        ],
+        name: 'Pete',
+        hello: 'Hello Pete'
+      ],
       letter: 'To World: Hello Pete'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -354,14 +351,14 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
     def config = [
       number: 1,
       value: '{{ number }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
     def expected = [
       number: 1,
       value: '1' // the type is not retained
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -372,7 +369,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       bool: true,
       value: '{{ bool }}',
       value2: '{{ not bool }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -380,7 +377,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       bool: true,
       value: true,
       value2: false
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -391,7 +388,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       bool: true,
       cond: '{{ value ? "one" : "two" }}',
       value: '{{ not bool }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -399,7 +396,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       bool: true,
       cond: 'two',
       value: false
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -410,7 +407,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       bool: true,
       value: '{{ not bool }}',
       cond: '{{ value ? "one" : "two" }}'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -418,7 +415,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       bool: true,
       value: false,
       cond: 'two'
-      ]
+    ]
 
     assert evaluated == expected
   }
@@ -429,7 +426,7 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       val: 'xxx',
       cond: '{{ value == "laxxxal" ? "one" : "two" }}',
       value: 'la{{ val }}al'
-      ]
+    ]
 
     def evaluated = eval.evaluate(config)
 
@@ -437,9 +434,8 @@ abstract class ConfigEvaluatorTest<T extends ConfigEvaluator> {
       val: 'xxx',
       cond: 'one',
       value: 'laxxxal'
-      ]
+    ]
 
     assert evaluated == expected
   }
-
 }

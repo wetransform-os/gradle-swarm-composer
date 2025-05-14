@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.crypt
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 import org.junit.Test
 
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper;
-import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor;;
+import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor
 
 /**
  * Tests for SimpleConfigCryptor
@@ -62,5 +62,4 @@ ipsum - or what?'''
 
     assert encrypted != decrypted
   }
-
 }

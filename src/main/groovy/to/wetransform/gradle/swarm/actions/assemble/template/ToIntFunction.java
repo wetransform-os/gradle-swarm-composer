@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Collections;
@@ -42,8 +41,7 @@ public class ToIntFunction implements Function {
     Object value = args.get("value");
     if (value instanceof Number) {
       result = (Number) value;
-    }
-    else {
+    } else {
       result = Integer.valueOf(value.toString());
     }
     return result.intValue();

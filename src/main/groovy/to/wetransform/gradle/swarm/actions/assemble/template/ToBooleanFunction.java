@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.Collections;
@@ -36,16 +35,18 @@ public class ToBooleanFunction implements Function {
     return Collections.singletonList("value");
   }
 
-  /* (non-Javadoc)
-   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map, io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
+  /*
+   * (non-Javadoc)
+   *
+   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map,
+   * io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
    */
   @Override
   public Boolean execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
     Object value = args.get("value");
     if (value instanceof Boolean) {
       return (Boolean) value;
-    }
-    else if (value instanceof String) {
+    } else if (value instanceof String) {
       String lower = ((String) value).toLowerCase();
       if (lower.equals("true")) {
         return true;

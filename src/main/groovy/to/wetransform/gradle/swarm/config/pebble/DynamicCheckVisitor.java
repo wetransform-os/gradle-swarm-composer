@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config.pebble;
 
 import io.pebbletemplates.pebble.extension.NodeVisitor;
@@ -53,7 +52,7 @@ public class DynamicCheckVisitor implements NodeVisitor {
   @Override
   public void visit(Node node) {
     // ignore
-    //XXX for which nodes is this called?
+    // XXX for which nodes is this called?
   }
 
   @Override

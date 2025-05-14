@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble;
 
 import java.util.List;
@@ -49,7 +48,8 @@ public interface AssembleConfig {
   /**
    * Set the template file to assemble.
    *
-   * @param template the template file, should be a File or String with the file path
+   * @param template
+   *          the template file, should be a File or String with the file path
    */
   void setTemplate(Object template);
 
@@ -63,8 +63,9 @@ public interface AssembleConfig {
   /**
    * Set the file list of configuration files or configuration maps.
    *
-   * @param config the list of configurations, each should be a File or
-   *   String with the file path, or an already loaded configuration map
+   * @param config
+   *          the list of configurations, each should be a File or
+   *          String with the file path, or an already loaded configuration map
    */
   void setConfig(List<Object> config);
 
@@ -78,7 +79,8 @@ public interface AssembleConfig {
   /**
    * Set the target file to write the assembled content to.
    *
-   * @param target the target file, should be a File or String with the file path
+   * @param target
+   *          the target file, should be a File or String with the file path
    */
   void setTarget(Object target);
 

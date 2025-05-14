@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ public class OrErrorFilter extends DefaultFilter {
 
   @Override
   public Object apply(Object input, Map<String, Object> args, PebbleTemplate self,
-      EvaluationContext context, int lineNumber) throws PebbleException {
+    EvaluationContext context, int lineNumber) throws PebbleException {
 
     Test emptyTest = new EmptyTest();
     if (emptyTest.apply(input, new HashMap<>(), self, context, lineNumber)) {
@@ -63,8 +62,7 @@ public class OrErrorFilter extends DefaultFilter {
       String message;
       if (messageRaw != null) {
         message = messageRaw.toString();
-      }
-      else {
+      } else {
         message = "orError: null or empty input";
       }
 

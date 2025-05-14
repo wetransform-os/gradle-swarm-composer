@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm
 
-import java.util.function.Supplier;
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
+import java.util.function.Supplier
+import java.util.regex.Pattern
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -25,21 +28,17 @@ import org.gradle.api.tasks.bundling.Jar
 
 import com.bmuschko.gradle.docker.DockerRegistryCredentials
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-import com.bmuschko.gradle.docker.tasks.image.DockerPushImage;
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler;
+import to.wetransform.gradle.swarm.actions.assemble.template.TemplateAssembler
 import to.wetransform.gradle.swarm.config.ConfigHelper
 import to.wetransform.gradle.swarm.config.SetupConfiguration
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
 import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap
 import to.wetransform.gradle.swarm.crypt.ConfigCryptor
-import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor;
-import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor;
+import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor
+import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor
 import to.wetransform.gradle.swarm.tasks.Assemble
-
-import java.util.regex.Pattern;
 
 class SwarmComposerPlugin implements Plugin<Project> {
 
@@ -93,7 +92,11 @@ class SwarmComposerPlugin implements Plugin<Project> {
         try {
           extendedStacks.each { extended ->
             stackConfigFiles.addAll(collectConfigFiles(project, stacksDir, extended,
-              ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml']))
+              [
+                'config/**/*.env',
+                'config/**/*.yml',
+                'config/**/*.yaml'
+              ]))
           }
         } catch (e) {
           throw new RuntimeException('Error collecting configuration files from extended stacks', e)
@@ -101,7 +104,11 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
         // stack base configuration
         stackConfigFiles.addAll(collectConfigFiles(project, stacksDir, name,
-          ['config/**/*.env', 'config/**/*.yml', 'config/**/*.yaml']))
+          [
+            'config/**/*.env',
+            'config/**/*.yml',
+            'config/**/*.yaml'
+          ]))
 
         // identify builds
         def stackBuilds = []
@@ -191,7 +198,11 @@ class SwarmComposerPlugin implements Plugin<Project> {
             // collect setup configuration files
             def defaultConfig = project.fileTree(
               dir: project.projectDir,
-              includes: ['*.env', '*-config.yml', '*-config.yaml'],
+              includes: [
+                '*.env',
+                '*-config.yml',
+                '*-config.yaml'
+              ],
               excludes: ['swarm-composer.yml'])
             configFiles.addAll(defaultConfig.asCollection())
 
@@ -208,7 +219,6 @@ class SwarmComposerPlugin implements Plugin<Project> {
           }
         }
       }
-
     }
   }
 
@@ -472,7 +482,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
             def files = project.fileTree(
               dir: sc.setupDir,
-              includes: ["*.${PLAIN_FILE_IDENTIFIER}.*"]).asCollection()
+              includes: [
+                "*.${PLAIN_FILE_IDENTIFIER}.*"
+              ]).asCollection()
 
             files.each { plainFile ->
               def name = plainFile.name.replaceAll("\\.${PLAIN_FILE_IDENTIFIER}\\.", ".${ENCRYPTED_FILE_IDENTIFIER}.")
@@ -523,7 +535,9 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
             def files = project.fileTree(
               dir: sc.setupDir,
-              includes: ["*.${ENCRYPTED_FILE_IDENTIFIER}.*"]).asCollection()
+              includes: [
+                "*.${ENCRYPTED_FILE_IDENTIFIER}.*"
+              ]).asCollection()
 
             files.each { secretFile ->
               def name = secretFile.name.replaceAll("\\.${ENCRYPTED_FILE_IDENTIFIER}\\.",
@@ -552,13 +566,14 @@ class SwarmComposerPlugin implements Plugin<Project> {
             description = "Delete all plain text secret files for setup ${sc.setupName}"
           }.doLast {
             project.fileTree(dir: sc.setupDir,
-                includes: ["*.${PLAIN_FILE_IDENTIFIER}.*"]).each { File file ->
+            includes: [
+              "*.${PLAIN_FILE_IDENTIFIER}.*"
+            ]).each { File file ->
               file.delete()
             }
           }
           purgeSecretsTask.dependsOn(purgeTask)
         }
-
       }
     }
 
@@ -716,7 +731,11 @@ set -e
 ./gradlew ${gradleArgs.join(' ')}
 $run"""
         try {
-          ['chmod', 'a+x', scriptFile.absolutePath].execute()
+          [
+            'chmod',
+            'a+x',
+            scriptFile.absolutePath
+          ].execute()
         } catch (e) {
           // ignore
         }
@@ -732,7 +751,6 @@ $run"""
 
     // configure Docker image build tasks
     configureBuilds(project, sc, task)
-
   }
 
   String buildScriptTaskName(String taskName, SetupConfiguration sc, boolean scriptPerSetup) {
@@ -852,13 +870,16 @@ $run"""
         // custom registry credentials for a build
         def customCredentials = settings.registry_credentials
         if (customCredentials) {
-          if (customCredentials.url) { // evaluate url
+          if (customCredentials.url) {
+            // evaluate url
             customCredentials.url = evaluateSetting(customCredentials.url, settingBinding)
           }
-          if (customCredentials.username) { // evaluate username
+          if (customCredentials.username) {
+            // evaluate username
             customCredentials.username = evaluateSetting(customCredentials.username, settingBinding)
           }
-          if (customCredentials.password) { // evaluate password
+          if (customCredentials.password) {
+            // evaluate password
             customCredentials.password = evaluateSetting(customCredentials.password, settingBinding)
           }
         }
@@ -876,11 +897,11 @@ $run"""
         // extend configuration with info on build image
         def results = [
           builds:
-            [(buildName): [
-                image_tag: imageTag
-              ]
+          [(buildName): [
+              image_tag: imageTag
             ]
           ]
+        ]
         sc.addConfig(results)
 
         def setupTask = project.task("setup-build-${sc.stackName}-${sc.setupName}-${buildName}").doFirst {
@@ -901,20 +922,20 @@ $run"""
           assert processor
 
           project.fileTree(dir: tempDir, includes: ['**/*'], excludes: ['**/*.inc.*'])
-            .filter { File f -> !f.isDirectory() }
-            .each { File f ->
-              ByteArrayOutputStream result
-              def supplier = {
-                result = new ByteArrayOutputStream()
-                result
-              } as Supplier<OutputStream>
-              processor.compile(f, sc.config, supplier)
-              if (result != null) {
-                f.withOutputStream {
-                  result.writeTo(it)
-                }
+          .filter { File f -> !f.isDirectory() }
+          .each { File f ->
+            ByteArrayOutputStream result
+            def supplier = {
+              result = new ByteArrayOutputStream()
+              result
+            } as Supplier<OutputStream>
+            processor.compile(f, sc.config, supplier)
+            if (result != null) {
+              f.withOutputStream {
+                result.writeTo(it)
               }
             }
+          }
         }
 
         setupPrepareTasks(project, setupTask, sc, buildName)
@@ -942,7 +963,6 @@ $run"""
               username = customCredentials.username
               password = customCredentials.password
             }
-
           }
 
           group 'Build individual image'
@@ -966,7 +986,6 @@ $run"""
         }
 
         pushAllTask.dependsOn(pushTask)
-
       }
     }
   }
@@ -1037,5 +1056,4 @@ $run"""
       throw new RuntimeException("Error evaluating setting script:\n$setting\n\nBinding keys: ${binding.keySet()}", e)
     }
   }
-
 }

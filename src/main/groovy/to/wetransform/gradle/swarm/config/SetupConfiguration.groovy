@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config
 
 /**
@@ -101,5 +100,4 @@ class SetupConfiguration {
   }
 
   final List yamlPostProcessors = []
-
 }

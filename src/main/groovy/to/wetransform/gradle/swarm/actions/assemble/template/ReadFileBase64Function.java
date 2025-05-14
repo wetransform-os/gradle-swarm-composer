@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.io.File;
@@ -41,7 +40,8 @@ public class ReadFileBase64Function implements Function {
   private final File rootDir;
 
   /**
-   * @param rootDir the project root directory for resolving absolute references
+   * @param rootDir
+   *          the project root directory for resolving absolute references
    */
   public ReadFileBase64Function(File rootDir) {
     this.rootDir = rootDir;
@@ -52,8 +52,11 @@ public class ReadFileBase64Function implements Function {
     return Collections.singletonList("value");
   }
 
-  /* (non-Javadoc)
-   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map, io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
+  /*
+   * (non-Javadoc)
+   *
+   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map,
+   * io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
    */
   @Override
   public String execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
@@ -62,14 +65,11 @@ public class ReadFileBase64Function implements Function {
 
     if (value == null) {
       throw new NullPointerException("File path must be specified");
-    }
-    else if (value instanceof Path) {
+    } else if (value instanceof Path) {
       file = (Path) value;
-    }
-    else if (value instanceof File) {
+    } else if (value instanceof File) {
       file = ((File) value).toPath();
-    }
-    else {
+    } else {
       String path = value.toString();
       path = ReadFileFunction.resolvePath((PebbleTemplateImpl) self, rootDir, path);
       file = Paths.get(path);

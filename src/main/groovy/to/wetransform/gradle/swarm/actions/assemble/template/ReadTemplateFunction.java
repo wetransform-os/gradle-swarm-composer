@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.io.File;
@@ -56,7 +55,8 @@ public class ReadTemplateFunction implements Function {
   private final File rootDir;
 
   /**
-   * @param rootDir the project root directory for resolving absolute references
+   * @param rootDir
+   *          the project root directory for resolving absolute references
    */
   public ReadTemplateFunction(File rootDir) {
     this.rootDir = rootDir;
@@ -67,8 +67,11 @@ public class ReadTemplateFunction implements Function {
     return Arrays.asList(ARGUMENT_PATH, ARGUMENT_BINDING);
   }
 
-  /* (non-Javadoc)
-   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map, io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
+  /*
+   * (non-Javadoc)
+   *
+   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map,
+   * io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
    */
   @Override
   public String execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {
@@ -76,8 +79,7 @@ public class ReadTemplateFunction implements Function {
 
     if (value == null) {
       throw new NullPointerException("Template name/path must be specified");
-    }
-    else {
+    } else {
       String templateName = value.toString();
       Map<String, Object> addVars = new LinkedHashMap<>();
 
@@ -112,8 +114,11 @@ public class ReadTemplateFunction implements Function {
         try {
           writer = new StringWriter();
           Path templateFile = Paths.get(templateName);
-          String templateContent = Files.readAllLines(templateFile, StandardCharsets.UTF_8).stream().collect(Collectors.joining("\n"));
-          ((PebbleTemplateImpl) self).includeTemplate(writer, (EvaluationContextImpl) context, templateContent, addVars);
+          String templateContent = Files.readAllLines(templateFile, StandardCharsets.UTF_8)
+            .stream()
+            .collect(Collectors.joining("\n"));
+          ((PebbleTemplateImpl) self).includeTemplate(writer, (EvaluationContextImpl) context, templateContent,
+            addVars);
           result = writer.toString();
         } catch (IOException e) {
           throw new RuntimeException("Error processing template using string loader", e);

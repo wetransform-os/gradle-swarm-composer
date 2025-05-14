@@ -13,29 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config.pebble
 
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.io.Reader
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
+import java.io.Writer
+import java.nio.charset.StandardCharsets
 import java.util.Map
 
 import org.slf4j.Logger
-import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory
 
 import io.pebbletemplates.pebble.PebbleEngine
-import io.pebbletemplates.pebble.lexer.LexerImpl;
-import io.pebbletemplates.pebble.lexer.TokenStream;
+import io.pebbletemplates.pebble.lexer.LexerImpl
+import io.pebbletemplates.pebble.lexer.TokenStream
 import io.pebbletemplates.pebble.loader.StringLoader
-import io.pebbletemplates.pebble.node.RootNode;
-import io.pebbletemplates.pebble.parser.Parser;
+import io.pebbletemplates.pebble.node.RootNode
+import io.pebbletemplates.pebble.parser.Parser
 import io.pebbletemplates.pebble.parser.ParserImpl
 import io.pebbletemplates.pebble.template.PebbleTemplate
-
-import to.wetransform.gradle.swarm.actions.assemble.template.ContextWrapper;
+import to.wetransform.gradle.swarm.actions.assemble.template.ContextWrapper
 import to.wetransform.gradle.swarm.actions.assemble.template.SwarmComposerExtension
 import to.wetransform.gradle.swarm.config.ConfigEvaluator
 import to.wetransform.gradle.swarm.config.ConfigHelper
@@ -71,12 +69,12 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
   protected void init() {
     if (engine == null) {
       engine = new PebbleEngine.Builder()
-      .newLineTrimming(false)
-      .strictVariables(!lenient)
-      .autoEscaping(false)
-      .extension(this.extension)
-      .loader(new StringLoader())
-      .build()
+        .newLineTrimming(false)
+        .strictVariables(!lenient)
+        .autoEscaping(false)
+        .extension(this.extension)
+        .loader(new StringLoader())
+        .build()
     }
   }
 
@@ -91,7 +89,7 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
       TokenStream tokenStream = lexer.tokenize(templateReader, 'dynamic')
 
       Parser parser = new ParserImpl(engine.extensionRegistry.getUnaryOperators(),
-        engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers());
+        engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers())
       RootNode root = parser.parse(tokenStream)
       def visitor = new DynamicCheckVisitor()
       root.accept(visitor)
@@ -113,7 +111,7 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
       TokenStream tokenStream = lexer.tokenize(templateReader, 'dynamic')
 
       Parser parser = new ParserImpl(engine.extensionRegistry.getUnaryOperators(),
-        engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers());
+        engine.extensionRegistry.getBinaryOperators(), engine.extensionRegistry.getTokenParsers())
       RootNode root = parser.parse(tokenStream)
       def visitor = new DependencyCollectorVisitor()
       root.accept(visitor)
@@ -123,5 +121,4 @@ abstract class AbstractPebbleEvaluator implements ConfigEvaluator {
       false
     }
   }
-
 }

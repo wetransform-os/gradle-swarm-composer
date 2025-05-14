@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config
 
+import groovy.lang.Closure
+
 import java.util.Iterator
-import java.util.Map;
+import java.util.Map
 import java.util.stream.Collectors
 
 import org.gradle.internal.impldep.bsh.This
-
-import groovy.lang.Closure
 
 /**
  * Collection of configurations for setups and stacks.
@@ -132,5 +131,4 @@ class SetupConfigurations implements Iterable<SetupConfiguration> {
   void processYaml(Closure processor) {
     this.toList()*.processYaml(processor)
   }
-
 }

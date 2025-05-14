@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.actions.assemble.template;
 
 import java.io.File;
@@ -34,7 +33,8 @@ public class GroovyScriptFunction implements Function {
   private final GroovyScriptFilter filter;
 
   /**
-   * @param rootDir the project root directory for resolving absolute references
+   * @param rootDir
+   *          the project root directory for resolving absolute references
    */
   public GroovyScriptFunction(File rootDir) {
     this.filter = new GroovyScriptFilter(rootDir);
@@ -45,8 +45,11 @@ public class GroovyScriptFunction implements Function {
     return filter.getArgumentNames();
   }
 
-  /* (non-Javadoc)
-   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map, io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
+  /*
+   * (non-Javadoc)
+   *
+   * @see io.pebbletemplates.pebble.extension.Function#execute(java.util.Map,
+   * io.pebbletemplates.pebble.template.PebbleTemplate, io.pebbletemplates.pebble.template.EvaluationContext, int)
    */
   @Override
   public Object execute(Map<String, Object> args, PebbleTemplate self, EvaluationContext context, int lineNumber) {

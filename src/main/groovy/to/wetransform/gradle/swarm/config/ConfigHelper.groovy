@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config
 
 import java.nio.charset.StandardCharsets
 
-import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.constructor.SafeConstructor
+
 import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
 import to.wetransform.gradle.swarm.util.Helpers
 
@@ -32,7 +32,7 @@ import to.wetransform.gradle.swarm.util.Helpers
 class ConfigHelper {
 
   static Map<String, Object> loadConfig(File rootDir, List configFiles, String stackName = null, String setupName = null,
-      Map initialConfig = null, boolean evaluate = true) {
+    Map initialConfig = null, boolean evaluate = true) {
     // config files
     def configs = configFiles.collect { cfg ->
 
@@ -181,7 +181,7 @@ class ConfigHelper {
    * @return the loaded configuration map
    */
   static Map loadYaml(File yamlFile) {
-    Yaml yaml = new Yaml();
+    Yaml yaml = new Yaml()
     Map result
     yamlFile.withInputStream {
       result = yaml.load(it)
@@ -197,13 +197,12 @@ class ConfigHelper {
    */
   static void saveYaml(Map config, File yamlFile) {
     DumperOptions options = new DumperOptions()
-//    options.explicitStart = true
+    //    options.explicitStart = true
     options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
-    Yaml yaml = new Yaml(options);
+    Yaml yaml = new Yaml(options)
     Map result
     yamlFile.withWriter(StandardCharsets.UTF_8.name()) {
       result = yaml.dump(config, it)
     }
   }
-
 }

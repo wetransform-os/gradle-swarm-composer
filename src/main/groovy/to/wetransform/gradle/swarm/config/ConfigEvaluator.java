@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package to.wetransform.gradle.swarm.config;
 
 import java.util.Map;
@@ -29,7 +28,8 @@ public interface ConfigEvaluator {
    * Evaluate the given configuration and return the evaluated version of the configuration.
    * The evaluator may mutate the given configuration and return it or create a new configuration.
    *
-   * @param config the configuration
+   * @param config
+   *          the configuration
    * @return the evaluated configuration
    */
   Map<String, Object> evaluate(Map<String, Object> config) throws Exception;
