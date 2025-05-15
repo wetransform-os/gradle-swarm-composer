@@ -1,3 +1,9 @@
+## [2.3.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.2.0...v2.3.0) (2025-05-15)
+
+### Features
+
+* pass HTTP proxy settings to image builds ([16ed375](https://github.com/wetransform-os/gradle-swarm-composer/commit/16ed375144b2c238d33ad3c6bb4da0781f83595d))
+
 ## [2.2.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.1.2...v2.2.0) (2025-05-15)
 
 ### Features
