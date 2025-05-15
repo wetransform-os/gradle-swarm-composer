@@ -1,3 +1,9 @@
+## [2.2.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.1.2...v2.2.0) (2025-05-15)
+
+### Features
+
+* add escape strategy for here documents ([63a3a61](https://github.com/wetransform-os/gradle-swarm-composer/commit/63a3a6136d4cbbb7964f72c8834811c9facc5855)), closes [ING-4797](https://wetransform.atlassian.net/browse/ING-4797)
+
 ## [2.1.2](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.1.1...v2.1.2) (2025-04-14)
 
 ### Bug Fixes
