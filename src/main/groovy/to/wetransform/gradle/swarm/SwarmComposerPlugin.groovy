@@ -24,6 +24,7 @@ import java.util.regex.Pattern
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.bundling.Jar
 
 import com.bmuschko.gradle.docker.DockerRegistryCredentials
@@ -965,6 +966,8 @@ $run"""
             }
           }
 
+          buildArgs = createBuildArgs(project)
+
           group 'Build individual image'
           description "Build \"${buildName}\" for stack ${sc.stackName} with setup ${sc.setupName}"
         }.doLast {
@@ -1055,5 +1058,66 @@ $run"""
       // catch and rethrow to add more details
       throw new RuntimeException("Error evaluating setting script:\n$setting\n\nBinding keys: ${binding.keySet()}", e)
     }
+  }
+
+  def Map<String, String> createBuildArgs(Project project) {
+    // build args for HTTP/S proxy
+    def result = [:]
+
+    // prefer specific Gradle properties, fall back to Java system property settings
+    // Note: specific properties exist for the case that from within Docker the proxy address is different than from outside
+
+    def httpProxyHost = project.findProperty('dockerHttpProxyHost') ?: System.getProperty('http.proxyHost')
+    def httpProxyPort = project.findProperty('dockerHttpProxyPort') ?: System.getProperty('http.proxyPort')
+    def httpProxyUser = project.findProperty('dockerHttpProxyUser') ?: System.getProperty('http.proxyUser')
+    def httpProxyPass = project.findProperty('dockerHttpProxyPass') ?: System.getProperty('http.proxyPass')
+    def httpNonProxy = project.findProperty('dockerHttpNonProxyHosts') ?: System.getProperty('http.nonProxyHosts')
+
+    def httpProxyUrl = buildProxyUrl(httpProxyHost, httpProxyPort, httpProxyUser, httpProxyPass)
+
+    if (httpProxyUrl) {
+      result['HTTP_PROXY'] = httpProxyUrl
+      result['http_proxy'] = httpProxyUrl
+    }
+
+    def httpsProxyHost = project.findProperty('dockerHttpsProxyHost') ?: System.getProperty('https.proxyHost')
+    def httpsProxyPort = project.findProperty('dockerHttpsProxyPort') ?: System.getProperty('https.proxyPort')
+    def httpsProxyUser = project.findProperty('dockerHttpsProxyUser') ?: System.getProperty('https.proxyUser')
+    def httpsProxyPass = project.findProperty('dockerHttpsProxyPass') ?: System.getProperty('https.proxyPass')
+    def httpsNonProxy = project.findProperty('dockerHttpsNonProxyHosts') ?: System.getProperty('https.nonProxyHosts')
+
+    def httpsProxyUrl = buildProxyUrl(httpsProxyHost, httpsProxyPort, httpsProxyUser, httpsProxyPass)
+
+    if (httpsProxyUrl) {
+      result['HTTPS_PROXY'] = httpsProxyUrl
+      result['https_proxy'] = httpsProxyUrl
+    }
+
+    if (httpNonProxy) {
+      result['NO_PROXY'] = httpNonProxy
+      result['no_proxy'] = httpNonProxy
+    }
+    else if (httpsNonProxy) {
+      // TODO potentially combine
+      result['NO_PROXY'] = httpsNonProxy
+      result['no_proxy'] = httpsNonProxy
+    }
+
+    result
+  }
+
+  def String buildProxyUrl(String host, String port, String user, String pass) {
+    if (!host) {
+      return null
+    }
+
+    def url = "http://$host"
+    if (port) {
+      url += ":$port"
+    }
+    if (user && pass) {
+      url = "http://$user:$pass@$host:$port"
+    }
+    return url
   }
 }
