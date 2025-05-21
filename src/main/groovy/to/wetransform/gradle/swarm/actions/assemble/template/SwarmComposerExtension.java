@@ -59,6 +59,7 @@ public class SwarmComposerExtension extends AbstractExtension {
     filters.put("ifNull", new IfNullFilter());
     filters.put("orError", new OrErrorFilter());
     filters.put("merge", new MergeFilter());
+    filters.put("flatten", new FlattenFilter());
 
     filters.put("apply", new GroovyScriptFilter(rootDir));
     filters.put("map", new GroovyScriptMapFilter(rootDir));

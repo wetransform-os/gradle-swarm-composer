@@ -237,6 +237,39 @@ class PebbleAssemblerTest {
   }
 
   @Test
+  void testFlattenList() {
+    def assembler =  new PebbleAssembler()
+
+    def tmpFile = Files.createTempFile('template', '.tmp').toFile()
+    try {
+      tmpFile.text = '''
+      |{{ items | flatten | json }}
+      '''.stripMargin().trim()
+
+      def context = [
+        items: [
+          'test',
+          ['test2', 'test3'],
+          ['test4', ['test5', 'test6']]
+        ]
+      ]
+
+      ConfigEvaluator evaluator = new PebbleCachingEvaluator()
+      context = evaluator.evaluate(context)
+
+      def out = new ByteArrayOutputStream()
+
+      assembler.compile(tmpFile, context) { out }
+
+      def result = out.toString()
+
+      assert result == '["test","test2","test3","test4","test5","test6"]'
+    } finally {
+      tmpFile.delete()
+    }
+  }
+
+  @Test
   void testFindFirstMap() {
     def assembler =  new PebbleAssembler()
 
