@@ -1,3 +1,9 @@
+## [2.4.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.3.0...v2.4.0) (2025-05-21)
+
+### Features
+
+* add flatten filter for collections ([50a55c9](https://github.com/wetransform-os/gradle-swarm-composer/commit/50a55c9c964a12dc7db0088055c4a19487ba1682)), closes [WGS-3239](https://wetransform.atlassian.net/browse/WGS-3239)
+
 ## [2.3.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.2.0...v2.3.0) (2025-05-15)
 
 ### Features
