@@ -7,6 +7,6 @@ semver4j = { module = "com.vdurmont:semver4j", version = "3.1.0" }
 
 snakeyaml = { module = "org.yaml:snakeyaml", version = "2.5" }
 
-gradle-docker-plugin = { module = "com.bmuschko:gradle-docker-plugin", version = "9.4.0" }
+gradle-docker-plugin = { module = "com.bmuschko:gradle-docker-plugin", version = "10.0.0" }
 
 alice = { module = "to.wetransform:alice", version = "1.0.0" }
