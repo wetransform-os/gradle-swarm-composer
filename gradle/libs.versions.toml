@@ -1,7 +1,7 @@
 [versions]
 
 [libraries]
-pebble = { module = "io.pebbletemplates:pebble", version = "3.2.4" }
+pebble = { module = "io.pebbletemplates:pebble", version = "4.0.0" }
 
 semver4j = { module = "com.vdurmont:semver4j", version = "3.1.0" }
 
