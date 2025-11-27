@@ -6,7 +6,3 @@ presets:
   - gradle-library
   - renovate
   - workflows-default
-
-workflows:
-  presets:
-    - java-17 # for Gradle plugin, library uses Java 8
