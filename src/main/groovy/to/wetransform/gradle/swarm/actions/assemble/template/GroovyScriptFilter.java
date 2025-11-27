@@ -153,7 +153,7 @@ public class GroovyScriptFilter implements Filter {
 
   private GroovyShell createShell(Binding binding) {
     CompilerConfiguration cc = new CompilerConfiguration();
-    return new GroovyShell(binding, cc);
+    return new GroovyShell(getClass().getClassLoader(), binding, cc);
   }
 
 }
