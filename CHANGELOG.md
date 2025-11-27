@@ -1,3 +1,22 @@
+## [3.0.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.4.0...v3.0.0) (2025-11-27)
+
+### ⚠ BREAKING CHANGES
+
+* require Java 17
+
+### Features
+
+* make plugin classpath available to Groovy scripts ([ba42f55](https://github.com/wetransform-os/gradle-swarm-composer/commit/ba42f55fffa57ee65129e73a207ef8220c17ddcc)), closes [ING-4849](https://wetransform.atlassian.net/browse/ING-4849)
+
+### Bug Fixes
+
+* **deps:** update dependency io.pebbletemplates:pebble to v4 ([1c87e65](https://github.com/wetransform-os/gradle-swarm-composer/commit/1c87e65275ce79ccd4bb5139f0c6ef4468b1bfe8))
+* **deps:** update dependency org.yaml:snakeyaml to v2.5 ([43403c2](https://github.com/wetransform-os/gradle-swarm-composer/commit/43403c29d4577b264f35804a11d9b189031d8c79))
+
+### Build System
+
+* require Java 17 ([fcf4c75](https://github.com/wetransform-os/gradle-swarm-composer/commit/fcf4c75b3208c14a0ecac6011bcd857a325ee1da))
+
 ## [2.4.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.3.0...v2.4.0) (2025-05-21)
 
 ### Features
