@@ -15,8 +15,6 @@ wetransform {
   }
 
   setup {
-    javaVersion(8)
-
     spotless {
       licenseHeader = APACHE
     }
