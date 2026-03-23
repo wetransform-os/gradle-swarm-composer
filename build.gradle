@@ -1,7 +1,7 @@
 plugins {
   id 'groovy'
   id 'maven-publish'
-  id 'to.wetransform.conventions' version '2.4.0'
+  id 'to.wetransform.conventions' version '3.0.0'
 }
 
 repositories {
