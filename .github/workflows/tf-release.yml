@@ -11,6 +11,10 @@ on:
         type: boolean
         description: "Dry-Run"
         default: false
+      skipCheck:
+        type: boolean
+        description: "Skip checks/tests"
+        default: false
 
 concurrency:
   # only run one publishing at a time to avoid conflicts
@@ -23,7 +27,8 @@ jobs:
 
     uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@109404d78d84f07b3bb374a8171f8df4c13a7e88 # v4.1.4
     with:
-      semantic-release-dryrun: ${{ inputs.dryRun }}
+      semantic-release-dryrun: ${{ github.event_name == 'workflow_dispatch' && inputs.dryRun || false }}
+      skip-check: ${{ github.event_name == 'workflow_dispatch' && inputs.skipCheck || false }}
       multi-module: false
       semantic-release: true
       skip-scan: false
