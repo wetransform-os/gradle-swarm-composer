@@ -25,7 +25,7 @@ jobs:
     # Only on main repository (don't release on forks)
     if: github.repository_owner == 'wetransform-os'
 
-    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@906990fde86426c27eb355b1600afbcda8fddc25 # v4.1.5
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@b341d68ed4700098b66b6f00309bab0380f05a32 # v4.1.6
     with:
       semantic-release-dryrun: ${{ github.event_name == 'workflow_dispatch' && inputs.dryRun || false }}
       skip-check: ${{ github.event_name == 'workflow_dispatch' && inputs.skipCheck || false }}
