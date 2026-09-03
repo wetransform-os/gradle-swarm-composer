@@ -1,3 +1,15 @@
+## [3.1.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v3.0.0...v3.1.0) (2026-09-03)
+
+### Features
+
+* support fnox as source for vault passwords ([4e1d117](https://github.com/wetransform-os/gradle-swarm-composer/commit/4e1d1175680d1f618a01d4c3cac6f4419af97e80))
+
+### Bug Fixes
+
+* **deps:** update dependency com.bmuschko:gradle-docker-plugin to v10 ([7845986](https://github.com/wetransform-os/gradle-swarm-composer/commit/7845986678ab162ddacd710befbbe01be311a564))
+* **deps:** update dependency org.yaml:snakeyaml to v2.6 ([eebc2c2](https://github.com/wetransform-os/gradle-swarm-composer/commit/eebc2c2f1348c0ac7f681982549d6db9da94a3fd))
+* **deps:** update dependency org.yaml:snakeyaml to v2.7 ([ecbb616](https://github.com/wetransform-os/gradle-swarm-composer/commit/ecbb61654f23538ab22743ef9ab77b175b274aac))
+
 ## [3.0.0](https://github.com/wetransform-os/gradle-swarm-composer/compare/v2.4.0...v3.0.0) (2025-11-27)
 
 ### ⚠ BREAKING CHANGES
