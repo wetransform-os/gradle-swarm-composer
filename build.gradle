@@ -51,6 +51,11 @@ dependencies{
   testImplementation testLibs.junit
 }
 
+tasks.withType(Test).configureEach {
+  // required for Gradle's ProjectBuilder on Java 17
+  jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+}
+
 tasks.wrapper {
   distributionType = Wrapper.DistributionType.ALL
   gradleVersion = '8.14.5'

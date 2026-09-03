@@ -51,6 +51,13 @@ class SwarmComposerExtension {
   boolean enableConfigExport = false
 
   /**
+   * If the fnox CLI (https://fnox.jdx.dev) may be used to look up vault
+   * passwords that are not provided as Gradle properties.
+   * Only applies if the fnox executable is found on the PATH.
+   */
+  boolean enableFnox = true
+
+  /**
    * Enables checking if Docker is connected to the right swarm for
    * a specific setup by checking the node label <code>sc-setup</code>.
    *

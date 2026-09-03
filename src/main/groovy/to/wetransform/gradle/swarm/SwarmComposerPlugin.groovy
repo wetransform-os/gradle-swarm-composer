@@ -21,6 +21,7 @@ import groovy.json.JsonSlurper
 import java.util.function.Supplier
 import java.util.regex.Pattern
 
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -38,6 +39,7 @@ import to.wetransform.gradle.swarm.config.pebble.PebbleCachingEvaluator
 import to.wetransform.gradle.swarm.config.pebble.RootOrLocalMap
 import to.wetransform.gradle.swarm.crypt.ConfigCryptor
 import to.wetransform.gradle.swarm.crypt.SimpleConfigCryptor
+import to.wetransform.gradle.swarm.crypt.VaultPasswordResolver
 import to.wetransform.gradle.swarm.crypt.alice.AliceCryptor
 import to.wetransform.gradle.swarm.tasks.Assemble
 
@@ -53,11 +55,15 @@ class SwarmComposerPlugin implements Plugin<Project> {
 
   private final Map<String, groovy.text.Template> cachedTemplates = [:]
 
+  private VaultPasswordResolver passwordResolver
+
   void apply(Project project) {
     // register extension
     project.extensions.create('composer', SwarmComposerExtension, project)
 
     project.afterEvaluate { p ->
+      passwordResolver = VaultPasswordResolver.forProject(p, p.composer.enableFnox)
+
       if (project.composer.enableBuilds) {
         project.apply(plugin: 'com.bmuschko.docker-remote-api')
         project.repositories {
@@ -466,115 +472,117 @@ class SwarmComposerPlugin implements Plugin<Project> {
     if (sc.setupDir) {
       // encryption / decryption tasks
 
-      // get password
-      def password = project.findProperty("vault_password_${sc.setupName}")
-      if (!password) {
-        password = project.findProperty("vault_password")
-      }
+      def encryptName = "encrypt-${sc.setupName}"
+      if (!project.tasks.findByPath(encryptName)) {
+        def encryptTask = project.task(encryptName) {
+          group = vaultGroup
+          description = "Create encrypted vault files from plain text secret files for setup ${sc.setupName}"
+        }.doFirst {
+          ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
 
-      if (password) {
-        def encryptName = "encrypt-${sc.setupName}"
-        if (!project.tasks.findByPath(encryptName)) {
-          def encryptTask = project.task(encryptName) {
-            group = vaultGroup
-            description = "Create encrypted vault files from plain text secret files for setup ${sc.setupName}"
-          }.doFirst {
-            ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
-
-            def files = project.fileTree(
-              dir: sc.setupDir,
-              includes: [
-                "*.${PLAIN_FILE_IDENTIFIER}.*"
-              ]).asCollection()
-
-            files.each { plainFile ->
-              def name = plainFile.name.replaceAll("\\.${PLAIN_FILE_IDENTIFIER}\\.", ".${ENCRYPTED_FILE_IDENTIFIER}.")
-              def secretFile = new File(plainFile.parentFile, name)
-
-              /*
-               * XXX instead encrypt whole file?
-               *
-               * Advantages:
-               * - structure and comments preserved exactly
-               * - independent of file format
-               * Disadvantages:
-               * - not transparent which settings were changed in the encrypted file
-               *
-               * Both the file and the current implementation would allow handling
-               * encrypted configuration in memory without creating plain files.
-               * What stands in the way there is the fact that extended setups
-               * may have a different password protecting it.
-               */
-
-              // read, encrypt (with reference), write
-              //XXX only YAML supported right now
-              def config = ConfigHelper.loadYaml(plainFile)
-              def reference
-              if (secretFile.exists()) {
-                try {
-                  reference = ConfigHelper.loadYaml(secretFile)
-                } catch (e) {
-                  // ignore
-                }
-              }
-              config = cryptor.encrypt(config, password, reference)
-              ConfigHelper.saveYaml(config, secretFile)
-              // add comment to file
-              def comment = "# Encrypted configuration"
-              secretFile.text = comment + '\n' + secretFile.text
-            }
-          }
-        }
-
-        def decryptName = "decrypt-${sc.setupName}"
-        if (!project.tasks.findByPath(decryptName)) {
-          decryptTask = project.task(decryptName) {
-            group = vaultGroup
-            description = "Create plain text secret files from encrypted vault files for setup ${sc.setupName}"
-          }.doFirst {
-            ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
-
-            def files = project.fileTree(
-              dir: sc.setupDir,
-              includes: [
-                "*.${ENCRYPTED_FILE_IDENTIFIER}.*"
-              ]).asCollection()
-
-            files.each { secretFile ->
-              def name = secretFile.name.replaceAll("\\.${ENCRYPTED_FILE_IDENTIFIER}\\.",
-                ".${PLAIN_FILE_IDENTIFIER}.")
-              def plainFile = new File(secretFile.parentFile, name)
-
-              // read, decrypt, write
-              //XXX only YAML supported right now
-              def config = ConfigHelper.loadYaml(secretFile)
-              config = cryptor.decrypt(config, password)
-              ConfigHelper.saveYaml(config, plainFile)
-              // add comment to file
-              def now = new Date().toInstant().toString()
-              def comment = "# Decrypted configuration last updated on ${now}\n" +
-                '# DO NOT ADD TO VERSION CONTROL'
-              plainFile.text = comment + '\n' + plainFile.text
-            }
-          }
-        }
-
-        // purge task
-        def purgeName = "purgeSecrets-${sc.setupName}"
-        if (!project.tasks.findByPath(purgeName)) {
-          def purgeTask = project.task(purgeName) {
-            group = vaultGroup
-            description = "Delete all plain text secret files for setup ${sc.setupName}"
-          }.doLast {
-            project.fileTree(dir: sc.setupDir,
+          def files = project.fileTree(
+            dir: sc.setupDir,
             includes: [
               "*.${PLAIN_FILE_IDENTIFIER}.*"
-            ]).each { File file ->
-              file.delete()
-            }
+            ]).asCollection()
+
+          if (files.empty) {
+            return
           }
-          purgeSecretsTask.dependsOn(purgeTask)
+          String password = requirePassword(sc.setupName)
+
+          files.each { plainFile ->
+            def name = plainFile.name.replaceAll("\\.${PLAIN_FILE_IDENTIFIER}\\.", ".${ENCRYPTED_FILE_IDENTIFIER}.")
+            def secretFile = new File(plainFile.parentFile, name)
+
+            /*
+             * XXX instead encrypt whole file?
+             *
+             * Advantages:
+             * - structure and comments preserved exactly
+             * - independent of file format
+             * Disadvantages:
+             * - not transparent which settings were changed in the encrypted file
+             *
+             * Both the file and the current implementation would allow handling
+             * encrypted configuration in memory without creating plain files.
+             * What stands in the way there is the fact that extended setups
+             * may have a different password protecting it.
+             */
+
+            // read, encrypt (with reference), write
+            //XXX only YAML supported right now
+            def config = ConfigHelper.loadYaml(plainFile)
+            def reference
+            if (secretFile.exists()) {
+              try {
+                reference = ConfigHelper.loadYaml(secretFile)
+              } catch (e) {
+                // ignore
+              }
+            }
+            config = cryptor.encrypt(config, password, reference)
+            ConfigHelper.saveYaml(config, secretFile)
+            // add comment to file
+            def comment = "# Encrypted configuration"
+            secretFile.text = comment + '\n' + secretFile.text
+          }
         }
+      }
+
+      def decryptName = "decrypt-${sc.setupName}"
+      if (!project.tasks.findByPath(decryptName)) {
+        decryptTask = project.task(decryptName) {
+          group = vaultGroup
+          description = "Create plain text secret files from encrypted vault files for setup ${sc.setupName}"
+        }.doFirst {
+          ConfigCryptor cryptor = new SimpleConfigCryptor(new AliceCryptor())
+
+          def files = project.fileTree(
+            dir: sc.setupDir,
+            includes: [
+              "*.${ENCRYPTED_FILE_IDENTIFIER}.*"
+            ]).asCollection()
+
+          if (files.empty) {
+            return
+          }
+          String password = requirePassword(sc.setupName)
+
+          files.each { secretFile ->
+            def name = secretFile.name.replaceAll("\\.${ENCRYPTED_FILE_IDENTIFIER}\\.",
+              ".${PLAIN_FILE_IDENTIFIER}.")
+            def plainFile = new File(secretFile.parentFile, name)
+
+            // read, decrypt, write
+            //XXX only YAML supported right now
+            def config = ConfigHelper.loadYaml(secretFile)
+            config = cryptor.decrypt(config, password)
+            ConfigHelper.saveYaml(config, plainFile)
+            // add comment to file
+            def now = new Date().toInstant().toString()
+            def comment = "# Decrypted configuration last updated on ${now}\n" +
+              '# DO NOT ADD TO VERSION CONTROL'
+            plainFile.text = comment + '\n' + plainFile.text
+          }
+        }
+      }
+
+      // purge task
+      def purgeName = "purgeSecrets-${sc.setupName}"
+      if (!project.tasks.findByPath(purgeName)) {
+        def purgeTask = project.task(purgeName) {
+          group = vaultGroup
+          description = "Delete all plain text secret files for setup ${sc.setupName}"
+        }.doLast {
+          project.fileTree(dir: sc.setupDir,
+          includes: [
+            "*.${PLAIN_FILE_IDENTIFIER}.*"
+          ]).each { File file ->
+            file.delete()
+          }
+        }
+        purgeSecretsTask.dependsOn(purgeTask)
       }
     }
 
@@ -1002,6 +1010,24 @@ $run"""
       }
     }
     task
+  }
+
+  /**
+   * Get the password protecting the vault files of a setup.
+   *
+   * The password is resolved lazily when a task actually needs it, so setups
+   * that are not used in a build never trigger a lookup.
+   *
+   * @param setupName the name of the setup
+   * @return the password
+   * @throws GradleException if no source provides a password
+   */
+  private String requirePassword(String setupName) {
+    String password = passwordResolver.resolve(setupName)
+    if (!password) {
+      throw new GradleException(passwordResolver.missingPasswordMessage(setupName))
+    }
+    password
   }
 
   private void setupPrepareTasks(Project project, Task task, SetupConfiguration sc, String build = null) {

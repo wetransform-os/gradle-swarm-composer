@@ -109,7 +109,23 @@ To create an encrypted configuration file, first create its plain counterpart in
 The file names of the plain configuration files should end with `.secret.yml`.
 
 You also need to provide the password to use for the encryption.
-It can be provided as Gradle property, either for all setups (`vault_password`) or for individual setups (`vault_password_<setup>`).
+It is looked up in the following order, the first source that provides a password wins:
+
+1. Gradle property `vault_password_<setup>`
+2. Gradle property `vault_password`
+3. [fnox](https://fnox.jdx.dev) secret `vault_password_<setup>` (via `fnox get`)
+4. fnox secret `vault_password` (via `fnox get`)
+
+The fnox lookup is only attempted if the `fnox` executable is found on the `PATH`.
+It can be turned off completely by setting `enableFnox = false` in the `composer` extension.
+It is run in the project directory, so the `fnox.toml` of the project (or a parent directory) is used.
+This allows keeping vault passwords out of Gradle properties files and the environment.
+
+The password is only resolved when a task actually needs it, i.e. when there are files to encrypt or decrypt.
+If vault files exist for a setup but no source provides a password, decryption fails with a message listing the sources that were checked.
+As decryption is part of the preparation for a setup, this also applies to the assemble and build tasks of that setup.
+
+Note that the `purgeSecrets` task deletes the plain `.secret.yml` files of all setups, regardless of whether a password is configured for them.
 
 To encrypt the configuration file, run the encryption task for the respective setup (e.g. `./gradlew encrypt-<setup>`).
 Encrypted vault files have a file name that ends with `.vault.yml`.
