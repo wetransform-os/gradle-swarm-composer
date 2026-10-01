@@ -19,7 +19,7 @@ jobs:
     # Only on main repository (don't publish on forks)
     if: github.repository_owner == 'wetransform-os'
 
-    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@efabecf2fba436e990a9f9865ed4532845e1e710 # v4.6.1
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@e369ce8f658250de66c8a7e6945bf7bb592648ab # v4.6.2
     with:
       multi-module: false
       semantic-release: false
