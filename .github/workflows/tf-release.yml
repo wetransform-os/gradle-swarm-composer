@@ -15,20 +15,30 @@ on:
         type: boolean
         description: "Skip checks/tests"
         default: false
+      reAddReverted:
+        type: boolean
+        description: "Re-add reverted changes (only for releases from non-default branches)"
+        default: true
 
 concurrency:
-  # only run one publishing at a time to avoid conflicts
-  group: publish-${{ github.ref }}
+  # releases from any branch (incl. partial releases) run one at a time,
+  # so they can't compute the same version concurrently
+  group: release-refs/heads/${{ github.event.repository.default_branch }}
 
 jobs:
   publish:
     # Only on main repository (don't release on forks)
     if: github.repository_owner == 'wetransform-os'
 
-    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@e369ce8f658250de66c8a7e6945bf7bb592648ab # v4.6.2
+    concurrency:
+      # only run one publishing per branch at a time to avoid conflicts (shared with the Publish workflow)
+      group: publish-${{ github.ref }}
+
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@7971851395511ca7b1f5dbaea1835d9253f18388 # v4.7.1
     with:
       semantic-release-dryrun: ${{ github.event_name == 'workflow_dispatch' && inputs.dryRun || false }}
       skip-check: ${{ github.event_name == 'workflow_dispatch' && inputs.skipCheck || false }}
+      partial-release-readd: ${{ github.event_name != 'workflow_dispatch' || inputs.reAddReverted }}
       multi-module: false
       semantic-release: true
       skip-scan: false
