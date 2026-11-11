@@ -58,5 +58,5 @@ tasks.withType(Test).configureEach {
 
 tasks.wrapper {
   distributionType = Wrapper.DistributionType.ALL
-  gradleVersion = '8.14.7'
+  gradleVersion = '9.9.1'
 }
