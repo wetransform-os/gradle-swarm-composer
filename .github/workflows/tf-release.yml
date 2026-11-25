@@ -34,7 +34,7 @@ jobs:
       # only run one publishing per branch at a time to avoid conflicts (shared with the Publish workflow)
       group: publish-${{ github.ref }}
 
-    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@4fe8bc86059dd76d7f9c8146e13ed26cb1a6664c # v4.8.1
+    uses: wetransform/gha-workflows/.github/workflows/gradle-library-publish.yml@04362756c3b3abc8c2505617a37ec16fb0a5b7ce # v4.9.0
     with:
       semantic-release-dryrun: ${{ github.event_name == 'workflow_dispatch' && inputs.dryRun || false }}
       skip-check: ${{ github.event_name == 'workflow_dispatch' && inputs.skipCheck || false }}
